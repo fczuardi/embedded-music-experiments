@@ -2,10 +2,11 @@
 
 The buzzer package now exposes a configurable velocity-to-volume range. This
 slice updates the BLE MIDI buzzer showcase to consume that package version and
-sets the range locally in the showcase firmware:
+sets the range locally in the showcase firmware, for example, we can change the
+default values from 64-128 to something else like 96-136 with a line like this:
 
 ```cpp
-constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {64, 128};
+constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {96, 136};
 ```
 
 This keeps calibration fast. To try different limits, edit that constant and
