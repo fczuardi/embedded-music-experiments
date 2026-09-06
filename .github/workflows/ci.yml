@@ -13,6 +13,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
       - name: Validate shared C++ headers
         run: |
           cat > /tmp/check_note_event.cpp <<'CPP'
@@ -56,3 +64,6 @@ jobs:
 
           /tmp/check_note_event
           /tmp/check_instrument_event_sink
+
+      - name: Validate PlatformIO library package
+        run: pio pkg pack . --output /tmp

@@ -26,9 +26,19 @@ small C++ programs that include the shared headers and exercise their basic
 shape. It is not a firmware build; it only guards the shared contract syntax and
 interface boundary.
 
+The repository root also contains `library.json`, making the whole repository a
+PlatformIO library package. The manifest uses `build.includeDir` so the public
+headers can stay under `firmware-contracts/include/` while Git dependencies
+still point at the repository root.
+
+The manifest also defines an explicit export allowlist. This matters because the
+repository uses `jj`; without the allowlist, `pio pkg pack` would include `.jj/`
+metadata in the package tarball.
+
 Local verification mirrors CI:
 
 ```bash
 g++ -std=c++17 -Ifirmware-contracts/include -Wall -Wextra -Werror /tmp/check_note_event.cpp -o /tmp/check_note_event
 g++ -std=c++17 -Ifirmware-contracts/include -Wall -Wextra -Werror /tmp/check_instrument_event_sink.cpp -o /tmp/check_instrument_event_sink
+pio pkg pack . --output /tmp
 ```

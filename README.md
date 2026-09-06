@@ -23,7 +23,10 @@ The first shared C++ contracts live in `firmware-contracts/include/`. They are
 header-only and intentionally small so firmware experiments can include the same
 event vocabulary without sharing BLE, display, or audio backend code.
 
+This repository is also a PlatformIO library package. The root `library.json`
+points PlatformIO at `firmware-contracts/include/` through `build.includeDir`.
+
 ## CI
 
-GitHub Actions validates the shared C++ headers on pushes and pull requests. The
-workflow lives at `.github/workflows/ci.yml`.
+GitHub Actions validates the shared C++ headers and runs `pio pkg pack` on pushes
+and pull requests. The workflow lives at `.github/workflows/ci.yml`.

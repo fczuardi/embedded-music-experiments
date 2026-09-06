@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
+  "name": "EmbeddedMusicFirmwareContracts",
+  "version": "0.1.0",
+  "description": "Shared event contracts for embedded music experiments",
+  "keywords": ["midi", "embedded", "music", "contracts"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fczuardi/embedded-music-experiments.git"
+  },
+  "frameworks": "*",
+  "platforms": "*",
+  "headers": ["NoteEvent.h", "InstrumentEventSink.h"],
+  "build": {
+    "includeDir": "firmware-contracts/include"
+  },
+  "export": {
+    "include": [
+      "firmware-contracts/include/*",
+      "DESIGN.md",
+      "README.md",
+      "library.json"
+    ]
+  }
+}
