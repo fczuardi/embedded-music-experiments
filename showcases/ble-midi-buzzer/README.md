@@ -27,8 +27,12 @@ env PLATFORMIO_CORE_DIR="$PWD/.platformio-home" pio device monitor -d showcases/
 
 The device advertises using the BLE MIDI name provided by
 `EmbeddedMusicBleMidiInput`. After a controller connects, note on/off events
-should start and stop the buzzer. Disconnecting the controller should silence
-the output through `InstrumentEventSink::onDisconnected()`.
+should start and stop the buzzer. Note On velocity is mapped by
+`EmbeddedMusicBuzzerInstrument` to a constrained M5 speaker volume range, so
+different key velocities should produce audible loudness changes without using
+the distorted upper volume range. This has been validated on the M5StickC Plus2
+with a real BLE MIDI controller. Disconnecting the controller should silence the
+output through `InstrumentEventSink::onDisconnected()`.
 
 Button A is a local panic action. Pressing it clears held instrument state and
 stops the buzzer even if the BLE connection remains open. This was validated on

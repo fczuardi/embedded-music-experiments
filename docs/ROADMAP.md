@@ -20,26 +20,25 @@ Status:
 - The showcase has a local panic button for route failures that do not produce
   MIDI cleanup events or BLE disconnects, and that button has been validated on
   real hardware.
+- The buzzer package maps Note On velocity to a constrained speaker volume
+  range, and the showcase velocity response has been validated on real hardware.
 
 ## Next Priority Slices
 
-1. **Velocity response in the buzzer instrument**
-   Use MIDI velocity to affect the audible result. First test whether
-   `M5.Speaker` volume changes are useful on the buzzer; if not, map velocity to
-   articulation or timbre instead of pretending it is reliable loudness.
-
-2. **Pitch bend event contract**
+1. **Pitch bend event contract**
    Add a typed pitch bend path separate from `NoteEvent`. The receiver already
    observes pitch bend, and a monophonic instrument can use it naturally by
    changing the active voice frequency.
 
-3. **Simple channel behavior**
+2. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 
 ## Candidate Slices
 
 - Add support for CC 120 All Sound Off and CC 123 All Notes Off.
+- Revisit the velocity curve if more hardware tests show that the current
+  `64..128` speaker volume range is too subtle or too aggressive.
 - Add a serial diagnostic sink to the showcase for integration debugging.
 - Make the BLE advertised name configurable in `EmbeddedMusicBleMidiInput`.
 - Document the one-active-instance constraint of BLE MIDI examples in the
