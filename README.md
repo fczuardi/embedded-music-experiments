@@ -11,6 +11,12 @@ This repository is the documentation hub for the experiments. It does not contai
 | [midi-receiver](https://github.com/fczuardi/midi-receiver) | First milestone complete | Receive BLE MIDI, interpret messages, and make them observable on an M5StickC Plus2 |
 | [buzzer-instrument](https://github.com/fczuardi/buzzer-instrument) | Starting | Explore a small musical instrument using a passive buzzer, beginning with the M5StickC Plus2 |
 
+## Showcases
+
+Executable compositions live in `showcases/`. The first one,
+`showcases/ble-midi-buzzer/`, combines the BLE MIDI input package with the buzzer
+instrument package so an M5StickC Plus2 can act as a small BLE MIDI sound box.
+
 ## Design notes
 
 The current direction, boundaries, decisions, and open questions are recorded in [DESIGN.md](DESIGN.md).
@@ -28,5 +34,6 @@ points PlatformIO at `firmware-contracts/include/` through `build.includeDir`.
 
 ## CI
 
-GitHub Actions validates the shared C++ headers and runs `pio pkg pack` on pushes
-and pull requests. The workflow lives at `.github/workflows/ci.yml`.
+GitHub Actions validates the shared C++ headers, runs `pio pkg pack`, and builds
+the showcase firmware on pushes and pull requests. The workflow lives at
+`.github/workflows/ci.yml`.
