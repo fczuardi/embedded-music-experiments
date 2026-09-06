@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NoteEvent.h"
+#include "PitchBendEvent.h"
 
 // Boundary for code that produces instrument events.
 //
@@ -11,5 +12,6 @@ public:
   virtual ~InstrumentEventSink() = default;
 
   virtual void onNoteEvent(const NoteEvent& event) = 0;
+  virtual void onPitchBendEvent(const PitchBendEvent& event) = 0;
   virtual void onDisconnected() = 0;
 };

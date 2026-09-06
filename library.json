@@ -10,7 +10,7 @@
   },
   "frameworks": "*",
   "platforms": "*",
-  "headers": ["NoteEvent.h", "InstrumentEventSink.h"],
+  "headers": ["NoteEvent.h", "PitchBendEvent.h", "InstrumentEventSink.h"],
   "build": {
     "includeDir": "firmware-contracts/include"
   },
