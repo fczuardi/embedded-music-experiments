@@ -9,7 +9,7 @@ This repository is the documentation hub for the experiments. It does not contai
 | Repository | Status | Purpose |
 | --- | --- | --- |
 | [midi-receiver](https://github.com/fczuardi/midi-receiver) | First milestone complete | Receive BLE MIDI, interpret messages, and make them observable on an M5StickC Plus2 |
-| [buzzer-instrument](https://github.com/fczuardi/buzzer-instrument) | Starting | Explore a small musical instrument using a passive buzzer, beginning with the M5StickC Plus2 |
+| [buzzer-instrument](https://github.com/fczuardi/buzzer-instrument) | Packaged and hardware-validated | Provide a monophonic buzzer instrument for the M5StickC Plus2 |
 
 ## Showcases
 
@@ -20,7 +20,8 @@ instrument package so an M5StickC Plus2 can act as a small BLE MIDI sound box.
 ## Design notes
 
 The current direction, boundaries, decisions, and open questions are recorded in [DESIGN.md](DESIGN.md).
-Incremental follow-up ideas are tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
+Near-term priorities are tracked in [docs/ROADMAP.md](docs/ROADMAP.md), while
+lower-certainty follow-up ideas live in [docs/BACKLOG.md](docs/BACKLOG.md).
 
 The design is intentionally provisional. Shared libraries and additional repositories should emerge from working experiments rather than being designed in advance.
 

@@ -9,7 +9,7 @@
 
 Este documento registra a direção descoberta durante a construção de um receptor BLE MIDI no M5StickC Plus2. A ideia nasceu da curiosidade sobre instrumentos compactos e baratos, como o M-Vave FM1, mas não pretende copiar, desmontar ou substituir um produto específico. Também não pressupõe que o resultado será um sintetizador FM.
 
-A proposta é mais simples e mais aberta: construir pequenas peças de software musical embarcado que tenham valor isoladamente, possam ser combinadas e sejam apoiadas por contratos claros. O primeiro resultado concreto é um receptor BLE MIDI capaz de interpretar mensagens e expô-las de forma observável. O experimento seguinte poderá transformar essas mensagens em som usando apenas o buzzer interno do M5StickC Plus2.
+A proposta é mais simples e mais aberta: construir pequenas peças de software musical embarcado que tenham valor isoladamente, possam ser combinadas e sejam apoiadas por contratos claros. O primeiro resultado concreto foi um receptor BLE MIDI capaz de interpretar mensagens e expô-las de forma observável. O segundo resultado foi um instrumento monofônico de buzzer. Ambos agora foram empacotados e combinados em um showcase que permite a um controlador BLE MIDI tocar o buzzer interno do M5StickC Plus2.
 
 O projeto privilegia aprendizado, reaproveitamento, código aberto e limites assumidos. Um aparelho monofônico de onda quadrada pode ser musicalmente interessante se responder bem, tiver uma interface legível e, mais tarde, ganhar recursos como arpejador ou sequenciador. Complexidade sonora não é requisito para validar a arquitetura.
 
@@ -47,6 +47,21 @@ O repositório `midi-receiver` representa a primeira milestone concluída. No M5
 - possui testes nativos e integração contínua.
 
 O `AppState` existente é útil para a tela e para o diagnóstico do receiver. Ele não deve ser promovido automaticamente a estado universal do ecossistema.
+
+## Estado atual: instrumento de buzzer e showcase
+
+O repositório `buzzer-instrument` representa a segunda milestone concluída. No M5StickC Plus2, ele:
+
+- converte números de nota MIDI em frequência;
+- toca uma voz monofônica no buzzer interno via `M5.Speaker`;
+- implementa prioridade de última nota para múltiplas teclas pressionadas;
+- silencia a saída na desconexão;
+- possui testes nativos para conversão de notas, política monofônica e sink de instrumento;
+- é empacotado como `EmbeddedMusicBuzzerInstrument`.
+
+O repositório guarda-chuva também contém `showcases/ble-midi-buzzer`, que compõe `EmbeddedMusicBleMidiInput` e `EmbeddedMusicBuzzerInstrument` através do contrato compartilhado `InstrumentEventSink`. Esse showcase já foi validado no hardware para o caminho feliz: conectar por BLE MIDI, tocar notas, soltar notas, sobrepor notas, desconectar durante uma nota e reconectar.
+
+O teste também revelou uma limitação externa útil: se um app bridge mantém o BLE conectado mas perde a ponta USB sem enviar Note Off, All Sound Off, All Notes Off ou desconexão BLE, o receiver não tem como inferir a quebra da rota. A mitigação local mais confiável é uma ação de panic no próprio showcase.
 
 ## Arquitetura proposta
 
@@ -146,7 +161,7 @@ Esse tipo pertence ao instrumento ou a uma camada de performance, não necessari
 
 ## Primeiro módulo de áudio: buzzer
 
-O M5StickC Plus2 inclui um buzzer passivo no GPIO 2. Ele é adequado para a próxima prova de conceito: transformar Note On/Off em uma onda quadrada audível. A biblioteca M5Unified já fornece primitivas como `Speaker.tone`, portanto não há motivo para inventar imediatamente uma grande API de áudio.
+O M5StickC Plus2 inclui um buzzer passivo no GPIO 2. Ele se mostrou adequado para a primeira prova de conceito audível: transformar Note On/Off em uma onda simples no buzzer. A biblioteca M5Unified já fornece primitivas como `Speaker.tone`, portanto não há motivo para inventar imediatamente uma grande API de áudio.
 
 Mesmo uma nota C4 não precisa ter um único timbre possível. Duty cycle, articulação, envelopes simples, alternância rápida de frequência, vibrato e mistura por software podem alterar o resultado. Entretanto, essas possibilidades são posteriores à validação do caminho básico.
 
@@ -161,7 +176,7 @@ stopAll();
 
 Uma função `playTone(frequency, duration)` pode existir como conveniência para melodias e sequenciadores, construída sobre essas operações. O backend de buzzer não deve conhecer MIDI. Ele recebe comandos de execução sonora; a política de instrumento converte mensagens MIDI nesses comandos.
 
-O primeiro marco de áudio deve permanecer modesto:
+O primeiro marco de áudio permaneceu modesto e foi validado:
 
 > Receber Note On e Note Off e controlar uma única voz de onda quadrada no buzzer interno, silenciando-a corretamente também na desconexão.
 
@@ -181,15 +196,15 @@ As placas MAX98357A e PCM5102 já disponíveis são candidatas interessantes a e
 
 ## Organização dos repositórios
 
-A organização recomendada é incremental:
+A organização evoluiu de forma incremental:
 
-1. Manter `midi-receiver` como projeto focado e milestone fechada, marcada por uma versão inicial.
-2. Criar um projeto separado para o experimento de buzzer, inicialmente capaz de funcionar sozinho.
-3. Integrar o receptor ao instrumento dentro desse projeto, copiando ou adaptando a menor quantidade necessária.
-4. Só extrair uma biblioteca MIDI compartilhada quando receiver e instrumento demonstrarem concretamente o contrato comum.
-5. Criar um repositório guarda-chuva apenas quando houver pelo menos duas peças maduras e uma relação que valha documentar.
+1. `midi-receiver` permaneceu como projeto focado em transporte, parsing e diagnóstico BLE MIDI.
+2. `buzzer-instrument` nasceu como experimento independente de áudio no buzzer interno.
+3. O contrato mínimo `NoteEvent`/`InstrumentEventSink` foi extraído para este guarda-chuva quando os dois projetos passaram a precisar da mesma linguagem.
+4. As partes reutilizáveis de BLE MIDI e buzzer foram empacotadas como bibliotecas PlatformIO separadas.
+5. O showcase `showcases/ble-midi-buzzer` foi adicionado ao guarda-chuva para provar a composição sem criar um quarto repositório.
 
-Nem todo módulo lógico precisa ser um repositório. Política de instrumento, alocação de vozes e backend do buzzer podem começar como módulos internos do projeto de áudio. Separação física prematura aumenta versionamento, dependências e manutenção sem comprovar reutilização.
+Nem todo módulo lógico precisa ser um repositório. A composição BLE MIDI -> buzzer é um exemplo executável, não um novo produto. Ela fica ao lado do design arquitetural, serve como teste de integração e demonstra uma combinação reproduzível dos pacotes existentes.
 
 ## Ferramentas e ambiente
 
@@ -221,7 +236,9 @@ Prior art orienta e reduz redescobertas, mas não define a arquitetura. Diferen�
 - Note Off encerra a voz correta;
 - política explícita para múltiplas teclas;
 - silêncio garantido na desconexão;
-- testes da conversão nota–frequência e da política de voz.
+- testes da conversão nota–frequência e da política de voz;
+- pacote PlatformIO reutilizável;
+- showcase BLE MIDI -> buzzer validado no hardware.
 
 ### Marco 2 — expressão mínima
 

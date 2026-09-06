@@ -1,5 +1,8 @@
 # Backlog
 
+Prioritized near-term work is tracked in [ROADMAP.md](ROADMAP.md). This file
+keeps lower-certainty ideas and notes that may become roadmap slices later.
+
 ## MIDI Panic and Cleanup Events
 
 Support standard MIDI cleanup messages in a future contract or transport slice:
@@ -15,3 +18,9 @@ disconnect happened.
 The BLE MIDI buzzer showcase exposed why this matters: if an upstream bridge can
 send CC 120 or CC 123 when a route breaks, the receiver could recover from stuck
 notes without requiring a BLE disconnect or local panic button.
+
+## Local Panic Action
+
+Add a local panic action to the BLE MIDI buzzer showcase. Unlike MIDI cleanup
+messages, this works even when no event arrives from an upstream bridge. It
+should unconditionally clear instrument state and stop the audio output.
