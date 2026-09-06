@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  firmware-contracts:
+    name: Firmware contracts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Validate shared C++ headers
+        run: |
+          cat > /tmp/check_note_event.cpp <<'CPP'
+          #include "NoteEvent.h"
+
+          int main() {
+            NoteEvent event = {NoteEventType::NoteOn, 1, 60, 100};
+            return event.note == 60 ? 0 : 1;
+          }
+          CPP
+
+          cat > /tmp/check_instrument_event_sink.cpp <<'CPP'
+          #include "InstrumentEventSink.h"
+
+          class CapturingSink : public InstrumentEventSink {
+          public:
+            void onNoteEvent(const NoteEvent& event) override {
+              lastEvent = event;
+            }
+
+            void onDisconnected() override {
+              disconnected = true;
+            }
+
+            NoteEvent lastEvent = {NoteEventType::NoteOff, 1, 0, 0};
+            bool disconnected = false;
+          };
+
+          int main() {
+            CapturingSink sink;
+            sink.onNoteEvent({NoteEventType::NoteOn, 1, 60, 100});
+            sink.onDisconnected();
+            return sink.disconnected && sink.lastEvent.note == 60 ? 0 : 1;
+          }
+          CPP
+
+          g++ -std=c++17 -Ifirmware-contracts/include -Wall -Wextra -Werror \
+            /tmp/check_note_event.cpp -o /tmp/check_note_event
+          g++ -std=c++17 -Ifirmware-contracts/include -Wall -Wextra -Werror \
+            /tmp/check_instrument_event_sink.cpp -o /tmp/check_instrument_event_sink
+
+          /tmp/check_note_event
+          /tmp/check_instrument_event_sink

@@ -16,3 +16,14 @@ This repository is the documentation hub for the experiments. It does not contai
 The current direction, boundaries, decisions, and open questions are recorded in [DESIGN.md](DESIGN.md).
 
 The design is intentionally provisional. Shared libraries and additional repositories should emerge from working experiments rather than being designed in advance.
+
+## Shared firmware contracts
+
+The first shared C++ contracts live in `firmware-contracts/include/`. They are
+header-only and intentionally small so firmware experiments can include the same
+event vocabulary without sharing BLE, display, or audio backend code.
+
+## CI
+
+GitHub Actions validates the shared C++ headers on pushes and pull requests. The
+workflow lives at `.github/workflows/ci.yml`.
