@@ -33,7 +33,9 @@ and reconnect.
 
 One external bridge edge case is known. When My Midi Hub on Android routes a USB
 MIDI controller to BLE MIDI, unplugging the USB controller while a note is held
-keeps the BLE connection open and sends no observed Note Off, CC 120, CC 123, or
-BLE disconnect. In that situation the receiver has no route-level signal that
-the upstream USB device disappeared, so the note can remain sounding until a
-local panic action or BLE disconnect is added.
+keeps the BLE connection open. In the observed test, the bridge sent no Note Off,
+no BLE disconnect, and no standard cleanup control messages such as CC 120 or
+CC 123. This showcase does not currently handle those CC messages; they are
+mentioned here only as examples of signals that a bridge could send to make the
+route failure observable. Without any such signal, the note can remain sounding
+until a local panic action or BLE disconnect occurs.

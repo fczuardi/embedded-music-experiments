@@ -20,6 +20,7 @@ instrument package so an M5StickC Plus2 can act as a small BLE MIDI sound box.
 ## Design notes
 
 The current direction, boundaries, decisions, and open questions are recorded in [DESIGN.md](DESIGN.md).
+Incremental follow-up ideas are tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
 
 The design is intentionally provisional. Shared libraries and additional repositories should emerge from working experiments rather than being designed in advance.
 

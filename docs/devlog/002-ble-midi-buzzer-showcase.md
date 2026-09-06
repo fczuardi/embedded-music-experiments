@@ -39,7 +39,10 @@ stopped them, overlapping notes followed the monophonic last-note policy, and a
 BLE disconnect during a sounding note silenced the output.
 
 One useful edge case was also observed. With My Midi Hub routing USB MIDI to BLE
-MIDI, unplugging the USB controller while a note was held did not send any
-observed Note Off, CC 120 All Sound Off, CC 123 All Notes Off, or BLE disconnect.
-The receiver cannot infer that hidden route break while BLE remains connected,
-so a future local panic button remains the appropriate mitigation on our side.
+MIDI, unplugging the USB controller while a note was held kept BLE connected and
+did not send any observed Note Off, BLE disconnect, or standard cleanup control
+messages such as CC 120 All Sound Off or CC 123 All Notes Off. The showcase does
+not currently support those CC messages; they are listed here as examples of
+signals that would have made the upstream route failure visible to the receiver.
+Since no such signal arrived, a future local panic button remains the appropriate
+mitigation on our side.
