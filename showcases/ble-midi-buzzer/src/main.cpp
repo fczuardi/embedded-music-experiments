@@ -37,6 +37,7 @@ void drawStaticScreen() {
   M5.Display.println();
   M5.Display.println("Connect BLE MIDI");
   M5.Display.println("Play notes");
+  M5.Display.println("BtnA: panic");
 }
 }
 
@@ -65,6 +66,11 @@ void setup() {
 void loop() {
   M5.update();
   bleMidiInput.update();
+
+  if (M5.BtnA.wasPressed()) {
+    instrumentSink.panic();
+    Serial.println("panic: local button");
+  }
 
   const uint32_t nowMs = millis();
   if (nowMs - lastUptimeLogAtMs >= UPTIME_LOG_INTERVAL_MS) {

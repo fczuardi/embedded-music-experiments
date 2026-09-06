@@ -44,5 +44,5 @@ did not send any observed Note Off, BLE disconnect, or standard cleanup control
 messages such as CC 120 All Sound Off or CC 123 All Notes Off. The showcase does
 not currently support those CC messages; they are listed here as examples of
 signals that would have made the upstream route failure visible to the receiver.
-Since no such signal arrived, a future local panic button remains the appropriate
-mitigation on our side.
+Since no such signal arrived, a local panic button is the appropriate mitigation
+on our side.

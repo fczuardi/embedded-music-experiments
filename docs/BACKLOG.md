@@ -17,10 +17,5 @@ disconnect happened.
 
 The BLE MIDI buzzer showcase exposed why this matters: if an upstream bridge can
 send CC 120 or CC 123 when a route breaks, the receiver could recover from stuck
-notes without requiring a BLE disconnect or local panic button.
-
-## Local Panic Action
-
-Add a local panic action to the BLE MIDI buzzer showcase. Unlike MIDI cleanup
-messages, this works even when no event arrives from an upstream bridge. It
-should unconditionally clear instrument state and stop the audio output.
+notes without requiring the local panic button that is now validated in the
+showcase.

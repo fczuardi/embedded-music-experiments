@@ -17,25 +17,23 @@ Status:
 - `EmbeddedMusicBuzzerInstrument` is packaged from `buzzer-instrument`.
 - `showcases/ble-midi-buzzer` composes both packages and passed happy-path
   hardware tests.
+- The showcase has a local panic button for route failures that do not produce
+  MIDI cleanup events or BLE disconnects, and that button has been validated on
+  real hardware.
 
 ## Next Priority Slices
 
-1. **Local panic button in the showcase**
-   Add one M5Stick button that unconditionally silences the instrument and
-   output. This handles stuck notes caused by upstream bridges that keep BLE
-   connected but stop forwarding events.
-
-2. **Velocity response in the buzzer instrument**
+1. **Velocity response in the buzzer instrument**
    Use MIDI velocity to affect the audible result. First test whether
    `M5.Speaker` volume changes are useful on the buzzer; if not, map velocity to
    articulation or timbre instead of pretending it is reliable loudness.
 
-3. **Pitch bend event contract**
+2. **Pitch bend event contract**
    Add a typed pitch bend path separate from `NoteEvent`. The receiver already
    observes pitch bend, and a monophonic instrument can use it naturally by
    changing the active voice frequency.
 
-4. **Simple channel behavior**
+3. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 

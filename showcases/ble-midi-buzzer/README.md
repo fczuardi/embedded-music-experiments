@@ -13,6 +13,11 @@ buzzer through M5Unified.
 ## Commands
 
 ```bash
+just showcase-list
+just showcase-build
+just showcase-upload
+just showcase-monitor
+just showcase-build 1
 env PLATFORMIO_CORE_DIR="$PWD/.platformio-home" pio run -d showcases/ble-midi-buzzer
 env PLATFORMIO_CORE_DIR="$PWD/.platformio-home" pio run -d showcases/ble-midi-buzzer --target upload
 env PLATFORMIO_CORE_DIR="$PWD/.platformio-home" pio device monitor -d showcases/ble-midi-buzzer
@@ -24,6 +29,10 @@ The device advertises using the BLE MIDI name provided by
 `EmbeddedMusicBleMidiInput`. After a controller connects, note on/off events
 should start and stop the buzzer. Disconnecting the controller should silence
 the output through `InstrumentEventSink::onDisconnected()`.
+
+Button A is a local panic action. Pressing it clears held instrument state and
+stops the buzzer even if the BLE connection remains open. This was validated on
+the M5StickC Plus2 hardware.
 
 ## Hardware Test Notes
 
@@ -38,4 +47,4 @@ no BLE disconnect, and no standard cleanup control messages such as CC 120 or
 CC 123. This showcase does not currently handle those CC messages; they are
 mentioned here only as examples of signals that a bridge could send to make the
 route failure observable. Without any such signal, the note can remain sounding
-until a local panic action or BLE disconnect occurs.
+until the local panic action or a BLE disconnect occurs.
