@@ -12,7 +12,10 @@
   "platforms": "*",
   "headers": ["NoteEvent.h", "PitchBendEvent.h", "InstrumentEventSink.h"],
   "build": {
-    "includeDir": "firmware-contracts/include"
+    "includeDir": "firmware-contracts/include",
+    "srcFilter": [
+      "-<*>"
+    ]
   },
   "export": {
     "include": [
