@@ -11,9 +11,36 @@ constexpr uint32_t UPTIME_LOG_INTERVAL_MS = 1000;
 // custom volume limits for velocity mapping, the defaults are 64-128
 constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {96, 136};
 
+class LoggingInstrumentEventSink : public InstrumentEventSink {
+public:
+  explicit LoggingInstrumentEventSink(InstrumentEventSink& innerSink)
+      : innerSink_(innerSink) {
+  }
+
+  void onNoteEvent(const NoteEvent& event) override {
+    innerSink_.onNoteEvent(event);
+  }
+
+  void onPitchBendEvent(const PitchBendEvent& event) override {
+    Serial.printf(
+        "pitch_bend: channel=%u value=%d\n",
+        event.channel,
+        event.value);
+    innerSink_.onPitchBendEvent(event);
+  }
+
+  void onDisconnected() override {
+    innerSink_.onDisconnected();
+  }
+
+private:
+  InstrumentEventSink& innerSink_;
+};
+
 MonophonicInstrument instrument;
 SpeakerToneOutput speakerToneOutput;
 MonophonicInstrumentSink instrumentSink(instrument, speakerToneOutput);
+LoggingInstrumentEventSink loggingInstrumentSink(instrumentSink);
 BleMidiInput bleMidiInput;
 uint32_t lastUptimeLogAtMs = 0;
 
@@ -53,7 +80,7 @@ void setup() {
   speakerToneOutput.setVelocityVolumeRange(SHOWCASE_VELOCITY_VOLUME_RANGE);
   speakerToneOutput.setWaveform(instrument.waveform());
 
-  bleMidiInput.setInstrumentEventSink(&instrumentSink);
+  bleMidiInput.setInstrumentEventSink(&loggingInstrumentSink);
   bleMidiInput.begin();
 
   Serial.println();

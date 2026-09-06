@@ -38,6 +38,10 @@ Button A is a local panic action. Pressing it clears held instrument state and
 stops the buzzer even if the BLE connection remains open. This was validated on
 the M5StickC Plus2 hardware.
 
+Pitch bend events are logged to serial as `pitch_bend`, but they do not change
+the buzzer frequency yet. This validates the event path before choosing the
+musical bend range.
+
 For velocity-volume calibration, edit `SHOWCASE_VELOCITY_VOLUME_RANGE` in
 `src/main.cpp` and upload again with `just showcase-upload`. This only changes
 the showcase firmware; it does not require a new package commit.

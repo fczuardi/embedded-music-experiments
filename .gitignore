@@ -1,4 +1,6 @@
 .pio/
 .platformio-home/
+.platformio-core/
 **/.pio/
 **/.platformio-home/
+**/.platformio-core/
