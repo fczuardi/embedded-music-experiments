@@ -35,6 +35,9 @@ The manifest also defines an explicit export allowlist. This matters because the
 repository uses `jj`; without the allowlist, `pio pkg pack` would include `.jj/`
 metadata in the package tarball.
 
+The CI pins PlatformIO to `6.1.19`, matching the firmware repositories. This
+keeps package validation reproducible while the contract is still young.
+
 Local verification mirrors CI:
 
 ```bash
