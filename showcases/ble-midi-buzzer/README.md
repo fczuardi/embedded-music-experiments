@@ -38,6 +38,10 @@ Button A is a local panic action. Pressing it clears held instrument state and
 stops the buzzer even if the BLE connection remains open. This was validated on
 the M5StickC Plus2 hardware.
 
+For velocity-volume calibration, edit `SHOWCASE_VELOCITY_VOLUME_RANGE` in
+`src/main.cpp` and upload again with `just showcase-upload`. This only changes
+the showcase firmware; it does not require a new package commit.
+
 ## Hardware Test Notes
 
 The first M5StickC Plus2 test passed the regular path: connect over BLE MIDI,

@@ -8,6 +8,8 @@
 
 namespace {
 constexpr uint32_t UPTIME_LOG_INTERVAL_MS = 1000;
+// custom volume limits for velocity mapping, the defaults are 64-128
+constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {96, 136};
 
 MonophonicInstrument instrument;
 SpeakerToneOutput speakerToneOutput;
@@ -48,6 +50,7 @@ void setup() {
   delay(200);
 
   speakerToneOutput.begin();
+  speakerToneOutput.setVelocityVolumeRange(SHOWCASE_VELOCITY_VOLUME_RANGE);
   speakerToneOutput.setWaveform(instrument.waveform());
 
   bleMidiInput.setInstrumentEventSink(&instrumentSink);
@@ -57,8 +60,10 @@ void setup() {
   Serial.println("BLE MIDI buzzer showcase");
   Serial.printf("board_id=%d\n", static_cast<int>(M5.getBoard()));
   Serial.printf(
-      "buzzer: backend=m5speaker waveform=%s\n",
-      speakerToneOutput.waveformName());
+      "buzzer: backend=m5speaker waveform=%s velocity_volume_min=%u velocity_volume_max=%u\n",
+      speakerToneOutput.waveformName(),
+      SHOWCASE_VELOCITY_VOLUME_RANGE.minimum,
+      SHOWCASE_VELOCITY_VOLUME_RANGE.maximum);
 
   drawStaticScreen();
 }
