@@ -16,9 +16,6 @@ This repository is the documentation hub for the experiments. It does not contai
 Executable compositions live in `showcases/`. The first one,
 `showcases/ble-midi-buzzer/`, combines the BLE MIDI input package with the buzzer
 instrument package so an M5StickC Plus2 can act as a small BLE MIDI sound box.
-Note On/Off, velocity, panic, disconnect cleanup, and audible pitch bend have
-been validated on hardware. The showcase also demonstrates composition-level
-calibration by overriding the packages' default volume and pitch-bend ranges.
 
 ## Design notes
 
@@ -42,3 +39,10 @@ points PlatformIO at `firmware-contracts/include/` through `build.includeDir`.
 GitHub Actions validates the shared C++ headers, runs `pio pkg pack`, and builds
 the showcase firmware on pushes and pull requests. The workflow lives at
 `.github/workflows/ci.yml`.
+
+## Local PlatformIO Cache
+
+Sibling firmware repositories share the parent workspace cache at
+`/home/fcz/dev/m5stick/.platformio-home`. Each PlatformIO project records this
+with `core_dir` in its `platformio.ini`, and this repository's `justfile` points
+showcase commands at the same cache.
