@@ -49,6 +49,43 @@ Status:
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 
+## Second Hardware Validation: M5Stack Core Gray
+
+After audible pitch bend is proven on the M5StickC Plus2, bring the available
+M5Stack Core Gray 1.0 into the test bench as the second hardware target. The
+goal is not merely to add another supported board: it is to discover which
+existing boundaries are genuinely portable.
+
+1. **Core Gray speaker smoke test**
+   Initialize the board through M5Unified, play and stop A4 through its built-in
+   1 W speaker, and record the effective speaker configuration. Keep BLE out of
+   this first test.
+
+2. **Audio-output boundary check**
+   Determine whether `SpeakerToneOutput` can support both devices through
+   explicit configuration or whether the Gray needs a separate output backend.
+   Keep Plus2 buzzer calibration and Gray speaker calibration outside musical
+   policy, and base the decision on observed differences rather than on a goal
+   of maximizing shared code.
+
+3. **Multi-board build coverage**
+   Build the relevant firmware for both Plus2 and Gray in CI. Board selection,
+   pinout, speaker setup, display layout, and physical controls may vary;
+   shared contracts and pure instrument policy should compile unchanged.
+
+4. **Core Gray BLE MIDI showcase**
+   Compose the existing BLE MIDI input and monophonic instrument with the Gray
+   output. Validate Note On/Off, overlapping-note fallback, velocity, panic,
+   disconnect cleanup, and pitch bend on its speaker. Preserve the Plus2
+   showcase as the baseline rather than converting it into a single application
+   full of board conditionals.
+
+5. **Cross-hardware comparison**
+   Document clarity, useful volume range, velocity response, pitch-bend
+   continuity, transition clicks, latency, and the amount of code that remained
+   shared. Use these findings to refine boundaries before starting the sampled
+   oscillator or external I2S work.
+
 ## Parallel Audio Exploration
 
 The proven `SpeakerToneOutput` remains the baseline backend. New audio paths
@@ -105,5 +142,8 @@ need to replace it to be useful.
 - Prefer contract changes only after at least one producer and one consumer need
   them.
 - Keep transport, event contracts, instrument policy, and audio output separate.
+- Keep board selection, pinout, calibration, display, and physical controls at
+  composition edges instead of spreading hardware conditionals through musical
+  semantics.
 - Keep each slice small enough to build, test, document, commit, and review.
 - Move speculative ideas down until a concrete test makes them relevant.
