@@ -10,6 +10,8 @@ namespace {
 constexpr uint32_t UPTIME_LOG_INTERVAL_MS = 1000;
 // custom volume limits for velocity mapping, the defaults are 64-128
 constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {96, 136};
+// custom pitch bend range in semitones, the package default is 2.0
+constexpr float SHOWCASE_PITCH_BEND_RANGE_SEMITONES = 4.0f;
 
 class LoggingInstrumentEventSink : public InstrumentEventSink {
 public:
@@ -77,6 +79,7 @@ void setup() {
   delay(200);
 
   speakerToneOutput.begin();
+  instrument.setPitchBendRangeSemitones(SHOWCASE_PITCH_BEND_RANGE_SEMITONES);
   speakerToneOutput.setVelocityVolumeRange(SHOWCASE_VELOCITY_VOLUME_RANGE);
   speakerToneOutput.setWaveform(instrument.waveform());
 
@@ -87,10 +90,11 @@ void setup() {
   Serial.println("BLE MIDI buzzer showcase");
   Serial.printf("board_id=%d\n", static_cast<int>(M5.getBoard()));
   Serial.printf(
-      "buzzer: backend=m5speaker waveform=%s velocity_volume_min=%u velocity_volume_max=%u\n",
+      "buzzer: backend=m5speaker waveform=%s velocity_volume_min=%u velocity_volume_max=%u pitch_bend_range_semitones=%.2f\n",
       speakerToneOutput.waveformName(),
       SHOWCASE_VELOCITY_VOLUME_RANGE.minimum,
-      SHOWCASE_VELOCITY_VOLUME_RANGE.maximum);
+      SHOWCASE_VELOCITY_VOLUME_RANGE.maximum,
+      SHOWCASE_PITCH_BEND_RANGE_SEMITONES);
 
   drawStaticScreen();
 }

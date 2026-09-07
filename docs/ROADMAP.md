@@ -22,17 +22,17 @@ Status:
   real hardware.
 - The buzzer package maps Note On velocity to a constrained speaker volume
   range, and the showcase velocity response has been validated on real hardware.
-- `PitchBendEvent` is part of the shared contract and the complete event path
-  has been observed on hardware. Comparative route tests now point to My MIDI
+- `PitchBendEvent` is part of the shared contract, the complete event path has
+  been observed on hardware, and the showcase now consumes the buzzer package
+  version that makes bend audible. Comparative route tests point to My MIDI
   Hub's USB-to-BLE bridge as the problematic path; SynthBridge routes stop notes
   immediately even during pitch bend activity.
 
 ## Next Priority Slices
 
-1. **Audible pitch bend through the validated route**
-   Re-enable audible pitch bend in the showcase and validate it primarily with
-   SynthBridge BLE routes. Keep My MIDI Hub documented as a known-problem route
-   for dense pitch bend traffic.
+1. **Validate audible pitch bend through the SynthBridge route**
+   Upload the showcase and test on real hardware with SynthBridge BLE routes.
+   Confirm that bending changes pitch while Note Off remains immediate.
 
 2. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
