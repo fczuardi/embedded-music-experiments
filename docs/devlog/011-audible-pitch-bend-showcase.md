@@ -21,14 +21,16 @@ strips that do not return to perfect zero.
 The showcase sets the initial range explicitly:
 
 ```cpp
-constexpr float SHOWCASE_PITCH_BEND_RANGE_SEMITONES = 2.0f;
+constexpr float SHOWCASE_PITCH_BEND_RANGE_SEMITONES = 4.0f;
 instrument.setPitchBendRangeSemitones(SHOWCASE_PITCH_BEND_RANGE_SEMITONES);
 ```
 
 This mirrors the velocity-volume calibration style. We can change the showcase
 constant and upload again without committing a new instrument package revision.
+The package default remains plus or minus two semitones; the showcase uses plus
+or minus four to make the override and audible movement explicit.
 
-The next hardware validation should use:
+The hardware validation used the responsive SynthBridge route:
 
 ```text
 Android SynthBridge -> BLE MIDI -> showcase
@@ -37,3 +39,7 @@ Arturia USB OTG -> Android SynthBridge Pro Trial -> BLE MIDI -> showcase
 
 My MIDI Hub remains useful for some basic BLE routing tests, but it is a
 known-problem route for dense pitch bend performance.
+
+The final test made bend audible in both directions while Note Off remained
+immediate. This closes the complete path from the BLE MIDI source through the
+shared event contract and monophonic policy to the current buzzer backend.

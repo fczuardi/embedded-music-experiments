@@ -5,7 +5,7 @@ This roadmap tracks the next useful slices across the umbrella repository,
 move up when they unlock a better hardware test, clarify a contract, or make a
 module more reusable.
 
-## Current Milestone: BLE MIDI Sound Box
+## Completed Milestone: BLE MIDI Sound Box
 
 Goal: use a BLE MIDI controller to play the M5StickC Plus2 buzzer through
 packaged modules.
@@ -27,31 +27,33 @@ Status:
   version that makes bend audible. Comparative route tests point to My MIDI
   Hub's USB-to-BLE bridge as the problematic path; SynthBridge routes stop notes
   immediately even during pitch bend activity.
+- Audible pitch bend has been validated through the responsive SynthBridge
+  route. The package keeps a ±2-semitone default while the showcase deliberately
+  overrides it to ±4 semitones, just as it overrides the default velocity-volume
+  range.
+
+**Status: complete.**
 
 ## Next Priority Slices
 
-1. **Validate audible pitch bend through the SynthBridge route**
-   Upload the showcase and test on real hardware with SynthBridge BLE routes.
-   Confirm that bending changes pitch while Note Off remains immediate.
+1. **Core Gray speaker smoke test**
+   Bring the second hardware target into the bench with a minimal local tone
+   test. Keep BLE, pitch bend, and cross-repo composition out of this first
+   slice.
 
 2. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 
-3. **Core Gray speaker smoke test**
-   Bring the second hardware target into the bench with a minimal local tone
-   test. Keep BLE, pitch bend, and cross-repo composition out of this first
-   slice.
-
-4. **Raw BLE-MIDI transport research**
+3. **Raw BLE-MIDI transport research**
    Keep this as a fallback if future sources reproduce the My MIDI Hub backlog.
    Do not redesign the transport while SynthBridge routes remain responsive.
 
 ## Second Hardware Validation: M5Stack Core Gray
 
 Bring the available M5Stack Core Gray 1.0 into the test bench as the second
-hardware target. The
-goal is not merely to add another supported board: it is to discover which
+hardware target. The goal is not merely to add another supported board: it is
+to discover which
 existing boundaries are genuinely portable.
 
 1. **Core Gray speaker smoke test**
@@ -120,9 +122,6 @@ need to replace it to be useful.
 - Revisit the velocity curve if more hardware tests show that the current
   package default or the showcase's calibrated `96..136` speaker volume range
   is too subtle or too aggressive.
-- Add route guidance to the BLE MIDI buzzer showcase README: SynthBridge is the
-  preferred Android validation route for pitch bend; My MIDI Hub is currently
-  unsuitable for dense pitch bend forwarding.
 - Make the BLE advertised name configurable in `EmbeddedMusicBleMidiInput`.
 - Document the one-active-instance constraint of BLE MIDI examples in the
   showcase README.

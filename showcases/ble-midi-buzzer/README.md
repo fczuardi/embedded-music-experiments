@@ -41,16 +41,17 @@ stops the buzzer even if the BLE connection remains open. This was validated on
 the M5StickC Plus2 hardware.
 
 Pitch bend events are logged to serial as `pitch_bend` and forwarded to the
-instrument. The current instrument policy maps the MIDI bend range
-`-8192..8191` to plus or minus two semitones with a small center dead zone.
+instrument. The package defaults to a range of plus or minus two semitones with
+a small center dead zone. This showcase intentionally overrides that default
+with a wider range of plus or minus four semitones.
 
 For velocity-volume calibration, edit `SHOWCASE_VELOCITY_VOLUME_RANGE` in
 `src/main.cpp` and upload again with `just showcase-upload`. This only changes
 the showcase firmware; it does not require a new package commit.
 
 For pitch bend calibration, edit `SHOWCASE_PITCH_BEND_RANGE_SEMITONES` in
-`src/main.cpp` and upload again. The package default is `2.0`, meaning plus or
-minus two semitones across the full MIDI pitch bend range.
+`src/main.cpp` and upload again. Its current value is `4.0`; the package
+default remains `2.0`.
 
 ## Hardware Test Notes
 
@@ -73,3 +74,9 @@ Note Off. The same physical Arturia strip routed through SynthBridge Pro Trial
 stopped notes immediately, and SynthBridge's on-screen pitch bend strip also
 kept Note Off immediate. Use SynthBridge as the preferred Android validation
 route for audible pitch bend.
+
+The final audible-pitch-bend test passed through the responsive SynthBridge
+route. Bend was audible in both directions and Note Off remained immediate. The
+showcase therefore closes the complete path from a BLE MIDI pitch bend message
+to a changed buzzer frequency. My MIDI Hub remains documented as a
+route-specific limitation rather than an instrument or contract failure.

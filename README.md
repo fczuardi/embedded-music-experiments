@@ -16,6 +16,9 @@ This repository is the documentation hub for the experiments. It does not contai
 Executable compositions live in `showcases/`. The first one,
 `showcases/ble-midi-buzzer/`, combines the BLE MIDI input package with the buzzer
 instrument package so an M5StickC Plus2 can act as a small BLE MIDI sound box.
+Note On/Off, velocity, panic, disconnect cleanup, and audible pitch bend have
+been validated on hardware. The showcase also demonstrates composition-level
+calibration by overriding the packages' default volume and pitch-bend ranges.
 
 ## Design notes
 

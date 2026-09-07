@@ -96,9 +96,9 @@ publica `EmbeddedMusicBuzzerInstrument`. Internamente, ele separa:
 
 O instrumento preserva velocity por nota e o backend a mapeia para uma faixa de
 volume calibrável. A ação local de panic limpa o estado de teclas mantidas e
-silencia imediatamente a saída. O pitch bend já atravessa o contrato e foi
-observado no showcase. Testes comparativos indicam que pitch bend audível deve
-ser retomado usando rotas BLE que preservam Note Off em tempo real.
+silencia imediatamente a saída. Pitch bend é armazenado como estado musical,
+mapeado para uma faixa configurável de semitons e entregue ao backend como uma
+frequência já calculada.
 
 ### Primeira composição
 
@@ -114,12 +114,12 @@ flowchart TD
 
 O showcase foi validado com um controlador BLE MIDI real para tocar, soltar e
 sobrepor notas, responder à velocity, executar panic, silenciar na desconexão e
-reconectar. O caminho completo de pitch bend também foi validado até o log.
-Testes posteriores separaram as rotas: My MIDI Hub atrasou Note Off ao rotear a
-fita de pitch física do Arturia por USB OTG para BLE, enquanto SynthBridge parou
-notas imediatamente tanto com pitch bend na tela quanto com a fita física do
-Arturia via USB OTG. Isso recoloca pitch bend audível no plano sem culpar a
-arquitetura do showcase.
+reconectar. O caminho completo de pitch bend audível também foi validado pela
+rota responsiva do SynthBridge. Testes comparativos separaram uma limitação
+externa: My MIDI Hub atrasou Note Off ao rotear a fita física do Arturia por USB
+OTG para BLE, enquanto SynthBridge parou notas imediatamente. Essa é uma
+observação específica da rota, não uma falha do contrato compartilhado, da
+política do instrumento ou do backend de buzzer.
 
 Essa composição é um exemplo executável, não um quarto produto. Ela pertence ao
 guarda-chuva porque prova que pacotes independentes realmente encaixam.
@@ -204,7 +204,8 @@ sonora**.
 - **Pitch Bend:** os dois valores de 7 bits do MIDI formam `0..16383`, com centro
   em `8192`. O contrato usa `int16_t` centrado em `-8192..8191`.
 - **Alcance do bend:** o evento não contém semitons. O instrumento escolhe a
-  faixa musical; o primeiro mapeamento previsto é ±2 semitons.
+  faixa musical; o pacote atual usa ±2 semitons por padrão e permite que a
+  composição sobrescreva esse valor.
 - **Modulation:** CC1 expressa intensidade, normalmente em `0..127`, mas o
   instrumento escolhe o destino — vibrato, tremolo, timbre ou outro parâmetro.
 - **Sustain:** CC64 informa a posição do pedal. A decisão de manter uma nota
@@ -222,10 +223,8 @@ Não existe um estado global universal. A mesma mensagem pode alimentar modelos
 diferentes:
 
 - o receiver guarda conexão, última atividade, contagens e notas observadas;
-- o instrumento atual guarda teclas pressionadas, nota ativa e velocity;
-- pitch bend pode ser modelado como estado contínuo por uma camada de
-  performance futura, mas essa decisão depende de um transporte que não atrase
-  Note Off;
+- o instrumento atual guarda teclas pressionadas, nota ativa, velocity e pitch
+  bend;
 - um sequenciador guardará eventos e relações temporais;
 - um monitor pode apenas registrar dados.
 
@@ -240,10 +239,16 @@ O `SpeakerToneOutput` usa a abstração `M5.Speaker` para tocar tabelas curtas d
 onda square ou saw no buzzer passivo do M5StickC Plus2. Ele provou pitches
 reconhecíveis, início e parada, troca de nota e resposta básica à velocity.
 
-Esse backend permanece como baseline para Note On/Off, velocity, panic e
-showcases simples. Pitch bend audível deixou de ser o próximo critério para
-avançar: antes de insistir nele, precisamos pesquisar uma entrada BLE MIDI capaz
-de tratar bend como estado contínuo sem atrasar mensagens discretas.
+Esse backend permanece como baseline para Note On/Off, velocity, panic e pitch
+bend. Ele já demonstrou movimento audível nas duas direções por uma rota BLE
+responsiva. O comportamento do My MIDI Hub sob tráfego denso de bend permanece
+como limitação externa documentada, não como motivo para redesenhar agora o
+transporte.
+
+O pacote oferece defaults conservadores — volume `64..128` e pitch bend de ±2
+semitons — enquanto composições podem sobrescrever ambos. O showcase atual usa
+volume `96..136` e pitch bend de ±4 semitons para demonstrar essa fronteira de
+calibração sem modificar nenhum dos pacotes reutilizáveis.
 
 ### Backends paralelos
 
@@ -259,10 +264,10 @@ Um backend novo não precisa substituir o anterior. Dois exemplos podem continua
 úteis se evidenciarem compromissos diferentes de latência, qualidade, memória,
 CPU ou simplicidade.
 
-Polifonia, envelopes, múltiplos osciladores e expressão contínua são
-experimentos posteriores. Um futuro retorno a pitch bend deve separar duas
-questões: transporte responsivo para eventos discretos e backend sonoro capaz
-de atualizar frequência sem comportamento de fila perceptível.
+Polifonia, envelopes e múltiplos osciladores são experimentos posteriores.
+Trabalhos futuros de expressão contínua devem continuar separando duas questões:
+transporte responsivo para eventos discretos e backend sonoro capaz de atualizar
+frequência sem artefatos perceptíveis.
 
 ## Segundo hardware: M5Stack Core Gray
 
@@ -334,8 +339,8 @@ dependências e compatibilidade com as fronteiras existentes.
 ## Decisões ainda abertas
 
 - Qual comportamento de canal será implementado primeiro?
-- Qual caminho de transporte permite tratar pitch bend como estado contínuo sem
-  atrasar Note Off?
+- Quais artefatos de atualização de frequência ficarão visíveis ao comparar o
+  backend atual com o speaker do Core Gray ou um oscilador amostrado?
 - O Core Gray reutilizará `SpeakerToneOutput` por configuração ou justificará
   outro backend?
 - Qual necessidade concreta fará Control Change atravessar o contrato comum?
