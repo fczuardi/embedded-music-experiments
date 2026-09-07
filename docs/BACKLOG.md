@@ -58,3 +58,12 @@ Future research options:
   appears outside My MIDI Hub;
 - compare with a non-BLE or direct hardware MIDI path before changing the shared
   event contract.
+
+## Repository Naming
+
+Consider renaming `buzzer-instrument` to `m5-buzzer-instrument` if the family of
+M5-specific instrument packages becomes established. The current name is short
+and already used by working showcases, but the implementation depends on
+M5Unified and is calibrated for the M5StickC Plus2 buzzer. A future rename would
+make it more symmetric with `m5-speaker-instrument`, at the cost of updating
+PlatformIO package references, documentation, CI, and recent review links.
