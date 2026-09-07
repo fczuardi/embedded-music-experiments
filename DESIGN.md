@@ -96,8 +96,9 @@ publica `EmbeddedMusicBuzzerInstrument`. Internamente, ele separa:
 
 O instrumento preserva velocity por nota e o backend a mapeia para uma faixa de
 volume calibrável. A ação local de panic limpa o estado de teclas mantidas e
-silencia imediatamente a saída. O pitch bend já chega ao sink pelo contrato,
-mas ainda não altera a frequência audível.
+silencia imediatamente a saída. O pitch bend já atravessa o contrato e foi
+observado no showcase, mas a tentativa de torná-lo audível no caminho atual foi
+despriorizada por enquanto.
 
 ### Primeira composição
 
@@ -113,8 +114,11 @@ flowchart TD
 
 O showcase foi validado com um controlador BLE MIDI real para tocar, soltar e
 sobrepor notas, responder à velocity, executar panic, silenciar na desconexão e
-reconectar. O caminho completo de pitch bend também foi validado até o log; a
-resposta sonora é o próximo passo.
+reconectar. O caminho completo de pitch bend também foi validado até o log.
+Testes posteriores mostraram que, com a rota Android USB MIDI para BLE MIDI
+usada até aqui, a fita de pitch pode gerar tráfego suficiente para atrasar Note
+Off. Esse comportamento ocorreu mesmo quando o showcase ignorava pitch bend
+antes do instrumento, indicando backlog abaixo da fronteira de instrumento.
 
 Essa composição é um exemplo executável, não um quarto produto. Ela pertence ao
 guarda-chuva porque prova que pacotes independentes realmente encaixam.
@@ -217,8 +221,10 @@ Não existe um estado global universal. A mesma mensagem pode alimentar modelos
 diferentes:
 
 - o receiver guarda conexão, última atividade, contagens e notas observadas;
-- o instrumento atual guarda teclas pressionadas, nota ativa e velocity; a
-  camada de performance prevista também guardará pitch bend;
+- o instrumento atual guarda teclas pressionadas, nota ativa e velocity;
+- pitch bend pode ser modelado como estado contínuo por uma camada de
+  performance futura, mas essa decisão depende de um transporte que não atrase
+  Note Off;
 - um sequenciador guardará eventos e relações temporais;
 - um monitor pode apenas registrar dados.
 
@@ -233,9 +239,10 @@ O `SpeakerToneOutput` usa a abstração `M5.Speaker` para tocar tabelas curtas d
 onda square ou saw no buzzer passivo do M5StickC Plus2. Ele provou pitches
 reconhecíveis, início e parada, troca de nota e resposta básica à velocity.
 
-Esse backend permanece como baseline enquanto o pitch bend audível é concluído.
-Limitações como descontinuidade, clique ou reinício de articulação durante a
-mudança de frequência devem ser medidas, não presumidas.
+Esse backend permanece como baseline para Note On/Off, velocity, panic e
+showcases simples. Pitch bend audível deixou de ser o próximo critério para
+avançar: antes de insistir nele, precisamos pesquisar uma entrada BLE MIDI capaz
+de tratar bend como estado contínuo sem atrasar mensagens discretas.
 
 ### Backends paralelos
 
@@ -251,16 +258,17 @@ Um backend novo não precisa substituir o anterior. Dois exemplos podem continua
 úteis se evidenciarem compromissos diferentes de latência, qualidade, memória,
 CPU ou simplicidade.
 
-Polifonia, envelopes e múltiplos osciladores são experimentos posteriores. A
-fronteira musical para pitch bend deve funcionar independentemente de o som vir
-de um buzzer, speaker, DAC ou mixer por software.
+Polifonia, envelopes, múltiplos osciladores e expressão contínua são
+experimentos posteriores. Um futuro retorno a pitch bend deve separar duas
+questões: transporte responsivo para eventos discretos e backend sonoro capaz
+de atualizar frequência sem comportamento de fila perceptível.
 
 ## Segundo hardware: M5Stack Core Gray
 
-O Core Gray 1.0 será introduzido depois da validação do pitch bend audível no
-Plus2. Ele mantém proximidade suficiente — ESP32 clássico, BLE e M5Unified — mas
-troca o buzzer passivo por um speaker eletromagnético interno de 1 W ligado ao
-DAC do ESP32.
+O Core Gray 1.0 será introduzido como segundo hardware de validação sem depender
+da conclusão de pitch bend audível no Plus2. Ele mantém proximidade suficiente —
+ESP32 clássico, BLE e M5Unified — mas troca o buzzer passivo por um speaker
+eletromagnético interno de 1 W ligado ao DAC do ESP32.
 
 Essa combinação permite testar, em ordem:
 
@@ -325,9 +333,8 @@ dependências e compatibilidade com as fronteiras existentes.
 ## Decisões ainda abertas
 
 - Qual comportamento de canal será implementado primeiro?
-- Como o instrumento tratará a pequena imprecisão de centro observada na strip
-  de pitch bend do controlador?
-- A atualização de frequência do backend atual será musicalmente contínua?
+- Qual caminho de transporte permite tratar pitch bend como estado contínuo sem
+  atrasar Note Off?
 - O Core Gray reutilizará `SpeakerToneOutput` por configuração ou justificará
   outro backend?
 - Qual necessidade concreta fará Control Change atravessar o contrato comum?

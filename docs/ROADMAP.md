@@ -22,37 +22,32 @@ Status:
   real hardware.
 - The buzzer package maps Note On velocity to a constrained speaker volume
   range, and the showcase velocity response has been validated on real hardware.
-- `PitchBendEvent` is part of the shared contract, the BLE MIDI package emits
-  it, and the buzzer package accepts it without changing the current voice.
-- The showcase logs centered pitch bend values and has validated the complete
-  event path on real hardware. Pitch bend is observable but not audible yet.
+- `PitchBendEvent` is part of the shared contract and the complete event path
+  has been observed on hardware, but audible pitch bend is currently
+  deprioritized. The Android USB-to-BLE bridge path tested so far can flood the
+  BLE-MIDI stack with stale bend values and delay Note Off, even when bend is
+  ignored by the instrument.
 
 ## Next Priority Slices
 
-1. **Pitch bend musical state and mapping**
-   Define the smallest backend-independent interpretation of `PitchBendEvent`.
-   Keep the shared event centered at `-8192..8191`, choose an initial musical
-   range such as +/-2 semitones in instrument or performance policy, and cover
-   the note-plus-bend frequency calculation with native tests. Account for the
-   small non-zero return value observed on the Arturia touch strip without
-   putting device-specific correction in the BLE receiver.
-
-2. **Audible pitch bend through the current backend**
-   Connect the mapped pitch to `SpeakerToneOutput` with the smallest useful
-   output capability, then test it on hardware. Record whether frequency updates
-   are continuous enough, whether they restart articulation, and whether they
-   create audible clicks. Keep those observations as evidence for comparing a
-   later sampled-audio backend rather than assuming the current backend must be
-   replaced.
-
-3. **Simple channel behavior**
+1. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 
+2. **Core Gray speaker smoke test**
+   Bring the second hardware target into the bench with a minimal local tone
+   test. Keep BLE, pitch bend, and cross-repo composition out of this first
+   slice.
+
+3. **Raw BLE-MIDI transport research**
+   Investigate whether a lower-level BLE packet parser can preserve Note On/Off
+   while dropping or sampling pitch bend before it enters a FIFO. This is
+   research, not the next performance feature.
+
 ## Second Hardware Validation: M5Stack Core Gray
 
-After audible pitch bend is proven on the M5StickC Plus2, bring the available
-M5Stack Core Gray 1.0 into the test bench as the second hardware target. The
+Bring the available M5Stack Core Gray 1.0 into the test bench as the second
+hardware target. The
 goal is not merely to add another supported board: it is to discover which
 existing boundaries are genuinely portable.
 
@@ -76,13 +71,13 @@ existing boundaries are genuinely portable.
 4. **Core Gray BLE MIDI showcase**
    Compose the existing BLE MIDI input and monophonic instrument with the Gray
    output. Validate Note On/Off, overlapping-note fallback, velocity, panic,
-   disconnect cleanup, and pitch bend on its speaker. Preserve the Plus2
-   showcase as the baseline rather than converting it into a single application
-   full of board conditionals.
+   and disconnect cleanup on its speaker. Preserve the Plus2 showcase as the
+   baseline rather than converting it into a single application full of board
+   conditionals.
 
 5. **Cross-hardware comparison**
-   Document clarity, useful volume range, velocity response, pitch-bend
-   continuity, transition clicks, latency, and the amount of code that remained
+   Document clarity, useful volume range, velocity response, note latency,
+   cleanup behavior, and the amount of code that remained
    shared. Use these findings to refine boundaries before starting the sampled
    oscillator or external I2S work.
 
@@ -101,9 +96,8 @@ need to replace it to be useful.
 
 2. **Backend comparison showcase**
    Compare the sampled oscillator with `SpeakerToneOutput` on the same hardware:
-   pitch-bend continuity, transition clicks, latency, clarity, CPU/memory cost,
-   and implementation complexity. Keep both backends if they demonstrate useful
-   trade-offs.
+   transition clicks, latency, clarity, CPU/memory cost, and implementation
+   complexity. Keep both backends if they demonstrate useful trade-offs.
 
 3. **Expression experiments on the sampled path**
    Only after the basic oscillator is proven, explore envelope-controlled
@@ -123,6 +117,9 @@ need to replace it to be useful.
 - Revisit the velocity curve if more hardware tests show that the current
   package default or the showcase's calibrated `96..136` speaker volume range
   is too subtle or too aggressive.
+- Revisit audible pitch bend only after transport-level research shows a way to
+  prevent bend floods from delaying Note Off, or after testing a different MIDI
+  bridge that does not create the same backlog.
 - Make the BLE advertised name configurable in `EmbeddedMusicBleMidiInput`.
 - Document the one-active-instance constraint of BLE MIDI examples in the
   showcase README.
