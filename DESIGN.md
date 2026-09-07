@@ -97,8 +97,8 @@ publica `EmbeddedMusicBuzzerInstrument`. Internamente, ele separa:
 O instrumento preserva velocity por nota e o backend a mapeia para uma faixa de
 volume calibrável. A ação local de panic limpa o estado de teclas mantidas e
 silencia imediatamente a saída. O pitch bend já atravessa o contrato e foi
-observado no showcase, mas a tentativa de torná-lo audível no caminho atual foi
-despriorizada por enquanto.
+observado no showcase. Testes comparativos indicam que pitch bend audível deve
+ser retomado usando rotas BLE que preservam Note Off em tempo real.
 
 ### Primeira composição
 
@@ -115,10 +115,11 @@ flowchart TD
 O showcase foi validado com um controlador BLE MIDI real para tocar, soltar e
 sobrepor notas, responder à velocity, executar panic, silenciar na desconexão e
 reconectar. O caminho completo de pitch bend também foi validado até o log.
-Testes posteriores mostraram que, com a rota Android USB MIDI para BLE MIDI
-usada até aqui, a fita de pitch pode gerar tráfego suficiente para atrasar Note
-Off. Esse comportamento ocorreu mesmo quando o showcase ignorava pitch bend
-antes do instrumento, indicando backlog abaixo da fronteira de instrumento.
+Testes posteriores separaram as rotas: My MIDI Hub atrasou Note Off ao rotear a
+fita de pitch física do Arturia por USB OTG para BLE, enquanto SynthBridge parou
+notas imediatamente tanto com pitch bend na tela quanto com a fita física do
+Arturia via USB OTG. Isso recoloca pitch bend audível no plano sem culpar a
+arquitetura do showcase.
 
 Essa composição é um exemplo executável, não um quarto produto. Ela pertence ao
 guarda-chuva porque prova que pacotes independentes realmente encaixam.

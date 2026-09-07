@@ -23,26 +23,29 @@ Status:
 - The buzzer package maps Note On velocity to a constrained speaker volume
   range, and the showcase velocity response has been validated on real hardware.
 - `PitchBendEvent` is part of the shared contract and the complete event path
-  has been observed on hardware, but audible pitch bend is currently
-  deprioritized. The Android USB-to-BLE bridge path tested so far can flood the
-  BLE-MIDI stack with stale bend values and delay Note Off, even when bend is
-  ignored by the instrument.
+  has been observed on hardware. Comparative route tests now point to My MIDI
+  Hub's USB-to-BLE bridge as the problematic path; SynthBridge routes stop notes
+  immediately even during pitch bend activity.
 
 ## Next Priority Slices
 
-1. **Simple channel behavior**
+1. **Audible pitch bend through the validated route**
+   Re-enable audible pitch bend in the showcase and validate it primarily with
+   SynthBridge BLE routes. Keep My MIDI Hub documented as a known-problem route
+   for dense pitch bend traffic.
+
+2. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 
-2. **Core Gray speaker smoke test**
+3. **Core Gray speaker smoke test**
    Bring the second hardware target into the bench with a minimal local tone
    test. Keep BLE, pitch bend, and cross-repo composition out of this first
    slice.
 
-3. **Raw BLE-MIDI transport research**
-   Investigate whether a lower-level BLE packet parser can preserve Note On/Off
-   while dropping or sampling pitch bend before it enters a FIFO. This is
-   research, not the next performance feature.
+4. **Raw BLE-MIDI transport research**
+   Keep this as a fallback if future sources reproduce the My MIDI Hub backlog.
+   Do not redesign the transport while SynthBridge routes remain responsive.
 
 ## Second Hardware Validation: M5Stack Core Gray
 
@@ -117,9 +120,9 @@ need to replace it to be useful.
 - Revisit the velocity curve if more hardware tests show that the current
   package default or the showcase's calibrated `96..136` speaker volume range
   is too subtle or too aggressive.
-- Revisit audible pitch bend only after transport-level research shows a way to
-  prevent bend floods from delaying Note Off, or after testing a different MIDI
-  bridge that does not create the same backlog.
+- Add route guidance to the BLE MIDI buzzer showcase README: SynthBridge is the
+  preferred Android validation route for pitch bend; My MIDI Hub is currently
+  unsuitable for dense pitch bend forwarding.
 - Make the BLE advertised name configurable in `EmbeddedMusicBleMidiInput`.
 - Document the one-active-instance constraint of BLE MIDI examples in the
   showcase README.

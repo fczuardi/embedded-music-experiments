@@ -20,12 +20,12 @@ send CC 120 or CC 123 when a route breaks, the receiver could recover from stuck
 notes without requiring the local panic button that is now validated in the
 showcase.
 
-## Pitch Bend Transport Research
+## Pitch Bend Route Compatibility
 
-Audible pitch bend is intentionally deprioritized until the transport behavior
-is better understood. Hardware tests with an Arturia controller routed through
-Android USB MIDI to BLE MIDI showed that pitch-strip movement can delay Note Off
-by seconds.
+Pitch bend is back on the near-term roadmap, but route compatibility remains a
+known risk. Hardware tests with an Arturia controller routed through Android USB
+MIDI to BLE MIDI in My MIDI Hub showed that pitch-strip movement can delay Note
+Off by seconds.
 
 Attempts above the BLE-MIDI library did not solve the problem:
 
@@ -37,14 +37,24 @@ Attempts above the BLE-MIDI library did not solve the problem:
 - disabling the receiver pitch bend callback.
 
 The delay persisted even when pitch bend was not audible and was not delivered
-to the instrument. That points to backlog inside the bridge, BLE-MIDI byte FIFO,
-or MIDI parser before our semantic event boundary.
+to the instrument. Later comparative tests narrowed the problem:
+
+- Arturia USB OTG -> Android My MIDI Hub -> BLE MIDI -> showcase: Note Off
+  delays when the physical pitch strip is used.
+- Android SynthBridge -> BLE MIDI -> showcase: Note Off remains immediate while
+  using the on-screen pitch bend strip.
+- Arturia USB OTG -> Android SynthBridge Pro Trial -> BLE MIDI -> showcase:
+  Note Off remains immediate while using the Arturia physical pitch strip.
+
+That points to My MIDI Hub's USB-to-BLE bridge path as the likely problematic
+route, not to BLE MIDI, Android USB OTG, the Arturia strip, or the showcase
+architecture in general.
 
 Future research options:
 
-- test a different BLE MIDI bridge or controller path;
 - inspect whether the Android bridge can reduce pitch bend rate;
 - prototype a raw BLE-MIDI packet parser that preserves Note On/Off while
-  dropping or sampling pitch bend before it enters a byte FIFO;
+  dropping or sampling pitch bend before it enters a byte FIFO if the problem
+  appears outside My MIDI Hub;
 - compare with a non-BLE or direct hardware MIDI path before changing the shared
   event contract.
