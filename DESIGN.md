@@ -1,313 +1,359 @@
 # Ecossistema modular para experimentos musicais embarcados
 
-**Status:** rascunho de arquitetura e direção  
-**Hardware inicial:** M5StickC Plus2  
+**Status:** documento vivo de arquitetura e direção
+
+**Plataforma-base atual:** M5StickC Plus2
+
 **Segundo hardware de validação:** M5Stack Core Gray 1.0
-**Primeiro componente:** [`fczuardi/midi-receiver`](https://github.com/fczuardi/midi-receiver)  
-**Escopo:** referência para decisões, experimentos e possíveis projetos futuros
+
+**Escopo:** contratos, componentes e experiências musicais embarcadas combináveis
 
 ## Resumo
 
-Este documento registra a direção descoberta durante a construção de um receptor BLE MIDI no M5StickC Plus2. A ideia nasceu da curiosidade sobre instrumentos compactos e baratos, como o M-Vave FM1, mas não pretende copiar, desmontar ou substituir um produto específico. Também não pressupõe que o resultado será um sintetizador FM.
+Este projeto investiga como construir pequenos sistemas musicais embarcados a
+partir de módulos que tenham valor isoladamente e possam ser combinados por
+fronteiras explícitas. Ele não define um sintetizador único nem pretende copiar
+um produto comercial específico.
 
-A proposta é mais simples e mais aberta: construir pequenas peças de software musical embarcado que tenham valor isoladamente, possam ser combinadas e sejam apoiadas por contratos claros. O primeiro resultado concreto foi um receptor BLE MIDI capaz de interpretar mensagens e expô-las de forma observável. O segundo resultado foi um instrumento monofônico de buzzer. Ambos agora foram empacotados e combinados em um showcase que permite a um controlador BLE MIDI tocar o buzzer interno do M5StickC Plus2.
+A implementação atual já ultrapassou a primeira prova de conceito. Hoje o
+ecossistema possui:
 
-O projeto privilegia aprendizado, reaproveitamento, código aberto e limites assumidos. Um aparelho monofônico de onda quadrada pode ser musicalmente interessante se responder bem, tiver uma interface legível e, mais tarde, ganhar recursos como arpejador ou sequenciador. Complexidade sonora não é requisito para validar a arquitetura.
+- contratos C++ compartilhados para eventos de nota, pitch bend e ciclo de vida;
+- uma entrada BLE MIDI reutilizável;
+- um instrumento monofônico com prioridade da última nota;
+- um backend de áudio para o buzzer do M5StickC Plus2;
+- um showcase que combina esses módulos e já foi tocado com um controlador real;
+- testes nativos, builds de firmware, empacotamento PlatformIO e registros de
+  validação em hardware.
 
-## Contexto e motivação
+O M5StickC Plus2 continua sendo a bancada principal. O M5Stack Core Gray será o
+segundo alvo real, não para declarar portabilidade por antecipação, mas para
+descobrir quais fronteiras sobrevivem a diferenças de placa, transdutor,
+controles e configuração.
 
-Instrumentos baratos frequentemente parecem desproporcionais ao seu preço: combinam síntese, sequenciamento, arpejo, Bluetooth, carga de SysEx e interface física em um único objeto. Parte dessa eficiência provavelmente vem de componentes comuns, produção em escala e firmware altamente integrado. Entretanto, reaproveitar um aparelho proprietário pode exigir engenharia reversa, depender de componentes pouco documentados e produzir um resultado difícil de manter.
+## O que estamos construindo
 
-Uma alternativa é recriar a **experiência de exploração musical**, não o produto. Hardware disponível em casa e software aberto tornam essa direção mais realista e reutilizável. O computador Linux inicialmente considerado, inclusive Raspberry Pi Zero 2 W e Milk-V, acabou sendo menos atraente por preço, disponibilidade ou maturidade do ecossistema. O ESP32 já disponível no M5StickC Plus2 oferece BLE, processamento suficiente para MIDI, tela, bateria e buzzer em um pacote pequeno.
+O resultado pretendido não é uma aplicação monolítica. É um pequeno ecossistema
+no qual origens de eventos, políticas musicais, saídas sonoras e interfaces
+possam ser recombinadas.
 
-Placas Heltec V3 e V4, incluindo modelos com ESP32-S3 e LoRa, permanecem como possibilidades futuras. LoRa, USB host e outras expansões não fazem parte do escopo imediato.
+| Papel | Implementação atual | Possibilidades futuras |
+| --- | --- | --- |
+| Origem de eventos | BLE MIDI | USB MIDI, sequenciador, controles locais |
+| Contrato | nota, pitch bend e desconexão | CCs musicais e outros eventos necessários |
+| Política musical | instrumento monofônico, última nota | sustain, modulation, arpejo, polifonia |
+| Saída sonora | `SpeakerToneOutput` no buzzer | speaker do Core Gray, oscilador amostrado, I²S |
+| Composição | showcase BLE MIDI → buzzer | novos showcases por hardware ou combinação |
 
-## Princípios
+Cada nova peça deve resolver um caso concreto. Generalizações surgem quando uma
+segunda implementação ou composição revela o que realmente precisa ser comum.
 
-1. **Experimentos pequenos e concluíveis.** Cada marco deve demonstrar algo utilizável sem depender de uma visão de produto distante.
-2. **Componentes com valor próprio.** Um receptor, um instrumento de buzzer ou um sequenciador devem ser compreensíveis e testáveis isoladamente.
-3. **Fronteiras semânticas.** Entre transporte e instrumento circulam mensagens MIDI interpretadas, não bytes ou pacotes BLE crus.
-4. **Baixo custo previsível.** Estruturas de tamanho fixo, filas limitadas e ausência de alocação dinâmica no caminho crítico.
-5. **Estado pertence ao consumidor.** A camada MIDI relata fatos; display e instrumento derivam estados diferentes desses fatos.
-6. **Evolução motivada por uso real.** Código compartilhado só deve virar biblioteca quando dois consumidores reais revelarem a abstração necessária.
-7. **Compatibilidade com padrões.** Os tipos internos se inspiram no MIDI, mas não tentam substituir o protocolo nem representar antecipadamente tudo o que ele oferece.
-8. **Documentação sem marketing.** Registrar capacidades comprovadas, limitações e perguntas abertas.
-9. **Portabilidade demonstrada.** Uma fronteira só deve ser considerada portátil depois de sobreviver a diferenças reais entre dispositivos. Condicionais de placa, pinout, calibração, display e controles físicos permanecem nas bordas da composição, não na semântica musical.
+## Estado comprovado
 
-## Estado atual: receptor BLE MIDI
+### Contratos compartilhados
 
-O repositório `midi-receiver` representa a primeira milestone concluída. No M5StickC Plus2, ele:
+O repositório guarda-chuva é também o pacote PlatformIO
+`EmbeddedMusicFirmwareContracts`. Ele publica, atualmente:
 
-- anuncia um endpoint BLE MIDI e aceita a conexão de um controlador;
-- interpreta Note On e Note Off, incluindo número, nome da nota, canal e velocity;
-- mantém múltiplas teclas ativas e representa acordes;
-- entrega eventos por uma fila limitada;
-- limpa notas e estado transitório ao desconectar;
-- observa mensagens Control Change, incluindo sustain em CC64;
-- interpreta Pitch Bend;
-- mostra informações de diagnóstico na tela;
-- possui testes nativos e integração contínua.
+- `NoteEvent`, com tipo, canal, nota e velocity;
+- `PitchBendEvent`, com canal e valor centrado em `-8192..8191`;
+- `InstrumentEventSink`, consumido por instrumentos e implementado sem conhecer
+  BLE, display ou hardware de áudio;
+- `onDisconnected()`, uma notificação de ciclo de vida usada para limpeza segura.
 
-O `AppState` existente é útil para a tela e para o diagnóstico do receiver. Ele não deve ser promovido automaticamente a estado universal do ecossistema.
+O contrato é deliberadamente pequeno. Control Change ainda não atravessa a
+fronteira de instrumento porque nenhum comportamento musical baseado em CC foi
+implementado. O receiver pode observar mais mensagens do que o contrato comum
+precisa expor.
 
-## Estado atual: instrumento de buzzer e showcase
+### Entrada BLE MIDI
 
-O repositório `buzzer-instrument` representa a segunda milestone concluída. No M5StickC Plus2, ele:
+O repositório [`midi-receiver`](https://github.com/fczuardi/midi-receiver)
+contém dois papéis relacionados, mas separados:
 
-- converte números de nota MIDI em frequência;
-- toca uma voz monofônica no buzzer interno via `M5.Speaker`;
-- implementa prioridade de última nota para múltiplas teclas pressionadas;
-- silencia a saída na desconexão;
-- possui testes nativos para conversão de notas, política monofônica e sink de instrumento;
-- é empacotado como `EmbeddedMusicBuzzerInstrument`.
+- `BleMidiInput` cuida do transporte BLE MIDI, normalização, fila limitada e
+  entrega de eventos ao `InstrumentEventSink`;
+- a aplicação receiver acrescenta `AppState`, display e diagnóstico serial para
+  tornar o tráfego observável no M5StickC Plus2.
 
-O repositório guarda-chuva também contém `showcases/ble-midi-buzzer`, que compõe `EmbeddedMusicBleMidiInput` e `EmbeddedMusicBuzzerInstrument` através do contrato compartilhado `InstrumentEventSink`. Esse showcase já foi validado no hardware para o caminho feliz: conectar por BLE MIDI, tocar notas, soltar notas, sobrepor notas, desconectar durante uma nota e reconectar.
+A parte reutilizável é publicada como `EmbeddedMusicBleMidiInput`. Consumidores
+não precisam copiar a implementação BLE nem importar o display do receiver.
 
-O teste também revelou uma limitação externa útil: se um app bridge mantém o BLE conectado mas perde a ponta USB sem enviar Note Off, All Sound Off, All Notes Off ou desconexão BLE, o receiver não tem como inferir a quebra da rota. A mitigação local mais confiável é uma ação de panic no próprio showcase.
+O receiver já foi validado em hardware com conexão e reconexão, Note On/Off,
+acordes, canais, velocity, Control Change, sustain observado em CC64, pitch bend,
+fila de eventos e limpeza após desconexão.
 
-## Arquitetura proposta
+### Instrumento monofônico e saída de buzzer
 
-### Nota de terminologia: “voz”
+O repositório [`buzzer-instrument`](https://github.com/fczuardi/buzzer-instrument)
+publica `EmbeddedMusicBuzzerInstrument`. Internamente, ele separa:
 
-Neste documento, **voz** tem o sentido usado em sintetizadores: uma instância independente de geração sonora que toca uma nota. Um instrumento monofônico dispõe de uma voz; um instrumento com oito vozes pode, em princípio, manter até oito notas simultâneas. A voz reúne o que for necessário para produzir aquela nota — por exemplo frequência, amplitude, forma de onda e evolução no tempo.
+- conversão de nota MIDI para frequência;
+- estado monofônico e prioridade da última nota ainda pressionada;
+- adaptação de eventos compartilhados para ações do instrumento;
+- interface de saída de voz;
+- implementação física com `M5.Speaker`.
 
-Portanto, **voz não significa voz humana**, reconhecimento de fala ou comando ditado à máquina. Para evitar essa ambiguidade, o documento usa “comandos para as vozes do sintetizador” ou “comandos de execução sonora”, e não “comandos de voz”.
+O instrumento preserva velocity por nota e o backend a mapeia para uma faixa de
+volume calibrável. A ação local de panic limpa o estado de teclas mantidas e
+silencia imediatamente a saída. O pitch bend já chega ao sink pelo contrato,
+mas ainda não altera a frequência audível.
+
+### Primeira composição
+
+`showcases/ble-midi-buzzer` combina os três pacotes:
 
 ```mermaid
 flowchart TD
-    T["Transporte MIDI<br/>BLE agora; outros depois"] --> M["Mensagem MIDI tipada"]
-    M --> D["Display e diagnóstico"]
-    M --> I["Política de instrumento"]
-    M --> Q["Gravador ou sequenciador"]
-    I --> V["Comandos para vozes<br/>do sintetizador"]
-    V --> B["Backend de áudio<br/>buzzer agora; outros depois"]
+    B["EmbeddedMusicBleMidiInput"] --> C["EmbeddedMusicFirmwareContracts"]
+    C --> I["EmbeddedMusicBuzzerInstrument"]
+    I --> A["Buzzer do M5StickC Plus2"]
+    P["Botão de panic"] --> I
 ```
 
-As fronteiras separam quatro responsabilidades:
+O showcase foi validado com um controlador BLE MIDI real para tocar, soltar e
+sobrepor notas, responder à velocity, executar panic, silenciar na desconexão e
+reconectar. O caminho completo de pitch bend também foi validado até o log; a
+resposta sonora é o próximo passo.
+
+Essa composição é um exemplo executável, não um quarto produto. Ela pertence ao
+guarda-chuva porque prova que pacotes independentes realmente encaixam.
+
+## Princípios
+
+1. **Experimentos pequenos e concluíveis.** Cada slice deve produzir evidência
+   observável, documentação e um estado coerente do código.
+2. **Componentes com valor próprio.** Receiver, instrumento, backend e showcase
+   devem continuar compreensíveis isoladamente.
+3. **Fronteiras semânticas.** Instrumentos recebem eventos interpretados, não
+   pacotes BLE ou bytes MIDI crus.
+4. **Estado pertence ao consumidor.** Display, instrumento e gravador podem
+   derivar estados diferentes do mesmo evento.
+5. **Recursos previsíveis.** Filas e coleções no caminho crítico usam capacidade
+   limitada e evitam alocação dinâmica.
+6. **Evolução motivada por uso real.** Uma abstração compartilhada precisa ser
+   justificada por produtores, consumidores ou hardwares concretos.
+7. **Diferenças ficam nas bordas.** Pinagem, inicialização, calibração, display e
+   botões pertencem à composição ou ao backend específico.
+8. **Portabilidade demonstrada.** Compilar não basta; a mesma fronteira deve ser
+   exercitada em dispositivos reais.
+9. **Documentação sem marketing.** Capacidade comprovada, limitação conhecida e
+   hipótese futura devem aparecer como categorias diferentes.
+
+## Arquitetura
+
+```mermaid
+flowchart TD
+    T["Origem ou transporte"] --> E["Eventos compartilhados"]
+    E --> D["Display e diagnóstico"]
+    E --> I["Política de instrumento"]
+    E --> R["Gravador ou sequenciador"]
+    I --> V["Ações de voz"]
+    V --> O["Backend de áudio"]
+```
 
 | Camada | Responsabilidade | Não deve decidir |
 | --- | --- | --- |
-| Transporte | receber bytes, reconstruir mensagens e cuidar da conexão | timbre, vozes, sustain musical |
-| MIDI semântico | representar mensagens reconhecidas com tipos estáveis | como cada consumidor reagirá |
-| Instrumento | manter vozes e interpretar controles musicalmente | detalhes de BLE ou do display |
-| Saída de áudio | produzir frequências e níveis no hardware | significado de Note On, CC ou bend |
+| Origem/transporte | receber dados, reconstruir mensagens e cuidar da conexão | timbre, prioridade de notas, faixa musical do bend |
+| Contratos | representar fatos já interpretados | como cada consumidor reage |
+| Instrumento | manter estado musical e produzir ações de voz | detalhes de BLE, display ou pinagem |
+| Saída de áudio | transformar ações em som físico | significado de Note On, canal ou CC |
+| Composição | escolher módulos, configuração e controles do aparelho | reimplementar as responsabilidades internas |
 
-Uma saída opcional de diagnóstico pode conservar pacotes crus, mas ela não é a API de instrumento.
+### Por que não expor BLE MIDI cru
 
-## Por que não expor BLE MIDI cru
+BLE MIDI é uma representação de transporte. Seus pacotes podem conter
+timestamps, várias mensagens, running status, mensagens de tempo real
+intercaladas e fragmentos de SysEx. Fazer cada consumidor entender esses
+detalhes duplicaria parsing e prenderia instrumentos ao Bluetooth.
 
-BLE MIDI é uma representação de transporte. Um pacote pode conter timestamps, múltiplas mensagens, running status, mensagens de tempo real intercaladas e fragmentos de SysEx. Obrigar cada consumidor a conhecer esses detalhes duplicaria parsing e ligaria toda a arquitetura ao Bluetooth.
+Estruturas semânticas pequenas permitem que BLE MIDI, USB MIDI, um sequenciador
+ou controles locais produzam a mesma intenção musical. Também permitem testar
+a política do instrumento no computador, sem rádio ou hardware.
 
-Um wrapper tipado pequeno não representa custo relevante diante do rádio, atualização da tela e geração de áudio. Implementado com estruturas triviais e filas de capacidade fixa, ele também torna testes no computador simples e permite que outra origem — USB MIDI, arquivo, sequenciador ou interface local — produza as mesmas mensagens.
+### Mensagens e tempo
 
-## Contrato MIDI interno
+O contrato compartilhado ainda não inclui timestamps. Isso é intencional: Note
+On, Note Off ou Pitch Bend são úteis sem relógio para execução ao vivo. Quando
+um gravador ou sequenciador concreto precisar de tempo, um evento temporizado
+poderá envolver a mensagem sem alterar seu significado.
 
-O contrato deve começar pequeno e crescer a partir de casos concretos. Um desenho indicativo, ainda não congelado, é:
+Tempo monotônico de uma performance ao vivo, delta em ticks de um Standard MIDI
+File e sincronização externa são domínios diferentes. Eles não devem ser
+fundidos antes de existir um caso que escolha a semântica necessária.
 
-```cpp
-enum class MidiMessageType : uint8_t {
-  NoteOn,
-  NoteOff,
-  ControlChange,
-  PitchBend,
-};
+## Terminologia: voz
 
-struct MidiMessage {
-  MidiMessageType type;
-  uint8_t channel;
-  // Payload compacto específico do tipo.
-};
+Neste documento, **voz** é uma instância independente de geração sonora capaz
+de executar uma nota. Um instrumento monofônico tem uma voz; um instrumento de
+oito vozes pode, em princípio, manter oito notas simultâneas.
 
-struct TimedMidiEvent {
-  MidiMessage message;
-  uint32_t timestamp;
-};
-```
+O termo não significa voz humana ou reconhecimento de fala. Para evitar a
+ambiguidade de “comando de voz”, usamos **ação de voz** ou **comando de execução
+sonora**.
 
-Conexão e desconexão pertencem ao ciclo de vida do transporte e podem usar um tipo separado. Isso evita fingir que são mensagens MIDI.
+## Semântica MIDI atual
 
-Também convém separar mensagem de tempo. Uma mensagem MIDI é útil sem relógio; um evento temporizado acrescenta o contexto de execução. Em MIDI ao vivo, o timestamp pode ser uma medida monotônica. Em um Standard MIDI File, o tempo normalmente é expresso como delta em ticks e interpretado junto com divisão temporal e eventos de tempo. Esses domínios não devem ser confundidos.
+- **Note On/Off:** usam canal, nota e velocity. Note On com velocity zero é
+  normalizado como Note Off na borda produtora.
+- **Pitch Bend:** os dois valores de 7 bits do MIDI formam `0..16383`, com centro
+  em `8192`. O contrato usa `int16_t` centrado em `-8192..8191`.
+- **Alcance do bend:** o evento não contém semitons. O instrumento escolhe a
+  faixa musical; o primeiro mapeamento previsto é ±2 semitons.
+- **Modulation:** CC1 expressa intensidade, normalmente em `0..127`, mas o
+  instrumento escolhe o destino — vibrato, tremolo, timbre ou outro parâmetro.
+- **Sustain:** CC64 informa a posição do pedal. A decisão de manter uma nota
+  soando pertence ao instrumento.
+- **Panic:** não é inferido de silêncio. Pode ser uma ação local explícita ou uma
+  reação a desconexão e, futuramente, a CC120/CC123.
 
-### Alinhamento com MIDI 1.0
+Conexão e desconexão são eventos do ciclo de vida do transporte, não mensagens
+MIDI. Ainda assim, a desconexão precisa atravessar a composição porque um
+instrumento deve silenciar notas que perderam seu Note Off.
 
-- **Note On/Off:** carregam canal, nota e velocity. Note On com velocity zero deve poder ser normalizado como Note Off na borda de parsing.
-- **Pitch Bend:** no fio usa dois valores de 7 bits, formando `0..16383`, com centro em `8192`. Internamente é conveniente normalizar para `-8192..8191`, centro zero, em `int16_t`.
-- **Alcance do bend:** o valor não contém semitons. O instrumento escolhe ou recebe separadamente a faixa, muitas vezes ±2 semitons e configurável por RPN.
-- **Modulation:** é Control Change 1 (CC1), normalmente `0..127`; não é uma mensagem dedicada como Pitch Bend. CC33 pode complementar CC1 como LSB de alta resolução.
-- **Sustain:** é CC64. O receiver relata o controle; o instrumento decide quando notas soltas deixam de soar.
+## Estado musical e estado de diagnóstico
 
-O destino sonoro de modulation não é prescrito pelo protocolo. Um instrumento pode mapear CC1 para vibrato, tremolo, filtro ou outro parâmetro. Controles físicos também podem mudar de função conforme o modo do controlador; o receiver serve para observar o que realmente foi enviado.
+Não existe um estado global universal. A mesma mensagem pode alimentar modelos
+diferentes:
 
-## Estado e fluxo de eventos
+- o receiver guarda conexão, última atividade, contagens e notas observadas;
+- o instrumento atual guarda teclas pressionadas, nota ativa e velocity; a
+  camada de performance prevista também guardará pitch bend;
+- um sequenciador guardará eventos e relações temporais;
+- um monitor pode apenas registrar dados.
 
-Não há necessidade de um único objeto global de estado musical. A mesma mensagem alimenta reduções diferentes:
+Essa separação fica especialmente importante com sustain: tecla pressionada e
+voz soando deixam de ser equivalentes.
 
-- o display guarda último evento, contagens e controles observados;
-- o instrumento guarda teclas pressionadas, vozes soando, notas sustentadas, bend e modulation por canal;
-- um gravador guarda eventos e seus tempos;
-- um monitor pode apenas escrever um log.
+## Estratégia de áudio
 
-Sustain demonstra por que essa separação importa: “tecla pressionada” e “voz soando” deixam de ser equivalentes quando o pedal está ativo.
+### Backend atual
 
-Um estado de performance por canal poderá assumir uma forma semelhante a:
+O `SpeakerToneOutput` usa a abstração `M5.Speaker` para tocar tabelas curtas de
+onda square ou saw no buzzer passivo do M5StickC Plus2. Ele provou pitches
+reconhecíveis, início e parada, troca de nota e resposta básica à velocity.
 
-```cpp
-struct ChannelPerformanceState {
-  int16_t pitchBend = 0;
-  uint8_t modulation = 0;
-  bool sustain = false;
-};
-```
+Esse backend permanece como baseline enquanto o pitch bend audível é concluído.
+Limitações como descontinuidade, clique ou reinício de articulação durante a
+mudança de frequência devem ser medidas, não presumidas.
 
-Esse tipo pertence ao instrumento ou a uma camada de performance, não necessariamente ao receiver.
+### Backends paralelos
 
-## Primeiro módulo de áudio: buzzer
+Novos caminhos de áudio devem começar ao lado do backend atual:
 
-O M5StickC Plus2 inclui um buzzer passivo no GPIO 2. Ele se mostrou adequado para a primeira prova de conceito audível: transformar Note On/Off em uma onda simples no buzzer. A biblioteca M5Unified já fornece primitivas como `Speaker.tone`, portanto não há motivo para inventar imediatamente uma grande API de áudio.
-
-Mesmo uma nota C4 não precisa ter um único timbre possível. Duty cycle, articulação, envelopes simples, alternância rápida de frequência, vibrato e mistura por software podem alterar o resultado. Entretanto, essas possibilidades são posteriores à validação do caminho básico.
-
-Para execução ao vivo, uma API baseada apenas em `play(frequência, duração)` é insuficiente: a duração não é conhecida no Note On. A fronteira entre instrumento e backend pode começar conceitualmente assim:
-
-```cpp
-startVoice(VoiceId id, float frequencyHz, uint8_t level);
-setVoiceFrequency(VoiceId id, float frequencyHz);
-stopVoice(VoiceId id);
-stopAll();
-```
-
-Uma função `playTone(frequency, duration)` pode existir como conveniência para melodias e sequenciadores, construída sobre essas operações. O backend de buzzer não deve conhecer MIDI. Ele recebe comandos de execução sonora; a política de instrumento converte mensagens MIDI nesses comandos.
-
-O primeiro marco de áudio permaneceu modesto e foi validado:
-
-> Receber Note On e Note Off e controlar uma única voz de onda quadrada no buzzer interno, silenciando-a corretamente também na desconexão.
-
-Decisões como prioridade de notas em modo monofônico — última nota, nota mais alta ou nota mais baixa — devem ficar na política de instrumento. Polifonia, sustain, bend e modulation vêm depois que o ciclo básico estiver confiável.
-
-## Outros caminhos de áudio
-
-Há opções para evoluir além do buzzer:
-
-- mistura por software e canais virtuais do M5Unified;
-- Speaker HAT ou hardware equivalente;
-- amplificador I²S MAX98357A ligado a um alto-falante;
+- oscilador contínuo por amostras;
+- speaker interno do M5Stack Core Gray;
+- amplificador I²S MAX98357A;
 - DAC I²S PCM5102 para saída de linha;
-- eventualmente Bluetooth A2DP, embora latência, coexistência com BLE e maior complexidade tornem essa opção ruim para a primeira saída interativa.
+- outras saídas motivadas por hardware disponível.
 
-As placas MAX98357A e PCM5102 já disponíveis são candidatas interessantes a experimentos posteriores. Elas não devem contaminar a API com detalhes específicos antes de existir um segundo backend real.
+Um backend novo não precisa substituir o anterior. Dois exemplos podem continuar
+úteis se evidenciarem compromissos diferentes de latência, qualidade, memória,
+CPU ou simplicidade.
 
-## Segundo hardware de validação: M5Stack Core Gray
+Polifonia, envelopes e múltiplos osciladores são experimentos posteriores. A
+fronteira musical para pitch bend deve funcionar independentemente de o som vir
+de um buzzer, speaker, DAC ou mixer por software.
 
-O M5Stack Core Gray 1.0 disponível será a segunda bancada de hardware depois que o pitch bend audível estiver fechado no M5StickC Plus2. Ele continua baseado no ESP32 clássico e pode receber o mesmo transporte BLE MIDI, mas oferece um speaker eletromagnético de 1 W ligado ao DAC do ESP32 em vez do buzzer passivo do Plus2.
+## Segundo hardware: M5Stack Core Gray
 
-Essa proximidade e essa diferença tornam o Gray um teste arquitetural útil. A meta não é declarar suporte genérico por meio de compilação condicional, mas executar as mesmas intenções musicais em outro transdutor e observar o que precisa variar:
+O Core Gray 1.0 será introduzido depois da validação do pitch bend audível no
+Plus2. Ele mantém proximidade suficiente — ESP32 clássico, BLE e M5Unified — mas
+troca o buzzer passivo por um speaker eletromagnético interno de 1 W ligado ao
+DAC do ESP32.
 
-- inicialização da placa e configuração do M5Unified;
-- pinout e recursos de áudio;
-- ganho, faixa de volume e resposta à velocity;
-- layout do display e escolha do botão de panic;
-- continuidade e artefatos durante pitch bend.
+Essa combinação permite testar, em ordem:
 
-Os contratos de eventos, a interpretação de nota e bend e a política monofônica devem permanecer independentes dessas diferenças. A saída física pode usar uma configuração explícita ou uma implementação separada; essa decisão será tomada depois do smoke test do speaker. Maximizar código compartilhado não é um objetivo se isso esconder diferenças reais dos dois hardwares.
+1. A4 e parada no speaker, sem BLE;
+2. configuração comum ou backend separado para a saída;
+3. build de firmware para o segundo alvo;
+4. composição BLE MIDI completa;
+5. comparação de volume, clareza, velocity, bend, cliques e latência.
 
-O caminho incremental previsto é: provar A4 e parada no speaker sem BLE, identificar a fronteira mínima da saída, adicionar build para o segundo alvo, compor o showcase BLE MIDI e então comparar Plus2 e Gray. O showcase existente do Plus2 permanece como referência, evitando transformá-lo numa aplicação universal com condicionais espalhados.
+O showcase do Plus2 permanece como referência. Não queremos convertê-lo numa
+aplicação universal cheia de condicionais de placa. A composição do Gray pode
+escolher outro backend, layout e botão, mantendo contratos e política musical.
 
-## Organização dos repositórios
+## Organização e distribuição
 
-A organização evoluiu de forma incremental:
+| Local | Responsabilidade |
+| --- | --- |
+| `embedded-music-experiments` | design, roadmap, contratos compartilhados e showcases |
+| `midi-receiver` | experimento de diagnóstico e pacote reutilizável de entrada BLE MIDI |
+| `buzzer-instrument` | política monofônica e pacote reutilizável de saída/instrumento |
 
-1. `midi-receiver` permaneceu como projeto focado em transporte, parsing e diagnóstico BLE MIDI.
-2. `buzzer-instrument` nasceu como experimento independente de áudio no buzzer interno.
-3. O contrato mínimo `NoteEvent`/`InstrumentEventSink` foi extraído para este guarda-chuva quando os dois projetos passaram a precisar da mesma linguagem.
-4. As partes reutilizáveis de BLE MIDI e buzzer foram empacotadas como bibliotecas PlatformIO separadas.
-5. O showcase `showcases/ble-midi-buzzer` foi adicionado ao guarda-chuva para provar a composição sem criar um quarto repositório.
+Os três repositórios usam PlatformIO com Arduino e dependências explícitas. Cada
+pacote possui `library.json`; o showcase fixa revisões das dependências para que
+uma composição validada possa ser reproduzida. CI verifica contratos, testes
+nativos, empacotamento e builds relevantes.
 
-Nem todo módulo lógico precisa ser um repositório. A composição BLE MIDI -> buzzer é um exemplo executável, não um novo produto. Ela fica ao lado do design arquitetural, serve como teste de integração e demonstra uma combinação reproduzível dos pacotes existentes.
+Nem todo módulo lógico precisa virar repositório. Um novo repositório se
+justifica quando a peça tem ciclo de vida e valor próprios; uma combinação
+executável pequena normalmente pertence a `showcases/`.
 
-## Ferramentas e ambiente
+## Forma de progresso
 
-PlatformIO com framework Arduino foi escolhido por oferecer builds reproduzíveis, dependências explícitas, testes nativos e boa integração com CI, preservando o acesso ao ecossistema Arduino e ao M5Unified. Arduino IDE continuaria válida para sketches exploratórios, mas oferece menos estrutura para um conjunto de projetos que pretende crescer com testes.
+O projeto avança por slices pequenos que possam ser construídos, testados,
+documentados, revisados e, quando necessário, tocados no hardware. Devlogs
+preservam tentativas e descobertas empíricas; este documento descreve a
+arquitetura vigente; [`docs/ROADMAP.md`](docs/ROADMAP.md) ordena os próximos
+testes; [`docs/BACKLOG.md`](docs/BACKLOG.md) guarda possibilidades de menor
+certeza.
+
+O Git e os devlogs contam como chegamos aqui. Este documento não precisa repetir
+essa cronologia nem funcionar como changelog.
 
 ## Prior art relevante
 
-- [`probonopd/MiniDexed`](https://github.com/probonopd/MiniDexed): implementação bare metal de Dexed para Raspberry Pi; prova que uma experiência DX7 pode existir sem Linux completo, mas exige uma classe de hardware diferente.
-- [`williamd1k0/m5-synth`](https://github.com/williamd1k0/m5-synth): referência direta para BLE MIDI e síntese no M5StickC Plus2, incluindo buzzer, formas de onda e múltiplas vozes. Sua topologia Bluetooth é diferente: atua como cliente que procura um controlador, enquanto `midi-receiver` anuncia um periférico BLE MIDI.
-- [`bstein2379/M5StickC-Plus-Ringtone-Jukebox`](https://github.com/bstein2379/M5StickC-Plus-Ringtone-Jukebox): demonstra melodias RTTTL no buzzer interno.
-- [`CITROMOSEPER/MIDIplayer`](https://github.com/CITROMOSEPER/MIDIplayer): exemplo de reprodução não bloqueante de melodias com FreeRTOS; apesar do nome, não é necessariamente um parser de Standard MIDI Files.
+- [`williamd1k0/m5-synth`](https://github.com/williamd1k0/m5-synth): BLE MIDI,
+  formas de onda e múltiplas vozes no M5StickC Plus2; usa topologia Bluetooth
+  diferente da entrada atual.
+- [`necobit/M5Stack-MIDI-Module`](https://github.com/necobit/M5Stack-MIDI-Module):
+  síntese por osciladores e acordes no M5Stack; inspira a exploração paralela de
+  áudio amostrado, sem determinar nossa arquitetura.
+- [`probonopd/MiniDexed`](https://github.com/probonopd/MiniDexed): Dexed bare
+  metal para Raspberry Pi; demonstra uma classe de instrumento muito mais
+  completa em hardware diferente.
+- [`bstein2379/M5StickC-Plus-Ringtone-Jukebox`](https://github.com/bstein2379/M5StickC-Plus-Ringtone-Jukebox):
+  melodias RTTTL no buzzer interno.
+- [`CITROMOSEPER/MIDIplayer`](https://github.com/CITROMOSEPER/MIDIplayer):
+  reprodução não bloqueante de melodias com FreeRTOS.
 
-Prior art orienta e reduz redescobertas, mas não define a arquitetura. Diferenças de papel BLE, dependências, licença e objetivo precisam ser verificadas antes de reutilizar código.
+Prior art reduz redescobertas. Reuso direto ainda depende de objetivo, licença,
+dependências e compatibilidade com as fronteiras existentes.
 
-## Roadmap indicativo
+## Decisões ainda abertas
 
-### Marco 0 — receiver concluído
-
-- BLE MIDI funcional;
-- mensagens essenciais interpretadas;
-- acordes e controles observáveis;
-- testes, CI e documentação;
-- tag inicial de milestone.
-
-### Marco 1 — instrumento monofônico de buzzer
-
-- geração básica de frequência por nota;
-- Note On inicia a voz;
-- Note Off encerra a voz correta;
-- política explícita para múltiplas teclas;
-- silêncio garantido na desconexão;
-- testes da conversão nota–frequência e da política de voz;
-- pacote PlatformIO reutilizável;
-- showcase BLE MIDI -> buzzer validado no hardware.
-
-### Marco 2 — expressão mínima
-
-- velocity mapeada para o parâmetro que o hardware realmente permitir;
-- pitch bend contínuo;
-- sustain;
-- modulation com um destino simples, provavelmente vibrato.
-
-### Marco 3 — brinquedo autônomo
-
-- arpejador ou sequenciador pequeno;
-- controles e feedback na tela;
-- reprodução sem controlador externo;
-- formato de sequência explicitamente definido, ou adaptação correta de SMF quando isso se justificar.
-
-### Marcos posteriores possíveis
-
-- validação horizontal no M5Stack Core Gray, começando pelo speaker e chegando à composição BLE MIDI completa;
-- polifonia por mistura de software;
-- backends I²S;
-- USB MIDI host em hardware ESP32-S3 apropriado;
-- outras origens de eventos;
-- sincronização ou experimentos LoRa;
-- repositório guarda-chuva e biblioteca comum.
-
-Esses itens são possibilidades, não compromissos.
-
-## Riscos e perguntas abertas
-
-- Qual latência total BLE–evento–som será percebida no buzzer?
-- Como o M5Unified disputa timers e recursos com BLE, display e outros periféricos?
-- Qual política monofônica é mais divertida e previsível?
-- Velocity pode produzir volume útil no buzzer ou deve controlar outra dimensão?
-- Quando a mistura de vozes deixa de ser musicalmente aceitável no transdutor interno?
-- Qual é a menor interface compartilhada que sobrevive a dois consumidores reais?
-- O sequenciador deve armazenar eventos internos, um subconjunto de MIDI ou Standard MIDI Files?
-- Quais licenças do prior art permitem reaproveitamento direto?
+- Qual comportamento de canal será implementado primeiro?
+- Como o instrumento tratará a pequena imprecisão de centro observada na strip
+  de pitch bend do controlador?
+- A atualização de frequência do backend atual será musicalmente contínua?
+- O Core Gray reutilizará `SpeakerToneOutput` por configuração ou justificará
+  outro backend?
+- Qual necessidade concreta fará Control Change atravessar o contrato comum?
+- Quando sustain, modulation, arpejo ou sequenciamento passam a ser o próximo
+  menor experimento útil?
+- Qual comparação justificaria investir em oscilador amostrado ou saída I²S?
 
 ## Critérios para boas decisões
 
 Uma mudança está alinhada com esta proposta quando:
 
-- pode ser demonstrada e testada em isolamento;
+- produz uma experiência observável ou resolve uma fronteira concreta;
 - mantém transporte, semântica MIDI, política musical e hardware separados;
-- não exige abstração maior do que os casos presentes;
-- melhora a capacidade de combinar ou reaproveitar uma peça;
-- deixa as limitações visíveis;
-- oferece algum resultado musical ou educativo mesmo antes do produto imaginado existir.
+- não exige uma abstração maior do que os casos existentes;
+- preserva recursos previsíveis no caminho crítico;
+- deixa diferenças de hardware explícitas;
+- registra limitações e evidência de validação;
+- continua útil mesmo que nenhuma visão de produto maior seja concluída.
 
 ## Norte
 
-O objetivo não é decidir cedo demais qual instrumento está sendo construído. É criar um terreno onde diferentes instrumentos pequenos possam surgir da mesma linguagem de eventos: um receiver com tela, um buzzer monofônico, um arpejador, um sequenciador, um sintetizador ou algo que ainda não foi imaginado.
+O objetivo não é decidir cedo demais qual instrumento final está sendo
+construído. É criar um terreno no qual receptores, instrumentos simples,
+sequenciadores, arpejadores e diferentes saídas sonoras possam surgir da mesma
+linguagem de eventos.
 
-A unidade de progresso é uma experiência que funciona. A unidade de arquitetura é uma fronteira que continua clara quando uma segunda peça aparece.
+**A unidade de progresso é uma experiência que funciona. A unidade de
+arquitetura é uma fronteira que continua clara quando aparece uma segunda
+peça — ou um segundo hardware.**
