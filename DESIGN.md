@@ -2,6 +2,7 @@
 
 **Status:** rascunho de arquitetura e direção  
 **Hardware inicial:** M5StickC Plus2  
+**Segundo hardware de validação:** M5Stack Core Gray 1.0
 **Primeiro componente:** [`fczuardi/midi-receiver`](https://github.com/fczuardi/midi-receiver)  
 **Escopo:** referência para decisões, experimentos e possíveis projetos futuros
 
@@ -31,6 +32,7 @@ Placas Heltec V3 e V4, incluindo modelos com ESP32-S3 e LoRa, permanecem como po
 6. **Evolução motivada por uso real.** Código compartilhado só deve virar biblioteca quando dois consumidores reais revelarem a abstração necessária.
 7. **Compatibilidade com padrões.** Os tipos internos se inspiram no MIDI, mas não tentam substituir o protocolo nem representar antecipadamente tudo o que ele oferece.
 8. **Documentação sem marketing.** Registrar capacidades comprovadas, limitações e perguntas abertas.
+9. **Portabilidade demonstrada.** Uma fronteira só deve ser considerada portátil depois de sobreviver a diferenças reais entre dispositivos. Condicionais de placa, pinout, calibração, display e controles físicos permanecem nas bordas da composição, não na semântica musical.
 
 ## Estado atual: receptor BLE MIDI
 
@@ -194,6 +196,22 @@ Há opções para evoluir além do buzzer:
 
 As placas MAX98357A e PCM5102 já disponíveis são candidatas interessantes a experimentos posteriores. Elas não devem contaminar a API com detalhes específicos antes de existir um segundo backend real.
 
+## Segundo hardware de validação: M5Stack Core Gray
+
+O M5Stack Core Gray 1.0 disponível será a segunda bancada de hardware depois que o pitch bend audível estiver fechado no M5StickC Plus2. Ele continua baseado no ESP32 clássico e pode receber o mesmo transporte BLE MIDI, mas oferece um speaker eletromagnético de 1 W ligado ao DAC do ESP32 em vez do buzzer passivo do Plus2.
+
+Essa proximidade e essa diferença tornam o Gray um teste arquitetural útil. A meta não é declarar suporte genérico por meio de compilação condicional, mas executar as mesmas intenções musicais em outro transdutor e observar o que precisa variar:
+
+- inicialização da placa e configuração do M5Unified;
+- pinout e recursos de áudio;
+- ganho, faixa de volume e resposta à velocity;
+- layout do display e escolha do botão de panic;
+- continuidade e artefatos durante pitch bend.
+
+Os contratos de eventos, a interpretação de nota e bend e a política monofônica devem permanecer independentes dessas diferenças. A saída física pode usar uma configuração explícita ou uma implementação separada; essa decisão será tomada depois do smoke test do speaker. Maximizar código compartilhado não é um objetivo se isso esconder diferenças reais dos dois hardwares.
+
+O caminho incremental previsto é: provar A4 e parada no speaker sem BLE, identificar a fronteira mínima da saída, adicionar build para o segundo alvo, compor o showcase BLE MIDI e então comparar Plus2 e Gray. O showcase existente do Plus2 permanece como referência, evitando transformá-lo numa aplicação universal com condicionais espalhados.
+
 ## Organização dos repositórios
 
 A organização evoluiu de forma incremental:
@@ -256,6 +274,7 @@ Prior art orienta e reduz redescobertas, mas não define a arquitetura. Diferen�
 
 ### Marcos posteriores possíveis
 
+- validação horizontal no M5Stack Core Gray, começando pelo speaker e chegando à composição BLE MIDI completa;
 - polifonia por mistura de software;
 - backends I²S;
 - USB MIDI host em hardware ESP32-S3 apropriado;
