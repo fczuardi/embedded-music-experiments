@@ -1,9 +1,9 @@
 # BLE MIDI Buzzer Showcase
 
-This firmware composes the reusable BLE MIDI input package with the reusable
-buzzer instrument package. It is intentionally small: BLE MIDI note events flow
-directly into the monophonic instrument sink, which drives the M5StickC Plus2
-buzzer through M5Unified.
+This firmware composes the reusable BLE MIDI input package, the shared
+monophonic instrument package, and the M5StickC Plus2 buzzer output package. It
+is intentionally small: BLE MIDI note events flow directly into the monophonic
+instrument sink, which drives the M5StickC Plus2 buzzer through M5Unified.
 
 ## Hardware
 
@@ -27,7 +27,7 @@ just showcase-build 1
 The device advertises using the BLE MIDI name provided by
 `EmbeddedMusicBleMidiInput`. After a controller connects, note on/off events
 should start and stop the buzzer. Note On velocity is mapped by
-`EmbeddedMusicBuzzerInstrument` to a constrained M5 speaker volume range, so
+`m5-buzzer-output` to a constrained M5 speaker volume range, so
 different key velocities should produce audible loudness changes without using
 the distorted upper volume range. This has been validated on the M5StickC Plus2
 with a real BLE MIDI controller. Disconnecting the controller should silence the

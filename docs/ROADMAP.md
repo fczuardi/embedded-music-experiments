@@ -14,9 +14,13 @@ Status:
 
 - `EmbeddedMusicFirmwareContracts` is shared by both firmware packages.
 - `EmbeddedMusicBleMidiInput` is packaged from `midi-receiver`.
-- `EmbeddedMusicBuzzerInstrument` is packaged from `buzzer-instrument`.
+- The original combined `EmbeddedMusicBuzzerInstrument` package has been split
+  into `monophonic-instrument` and `m5-buzzer-output` archives for the showcase
+  migration.
 - `showcases/ble-midi-buzzer` composes both packages and passed happy-path
   hardware tests.
+- The showcase now composes `EmbeddedMusicBleMidiInput`, `monophonic-instrument`,
+  and `m5-buzzer-output`.
 - The showcase has a local panic button for route failures that do not produce
   MIDI cleanup events or BLE disconnects, and that button has been validated on
   real hardware.
