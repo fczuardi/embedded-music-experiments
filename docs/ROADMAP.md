@@ -1,158 +1,150 @@
 # Roadmap
 
-This roadmap tracks the next useful slices across the umbrella repository,
-`midi-receiver`, and `monophonic-instrument`. It is intentionally practical: items
-move up when they unlock a better hardware test, clarify a contract, or make a
-module more reusable.
+This roadmap tracks small experiments across `embedded-music-experiments`,
+`midi-receiver`, and `monophonic-instrument`. It favors hardware evidence and
+reversible probes over feature accumulation.
 
-## Completed Milestone: BLE MIDI Sound Box
+## Stable Baseline: Two-Hardware BLE MIDI Instrument
 
-Goal: use a BLE MIDI controller to play the M5StickC Plus2 buzzer through
-packaged modules.
+The current baseline turns MIDI events into audible monophonic performance on
+two physical devices:
 
-Status:
+- M5StickC Plus2 built-in buzzer;
+- M5Stack Core Gray built-in speaker.
 
-- `firmware-contracts` is shared by both firmware packages.
-- `ble-midi-input` is packaged from `midi-receiver`.
-- The original combined buzzer instrument package has been split
-  into `monophonic-instrument` and `m5-tone-output` archives for the showcase
-  migration.
-- `showcases/ble-midi-buzzer` composes both packages and passed happy-path
-  hardware tests.
-- `showcases/ble-midi-core-gray-speaker` now runs the same BLE MIDI monophonic
-  instrument idea on the M5Stack Core Gray speaker. Initial hardware validation
-  passed with SynthBridge after clearing stale Android BLE app state.
-- The showcase now composes `ble-midi-input`, `monophonic-instrument`,
-  and `m5-tone-output`.
-- The showcase has a local panic button for route failures that do not produce
-  MIDI cleanup events or BLE disconnects, and that button has been validated on
-  real hardware.
-- The M5 tone output package maps Note On velocity to a constrained speaker
-  volume range, and the showcase velocity response has been validated on real
-  hardware.
-- `PitchBendEvent` is part of the shared contract, the complete event path has
-  been observed on hardware, and the showcase now consumes the buzzer package
-  version that makes bend audible. Comparative route tests point to My MIDI
-  Hub's USB-to-BLE bridge as the problematic path; SynthBridge routes stop notes
-  immediately even during pitch bend activity.
-- Audible pitch bend has been validated through the responsive SynthBridge
-  route. The package keeps a ±2-semitone default while the showcase deliberately
-  overrides it to ±4 semitones, just as it overrides the default velocity-volume
-  range.
+Both showcases compose versioned `firmware-contracts`, `ble-midi-input`,
+`monophonic-instrument`, and `m5-tone-output` packages. Hardware validation
+covers Note On/Off, last-note fallback, velocity, pitch bend, local panic,
+disconnect cleanup, and reconnection. Native tests and CI cover the pure policy,
+package consumers, and both firmware builds.
+
+The baseline is tagged as `two-hardware-showcases-v0.1.0`. Package milestones
+are tagged independently in their owning repositories.
 
 **Status: complete.**
 
-## Next Priority Slices
+## Why Continue
 
-1. **Simple channel behavior**
-   Decide one small channel-based behavior, such as per-channel waveform choice.
-   Keep this as instrument policy, not receiver logic.
+The project does not need to outperform phone or desktop synthesizer apps to be
+useful. Its current purpose is to explore how abandoned or modest embedded
+gadgets can become physical musical objects with their own buttons, displays,
+limitations, and playful character.
 
-2. **Raw BLE-MIDI transport research**
-   Keep this as a fallback if future sources reproduce the My MIDI Hub backlog.
-   Do not redesign the transport while SynthBridge routes remain responsive.
+The Arturia MicroLab currently reaches the devices through an Android USB MIDI
+to BLE MIDI bridge. A phone could synthesize the sound itself, so the current
+composition is not yet an autonomous product. It remains a valid learning and
+hardware-reuse experiment while exposing two independent directions:
 
-## Second Hardware Validation: M5Stack Core Gray
+1. remove the Android bridge;
+2. make the physical devices capable of richer sound.
 
-Bring the available M5Stack Core Gray 1.0 into the test bench as the second
-hardware target. The goal is not merely to add another supported board: it is
-to discover which
-existing boundaries are genuinely portable.
+## Active Direction: Existing Audio Engines
 
-1. **Core Gray speaker smoke test**
-   Initialize the board through M5Unified, play and stop A4 through its built-in
-   1 W speaker, and record the effective speaker configuration. Keep BLE out of
-   this first test.
+The current bench already has working input, contracts, two ESP32 devices, and
+two audio outputs. The next low-friction direction is to evaluate mature Open
+Source audio engines rather than reimplementing synthesis techniques already
+explored by other projects.
 
-2. **Audio-output boundary check**
-   Determine whether `M5ToneOutputCore` can support both devices through
-   explicit configuration wrappers or whether the Gray needs a separate output
-   backend.
-   Keep Plus2 buzzer calibration and Gray speaker calibration outside musical
-   policy, and base the decision on observed differences rather than on a goal
-   of maximizing shared code.
+| Candidate | Role to probe | Main question |
+| --- | --- | --- |
+| [AMY](https://github.com/shorepine/amy) | Complete polyphonic synth engine | Can its PCM or I²S path coexist with M5 hardware and later consume our events? |
+| [ESP32Synth](https://github.com/danilogcrf2-oss/ESP32Synth) | ESP32-optimized polyphonic engine | Do its direct task and peripheral choices coexist with M5Unified and BLE? |
+| [TinySoundFont](https://github.com/schellingb/TinySoundFont) | SoundFont 2 renderer | Can useful banks fit or stream while buffers reach an M5 or I²S output reliably? |
+| [Mozzi](https://github.com/sensorium/Mozzi) | Synthesis toolkit | Is it a useful educational/custom voice beside the complete engines? |
+| [Faust](https://faust.grame.fr/) | DSP language and code generator | Can generated DSP become a reproducible PlatformIO package or showcase backend? |
 
-3. **Multi-board build coverage**
-   Build the relevant firmware for both Plus2 and Gray in CI. Board selection,
-   pinout, speaker setup, display layout, and physical controls may vary;
-   shared contracts and pure instrument policy should compile unchanged.
+These are alternatives with different purposes, not a queue that must all be
+integrated.
 
-4. **Core Gray BLE MIDI showcase**
-   Compose the existing BLE MIDI input and monophonic instrument with the Gray
-   output. Validate Note On/Off, overlapping-note fallback, velocity, panic,
-   and disconnect cleanup on its speaker. Preserve the Plus2 showcase as the
-   baseline rather than converting it into a single application full of board
-   conditionals.
-   Complete: the showcase passed deliberate hardware validation with an Arturia
-   controller routed through Android SynthBridge to the M5Stack Core Gray.
-   Validated local panic, disconnect cleanup, reconnect without reset,
-   overlapping-note fallback with preserved velocities, velocity-to-volume
-   response, and the previously observed pitch bend path.
+### Suggested Next Micro-Slices
 
-5. **Cross-hardware comparison**
-   Document clarity, useful volume range, velocity response, note latency,
-   cleanup behavior, and the amount of code that remained
-   shared. Use these findings to refine boundaries before starting the sampled
-   oscillator or external I2S work.
+1. **AMY dependency and build probe**
+   Add no shared abstraction. Compile the smallest isolated Arduino/PlatformIO
+   program for the Core Gray target and record flash, RAM, toolchain, and package
+   friction.
 
-## Parallel Audio Exploration
+2. **AMY local sound probe**
+   Without BLE, start the engine and produce one preset note on the Core Gray
+   speaker or precisely document why its output path needs adaptation.
 
-The proven `M5BuzzerToneOutput` remains the Plus2 baseline backend. New audio
-paths should be added alongside it and compared in separate showcases; they do
-not need to replace it to be useful.
+3. **AMY local polyphony probe**
+   Trigger and release a small chord using buttons or a deterministic sequence.
+   Confirm cleanup and listen for underruns or conflicts before involving BLE.
 
-1. **Monophonic sampled oscillator proof**
-   Generate one continuous oscillator in software and route it to an available
-   output on the M5StickC Plus2. Start with one waveform and one voice. This is
-   informed by the multi-oscillator approach in
-   [necobit/M5Stack-MIDI-Module](https://github.com/necobit/M5Stack-MIDI-Module),
-   but should be implemented within this ecosystem's existing boundaries.
+4. **Event adapter probe**
+   If local audio works, adapt `NoteEvent`, `PitchBendEvent`, and disconnection to
+   the engine. A mature polyphonic engine may implement `InstrumentEventSink`
+   directly instead of pretending to be the current single `VoiceOutput`.
 
-2. **Backend comparison showcase**
-   Compare the sampled oscillator with `M5BuzzerToneOutput` on the same hardware:
-   transition clicks, latency, clarity, CPU/memory cost, and implementation
-   complexity. Keep both backends if they demonstrate useful trade-offs.
+5. **Third composition showcase**
+   Only after the adapter works, combine `ble-midi-input` with the engine and
+   compare it with the two baseline showcases.
 
-3. **Expression experiments on the sampled path**
-   Only after the basic oscillator is proven, explore envelope-controlled
-   amplitude, legato, glide, vibrato, or multiple oscillators within one
-   monophonic voice. Polyphony remains a separate later experiment.
+At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
+artifacts, BLE coexistence, output hardware, license, and adapter size. Failure
+to fit or coexist is useful evidence and does not require changing the baseline.
 
-4. **External I2S line output**
-   Explore a PCM5102-based output for the M5StickC Plus2 after continuous sample
-   generation is understood. Treat the DAC board and board-specific pinout as a
-   hardware backend while preserving reusable oscillator and musical-policy
-   code. A later M5StickS3 experiment may use its built-in audio path or its own
-   dedicated DAC wiring without requiring the physical HATs to be identical.
+## Deferred Direction: Autonomous MIDI Input
 
-## Candidate Slices
+Removing Android remains desirable, but it is not the immediate track.
 
-- Add support for CC 120 All Sound Off and CC 123 All Notes Off.
-- Revisit the velocity curve if more hardware tests show that the current
-  package default or the showcase's calibrated `96..136` speaker volume range
-  is too subtle or too aggressive.
-- Choose showcase-specific BLE advertised names now that `ble-midi-input` accepts
-  a compile-time name.
-- Document the one-active-instance constraint of BLE MIDI examples in the
-  showcase README.
-- Add tags for package milestones once the SHA-pinned integration settles.
+The cleanest likely experiment is a future ESP32-S3 device with usable USB OTG,
+such as an M5StickS3, acting as USB MIDI host for the Arturia. That hardware is
+not currently on the bench.
 
-## Deferred Ideas
+Available Heltec boards may also participate in an autonomous route, but would
+likely require more than one board or an additional audio device. That makes the
+probe a larger weekend-scale composition rather than a small continuation of
+the current setup.
 
-- Sustain/hold behavior in the monophonic instrument.
-- Modulation CC1 mapped to vibrato or timbre.
-- Polyphonic buzzer mixing.
-- Sequencer or arpeggiator.
-- USB MIDI host on hardware that supports it well.
+When hardware and time align, proceed in this order:
+
+1. enumerate the Arturia as a USB MIDI device;
+2. translate input into the existing semantic contracts;
+3. create `usb-midi-input` only after the event path works;
+4. reuse an existing instrument or engine without changing its MIDI semantics;
+5. compare latency and cleanup with the Android BLE bridge.
+
+Do not tie USB parsing to a particular synth engine. Input autonomy and sound
+generation must remain independently replaceable.
+
+## Contract Guidance for Future Engines
+
+The current `VoiceOutput` describes one simple voice and should remain the
+boundary used by `MonophonicInstrumentSink`. Do not force a polyphonic engine
+behind it if that would discard native voice allocation, envelopes, patches,
+effects, channels, or multitimbral behavior.
+
+A future engine adapter may consume `InstrumentEventSink` directly. If several
+engines expose PCM blocks, their real implementations may later justify a
+separate render-source/audio-sink boundary. Do not design that abstraction
+before the first working probe.
+
+Support for MIDI channels is therefore not a goal by itself. Add channel-based
+patches, routing, or multitimbrality when a selected engine provides a concrete
+behavior worth exposing.
+
+## Later Audio and Hardware Options
+
+- Compare a second engine only after the first integration teaches us what to
+  measure and where the real boundary lies.
+- Explore a PCM5102 I²S line output when an engine can already produce continuous
+  PCM; keep board-specific pins at the composition edge.
+- Keep the existing buzzer and Core Gray outputs as small, proven baselines.
+  Richer engines supplement them and do not need to replace them.
+- Revisit modulation, sustain, program change, CC120/CC123, sequencing, and
+  arpeggiation when an active composition needs them.
+- Keep raw BLE-MIDI parser research deferred unless the SynthBridge-compatible
+  route develops a reproducible transport problem.
 
 ## Prioritization Rules
 
-- Prefer slices that produce a hardware-observable improvement.
-- Prefer contract changes only after at least one producer and one consumer need
-  them.
-- Keep transport, event contracts, instrument policy, and audio output separate.
-- Keep board selection, pinout, calibration, display, and physical controls at
-  composition edges instead of spreading hardware conditionals through musical
-  semantics.
-- Keep each slice small enough to build, test, document, commit, and review.
-- Move speculative ideas down until a concrete test makes them relevant.
+- Prefer a probe that can finish in one short session.
+- Prefer integration over reimplementation when mature Open Source work exists.
+- Start audio engines without BLE, then add semantic events, then compose.
+- Add contracts only after a producer and a real consumer need them.
+- Keep transport, contracts, musical policy, engine, and physical output
+  independently replaceable.
+- Preserve license notices and upstream contribution policies.
+- Keep proven showcases working while experiments fail safely beside them.
+- Record negative findings instead of hiding or architecting around them.

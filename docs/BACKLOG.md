@@ -22,10 +22,10 @@ showcase.
 
 ## Pitch Bend Route Compatibility
 
-Pitch bend is back on the near-term roadmap, but route compatibility remains a
-known risk. Hardware tests with an Arturia controller routed through Android USB
-MIDI to BLE MIDI in My MIDI Hub showed that pitch-strip movement can delay Note
-Off by seconds.
+Audible pitch bend is complete in the current showcases, but route compatibility
+remains a recorded external risk. Hardware tests with an Arturia controller
+routed through Android USB MIDI to BLE MIDI in My MIDI Hub showed that
+pitch-strip movement can delay Note Off by seconds.
 
 Attempts above the BLE-MIDI library did not solve the problem:
 
@@ -50,7 +50,7 @@ That points to My MIDI Hub's USB-to-BLE bridge path as the likely problematic
 route, not to BLE MIDI, Android USB OTG, the Arturia strip, or the showcase
 architecture in general.
 
-Future research options:
+Research options if the problem appears on a route other than My MIDI Hub:
 
 - inspect whether the Android bridge can reduce pitch bend rate;
 - prototype a raw BLE-MIDI packet parser that preserves Note On/Off while
@@ -59,11 +59,14 @@ Future research options:
 - compare with a non-BLE or direct hardware MIDI path before changing the shared
   event contract.
 
-## Repository Naming
+## Autonomous MIDI Input
 
-Consider renaming `buzzer-instrument` to `m5-buzzer-instrument` if the family of
-M5-specific instrument packages becomes established. The current name is short
-and already used by working showcases, but the implementation depends on
-M5Unified and is calibrated for the M5StickC Plus2 buzzer. A future rename would
-make it more symmetric with `m5-speaker-instrument`, at the cost of updating
-PlatformIO package references, documentation, CI, and recent review links.
+Direct USB MIDI host input could remove the Android bridge from the current
+Arturia route. A future ESP32-S3 device with usable USB OTG is the smallest
+likely composition, but no such device is currently on the bench.
+
+The available Heltec boards are another possible input-side experiment. They
+would probably need a second board or separate audio device, increasing wiring,
+transport, cleanup, and power questions. Keep that as a larger exploration
+rather than introducing a multi-board protocol merely to avoid the working
+phone bridge.

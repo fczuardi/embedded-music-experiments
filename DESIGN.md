@@ -15,6 +15,13 @@ partir de módulos que tenham valor isoladamente e possam ser combinados por
 fronteiras explícitas. Ele não define um sintetizador único nem pretende copiar
 um produto comercial específico.
 
+O valor procurado também não é substituir os muitos sintetizadores completos
+que já existem em celulares e computadores. O experimento explora outra coisa:
+dar função musical a pequenos objetos físicos, inclusive gadgets esquecidos,
+preservando seus botões, telas, limitações e caráter de brinquedo. Aprendizado,
+reaproveitamento e limitação criativa são resultados válidos mesmo quando uma
+composição não se transforma em produto.
+
 A implementação atual já ultrapassou a primeira prova de conceito. Hoje o
 ecossistema possui:
 
@@ -27,10 +34,14 @@ ecossistema possui:
 - testes nativos, builds de firmware, empacotamento PlatformIO e registros de
   validação em hardware.
 
-O M5StickC Plus2 continua sendo a bancada principal. O M5Stack Core Gray será o
-segundo alvo real, não para declarar portabilidade por antecipação, mas para
-descobrir quais fronteiras sobrevivem a diferenças de placa, transdutor,
-controles e configuração.
+O M5StickC Plus2 continua sendo a bancada principal. O M5Stack Core Gray já
+funciona como segundo alvo real, demonstrando quais fronteiras sobreviveram a
+diferenças de placa, transdutor, controles e configuração.
+
+As composições atuais ainda recebem o Arturia MicroLab por uma ponte USB MIDI
+para BLE MIDI executada no Android. Isso é uma limitação conhecida, mas também
+separa duas linhas de investigação: tornar a entrada autônoma e ampliar a voz
+sonora são problemas independentes.
 
 ## O que estamos construindo
 
@@ -48,6 +59,17 @@ possam ser recombinadas.
 
 Cada nova peça deve resolver um caso concreto. Generalizações surgem quando uma
 segunda implementação ou composição revela o que realmente precisa ser comum.
+
+O roadmap mantém dois eixos independentes:
+
+- **autonomia de entrada:** remover a ponte Android através de USB MIDI host ou
+  outra composição física;
+- **riqueza sonora:** integrar engines existentes ou novos backends atrás dos
+  contratos semânticos já comprovados.
+
+O segundo eixo está mais próximo da bancada atual. O primeiro permanece
+importante, mas aguarda hardware apropriado ou um intervalo maior para uma
+composição com mais de uma placa.
 
 ## Estado comprovado
 
@@ -175,6 +197,28 @@ flowchart TD
 | Saída de áudio | transformar ações em som físico | significado de Note On, canal ou CC |
 | Composição | escolher módulos, configuração e controles do aparelho | reimplementar as responsabilidades internas |
 
+### Engines completas não são uma única voz
+
+`VoiceOutput` representa a borda simples usada pelo instrumento monofônico
+atual: iniciar, atualizar ou parar uma voz. Uma engine polifônica madura não deve
+ser forçada a caber nessa abstração e perder sua própria alocação de vozes,
+envelopes, patches ou operação multitimbral.
+
+Uma integração futura pode implementar `InstrumentEventSink` diretamente:
+
+```mermaid
+flowchart TD
+    E["Eventos compartilhados"] --> M["MonophonicInstrumentSink"]
+    M --> V["VoiceOutput atual"]
+    E --> X["Adapter de engine polifônica"]
+    X --> S["Engine externa"]
+```
+
+Essa fronteira será extraída somente após um probe real. Engines que produzem
+buffers PCM também podem revelar uma segunda borda entre geração de amostras e
+saída física; ainda não existe evidência suficiente para nomear uma interface
+universal para ela.
+
 ### Por que não expor BLE MIDI cru
 
 BLE MIDI é uma representação de transporte. Seus pacotes podem conter
@@ -273,6 +317,24 @@ Novos caminhos de áudio devem começar ao lado do backend atual:
 - DAC I²S PCM5102 para saída de linha;
 - outras saídas motivadas por hardware disponível.
 
+O projeto deve preferir integrar trabalho Open Source maduro a reimplementar
+síntese já bem explorada. Os candidatos atuais não são intercambiáveis:
+
+- **AMY:** sintetizador completo com polifonia, presets, FM, samples, envelopes
+  e efeitos; primeiro candidato para um probe de engine pronta;
+- **ESP32Synth:** engine recente e otimizada especificamente para a família
+  ESP32, com vários modos de saída e ampla capacidade declarada;
+- **TinySoundFont:** renderer de SoundFont 2 para instrumentos baseados em
+  samples;
+- **Mozzi:** toolkit maduro e pedagógico de osciladores, envelopes, filtros e
+  saída de áudio para microcontroladores;
+- **Faust:** linguagem e toolchain capaz de gerar DSP C++ para ESP32.
+
+Cada candidato começa isolado, sem BLE, e precisa demonstrar som no hardware
+antes de receber um adapter para os contratos compartilhados. A integração deve
+preservar a dependência externa e sua licença, não copiar silenciosamente a
+engine para dentro do ecossistema.
+
 Um backend novo não precisa substituir o anterior. Dois exemplos podem continuar
 úteis se evidenciarem compromissos diferentes de latência, qualidade, memória,
 CPU ou simplicidade.
@@ -284,12 +346,11 @@ frequência sem artefatos perceptíveis.
 
 ## Segundo hardware: M5Stack Core Gray
 
-O Core Gray 1.0 será introduzido como segundo hardware de validação sem depender
-da conclusão de pitch bend audível no Plus2. Ele mantém proximidade suficiente —
-ESP32 clássico, BLE e M5Unified — mas troca o buzzer passivo por um speaker
-eletromagnético interno de 1 W ligado ao DAC do ESP32.
+O Core Gray 1.0 foi introduzido como segundo hardware de validação. Ele mantém
+proximidade suficiente — ESP32 clássico, BLE e M5Unified — mas troca o buzzer
+passivo por um speaker eletromagnético interno de 1 W ligado ao DAC do ESP32.
 
-Essa combinação permite testar, em ordem:
+Essa combinação validou, em ordem:
 
 1. A4 e parada no speaker, sem BLE;
 2. configuração comum ou backend separado para a saída;
@@ -300,6 +361,11 @@ Essa combinação permite testar, em ordem:
 O showcase do Plus2 permanece como referência. Não queremos convertê-lo numa
 aplicação universal cheia de condicionais de placa. A composição do Gray pode
 escolher outro backend, layout e botão, mantendo contratos e política musical.
+
+Uma passagem posterior confirmou no Gray Note On/Off, pitch bend, velocity,
+panic local, limpeza na desconexão, reconexão e fallback entre teclas
+sobrepostas. A milestone de dois hardwares é uma baseline concluída, não uma
+promessa de compatibilidade automática com qualquer ESP32.
 
 ## Organização e distribuição
 
@@ -338,6 +404,17 @@ essa cronologia nem funcionar como changelog.
 - [`necobit/M5Stack-MIDI-Module`](https://github.com/necobit/M5Stack-MIDI-Module):
   síntese por osciladores e acordes no M5Stack; inspira a exploração paralela de
   áudio amostrado, sem determinar nossa arquitetura.
+- [`shorepine/amy`](https://github.com/shorepine/amy): engine completa e
+  polifônica, com presets, síntese e renderização de buffers PCM.
+- [`danilogcrf2-oss/ESP32Synth`](https://github.com/danilogcrf2-oss/ESP32Synth):
+  engine otimizada para ESP32 com PWM, DAC, PDM e I²S.
+- [`schellingb/TinySoundFont`](https://github.com/schellingb/TinySoundFont):
+  renderer compacto de SoundFont 2; sua política explícita proíbe contribuições
+  geradas por LLM e deve ser respeitada em qualquer interação upstream.
+- [`sensorium/Mozzi`](https://github.com/sensorium/Mozzi): toolkit de síntese
+  para Arduino e vários microcontroladores, incluindo ESP32.
+- [`grame-cncm/faust`](https://github.com/grame-cncm/faust): linguagem e
+  compilador de DSP com ferramentas para gerar código destinado ao ESP32.
 - [`probonopd/MiniDexed`](https://github.com/probonopd/MiniDexed): Dexed bare
   metal para Raspberry Pi; demonstra uma classe de instrumento muito mais
   completa em hardware diferente.
@@ -351,15 +428,16 @@ dependências e compatibilidade com as fronteiras existentes.
 
 ## Decisões ainda abertas
 
-- Qual comportamento de canal será implementado primeiro?
-- Quais artefatos de atualização de frequência ficarão visíveis ao comparar o
-  backend atual com o speaker do Core Gray ou um oscilador amostrado?
-- O Core Gray reutilizará `SpeakerToneOutput` por configuração ou justificará
-  outro backend?
+- Qual engine existente produzirá primeiro som útil na bancada atual?
+- Uma engine completa consumirá `InstrumentEventSink` diretamente ou revelará
+  outra fronteira semântica necessária?
+- Os speakers internos aceitarão buffers PCM de forma útil ou uma saída I²S
+  externa será necessária para as engines contínuas?
 - Qual necessidade concreta fará Control Change atravessar o contrato comum?
-- Quando sustain, modulation, arpejo ou sequenciamento passam a ser o próximo
-  menor experimento útil?
-- Qual comparação justificaria investir em oscilador amostrado ou saída I²S?
+- Qual comportamento real de uma engine justificará expor canais, patches,
+  sustain ou modulation?
+- Quando hardware USB host disponível justificará retomar a autonomia de entrada
+  sem transformar o próximo slice numa composição grande demais?
 
 ## Critérios para boas decisões
 
