@@ -8,10 +8,12 @@ default:
 # List available showcase ids.
 showcase-list:
     @printf '1\tble-midi-buzzer\tshowcases/ble-midi-buzzer\n'
+    @printf '2\tpackage-archive-probe\tshowcases/package-archive-probe\n'
 
 _showcase-path id:
     @case "{{id}}" in \
       1) printf '%s\n' 'showcases/ble-midi-buzzer' ;; \
+      2) printf '%s\n' 'showcases/package-archive-probe' ;; \
       *) printf 'Unknown showcase id: %s\n' "{{id}}" >&2; exit 2 ;; \
     esac
 
