@@ -8,12 +8,11 @@ M5StickC Plus2 buzzer.
 
 ## Design
 
-Showcase 1 and showcase 2 now share `showcases/common/BleMidiInstrumentShowcase.h`.
-That common runner owns the BLE MIDI input, monophonic instrument, instrument
-sink, pitch bend logging, panic button behavior, uptime logging, and simple
-display. The board-specific `main.cpp` files only choose M5 initialization,
-the tone output backend, labels, velocity-volume calibration, and pitch bend
-range.
+Showcase 1 and showcase 2 intentionally keep complete `main.cpp` files. These
+showcases are usage examples for composing the package set, so each sketch shows
+the full wiring: BLE MIDI input, monophonic instrument, instrument sink, tone
+output backend, pitch bend logging, panic button behavior, uptime logging, and
+simple display.
 
 Showcase 2 lives at `showcases/ble-midi-core-gray-speaker` and composes:
 
@@ -59,9 +58,9 @@ just showcase-build 1
 just showcase-build 2
 ```
 
-Both showcase builds passed. Showcase 1 still builds after the common-runner
-refactor. Showcase 2 resolves the same package graph with `M5CoreGrayToneOutput`
-and links successfully with the larger app partition.
+Both showcase builds passed. Showcase 1 remains the Plus2 buzzer sample.
+Showcase 2 resolves the same package graph with `M5CoreGrayToneOutput` and
+links successfully with the larger app partition.
 
 ## Hardware Notes
 
