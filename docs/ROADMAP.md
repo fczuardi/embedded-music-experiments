@@ -15,17 +15,18 @@ Status:
 - `EmbeddedMusicFirmwareContracts` is shared by both firmware packages.
 - `EmbeddedMusicBleMidiInput` is packaged from `midi-receiver`.
 - The original combined `EmbeddedMusicBuzzerInstrument` package has been split
-  into `monophonic-instrument` and `m5-buzzer-output` archives for the showcase
+  into `monophonic-instrument` and `m5-tone-output` archives for the showcase
   migration.
 - `showcases/ble-midi-buzzer` composes both packages and passed happy-path
   hardware tests.
 - The showcase now composes `EmbeddedMusicBleMidiInput`, `monophonic-instrument`,
-  and `m5-buzzer-output`.
+  and `m5-tone-output`.
 - The showcase has a local panic button for route failures that do not produce
   MIDI cleanup events or BLE disconnects, and that button has been validated on
   real hardware.
-- The buzzer package maps Note On velocity to a constrained speaker volume
-  range, and the showcase velocity response has been validated on real hardware.
+- The M5 tone output package maps Note On velocity to a constrained speaker
+  volume range, and the showcase velocity response has been validated on real
+  hardware.
 - `PitchBendEvent` is part of the shared contract, the complete event path has
   been observed on hardware, and the showcase now consumes the buzzer package
   version that makes bend audible. Comparative route tests point to My MIDI
@@ -66,8 +67,9 @@ existing boundaries are genuinely portable.
    this first test.
 
 2. **Audio-output boundary check**
-   Determine whether `SpeakerToneOutput` can support both devices through
-   explicit configuration or whether the Gray needs a separate output backend.
+   Determine whether `M5ToneOutputCore` can support both devices through
+   explicit configuration wrappers or whether the Gray needs a separate output
+   backend.
    Keep Plus2 buzzer calibration and Gray speaker calibration outside musical
    policy, and base the decision on observed differences rather than on a goal
    of maximizing shared code.
@@ -92,9 +94,9 @@ existing boundaries are genuinely portable.
 
 ## Parallel Audio Exploration
 
-The proven `SpeakerToneOutput` remains the baseline backend. New audio paths
-should be added alongside it and compared in separate showcases; they do not
-need to replace it to be useful.
+The proven `M5BuzzerToneOutput` remains the Plus2 baseline backend. New audio
+paths should be added alongside it and compared in separate showcases; they do
+not need to replace it to be useful.
 
 1. **Monophonic sampled oscillator proof**
    Generate one continuous oscillator in software and route it to an available
@@ -104,7 +106,7 @@ need to replace it to be useful.
    but should be implemented within this ecosystem's existing boundaries.
 
 2. **Backend comparison showcase**
-   Compare the sampled oscillator with `SpeakerToneOutput` on the same hardware:
+   Compare the sampled oscillator with `M5BuzzerToneOutput` on the same hardware:
    transition clicks, latency, clarity, CPU/memory cost, and implementation
    complexity. Keep both backends if they demonstrate useful trade-offs.
 

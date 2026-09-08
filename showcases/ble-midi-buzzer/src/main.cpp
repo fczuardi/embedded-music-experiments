@@ -2,9 +2,9 @@
 #include <M5Unified.h>
 
 #include "BleMidiInput.h"
+#include "M5BuzzerToneOutput.h"
 #include "MonophonicInstrument.h"
 #include "MonophonicInstrumentSink.h"
-#include "SpeakerToneOutput.h"
 
 namespace {
 constexpr uint32_t UPTIME_LOG_INTERVAL_MS = 1000;
@@ -40,7 +40,7 @@ private:
 };
 
 MonophonicInstrument instrument;
-SpeakerToneOutput speakerToneOutput;
+M5BuzzerToneOutput speakerToneOutput;
 MonophonicInstrumentSink instrumentSink(instrument, speakerToneOutput);
 LoggingInstrumentEventSink loggingInstrumentSink(instrumentSink);
 BleMidiInput bleMidiInput;
