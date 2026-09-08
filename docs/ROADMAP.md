@@ -49,6 +49,7 @@ explored by other projects.
 | --- | --- | --- |
 | [AMY](https://github.com/shorepine/amy) | Complete polyphonic synth engine | Can its PCM or I²S path coexist with M5 hardware and later consume our events? |
 | [ESP32Synth](https://github.com/danilogcrf2-oss/ESP32Synth) | ESP32-optimized polyphonic engine | Do its direct task and peripheral choices coexist with M5Unified and BLE? |
+| [esp32_fm_synth](https://github.com/marcel-licence/esp32_fm_synth) and [successor](https://github.com/marcel-licence/ml_synth_fm_example) | FM synth reference implementation | Can the newer GPL-3.0 code be isolated, built on the current toolchain, and redistributed under clear terms? |
 | [TinySoundFont](https://github.com/schellingb/TinySoundFont) | SoundFont 2 renderer | Can useful banks fit or stream while buffers reach an M5 or I²S output reliably? |
 | [Mozzi](https://github.com/sensorium/Mozzi) | Synthesis toolkit | Is it a useful educational/custom voice beside the complete engines? |
 | [Faust](https://faust.grame.fr/) | DSP language and code generator | Can generated DSP become a reproducible PlatformIO package or showcase backend? |
@@ -130,6 +131,10 @@ behavior worth exposing.
   measure and where the real boundary lies.
 - Explore a PCM5102 I²S line output when an engine can already produce continuous
   PCM; keep board-specific pins at the composition edge.
+- Explore a physical AY-3-8910, AY-3-8912, or YM2149 only as a separate hardware
+  experiment. The `AY3891x` library needs the external PSG, its clock, a wide
+  GPIO bus, and an analog audio path; it is not another speaker backend for the
+  current M5 devices.
 - Keep the existing buzzer and Core Gray outputs as small, proven baselines.
   Richer engines supplement them and do not need to replace them.
 - Revisit modulation, sustain, program change, CC120/CC123, sequencing, and

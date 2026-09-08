@@ -324,6 +324,9 @@ síntese já bem explorada. Os candidatos atuais não são intercambiáveis:
   e efeitos; primeiro candidato para um probe de engine pronta;
 - **ESP32Synth:** engine recente e otimizada especificamente para a família
   ESP32, com vários modos de saída e ampla capacidade declarada;
+- **esp32_fm_synth:** implementação de referência de um sintetizador FM
+  multitimbral para ESP32; o projeto original está descontinuado e aponta para
+  um sucessor ainda pouco documentado;
 - **TinySoundFont:** renderer de SoundFont 2 para instrumentos baseados em
   samples;
 - **Mozzi:** toolkit maduro e pedagógico de osciladores, envelopes, filtros e
@@ -334,6 +337,13 @@ Cada candidato começa isolado, sem BLE, e precisa demonstrar som no hardware
 antes de receber um adapter para os contratos compartilhados. A integração deve
 preservar a dependência externa e sua licença, não copiar silenciosamente a
 engine para dentro do ecossistema.
+
+Chips sonoros físicos formam outra categoria. Uma biblioteca como `AY3891x`
+permite que um microcontrolador programe um PSG AY-3-8910, AY-3-8912 ou YM2149,
+mas não produz áudio nos transdutores M5 existentes. Ela exige o chip, clock,
+barramento paralelo, vários GPIOs e circuito de áudio próprios. Esse caminho é
+coerente com o interesse em objetos musicais peculiares, porém pertence a uma
+exploração futura de hardware, não à comparação imediata de engines em software.
 
 Um backend novo não precisa substituir o anterior. Dois exemplos podem continuar
 úteis se evidenciarem compromissos diferentes de latência, qualidade, memória,
@@ -408,6 +418,14 @@ essa cronologia nem funcionar como changelog.
   polifônica, com presets, síntese e renderização de buffers PCM.
 - [`danilogcrf2-oss/ESP32Synth`](https://github.com/danilogcrf2-oss/ESP32Synth):
   engine otimizada para ESP32 com PWM, DAC, PDM e I²S.
+- [`marcel-licence/esp32_fm_synth`](https://github.com/marcel-licence/esp32_fm_synth):
+  sintetizador FM inspirado no YM2612, com seis vozes, quatro operadores,
+  envelopes, efeitos e timbres por canal. O próprio projeto está marcado como
+  desatualizado e aponta para
+  [`ml_synth_fm_example`](https://github.com/marcel-licence/ml_synth_fm_example).
+  Ambos usam GPL-3.0; o README original também pede contato para usos comerciais,
+  portanto qualquer integração ou redistribuição exigiria esclarecer esses
+  termos e validar a compatibilidade com versões atuais do Arduino-ESP32.
 - [`schellingb/TinySoundFont`](https://github.com/schellingb/TinySoundFont):
   renderer compacto de SoundFont 2; sua política explícita proíbe contribuições
   geradas por LLM e deve ser respeitada em qualquer interação upstream.
@@ -415,6 +433,10 @@ essa cronologia nem funcionar como changelog.
   para Arduino e vários microcontroladores, incluindo ESP32.
 - [`grame-cncm/faust`](https://github.com/grame-cncm/faust): linguagem e
   compilador de DSP com ferramentas para gerar código destinado ao ESP32.
+- [`Andy4495/AY3891x`](https://github.com/Andy4495/AY3891x): biblioteca Arduino
+  MIT e independente de plataforma para controlar chips PSG físicos AY-3-8910,
+  AY-3-8912 e clones como YM2149. É prior art para um futuro backend de hardware
+  sonoro externo, não para os speakers internos atuais.
 - [`probonopd/MiniDexed`](https://github.com/probonopd/MiniDexed): Dexed bare
   metal para Raspberry Pi; demonstra uma classe de instrumento muito mais
   completa em hardware diferente.

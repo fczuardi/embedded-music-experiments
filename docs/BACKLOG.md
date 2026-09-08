@@ -70,3 +70,28 @@ would probably need a second board or separate audio device, increasing wiring,
 transport, cleanup, and power questions. Keep that as a larger exploration
 rather than introducing a multi-board protocol merely to avoid the working
 phone bridge.
+
+## FM Synth Reference Implementation
+
+`marcel-licence/esp32_fm_synth` demonstrates a six-voice, four-operator FM
+instrument with per-channel presets, velocity, pitch bend, modulation, effects,
+and voice stealing. It is useful prior art for both an engine adapter and a
+future concrete purpose for MIDI channels.
+
+The original repository declares support for older Arduino-ESP32 versions and
+marks itself as unmaintained. Its successor, `ml_synth_fm_example`, is active
+but minimally documented. Both use GPL-3.0, while the original README separately
+asks users to contact the author about commercial use. Before integration,
+verify the current build, identify the reusable engine boundary, and clarify
+redistribution terms. Do not make it the first audio-engine probe.
+
+## External Vintage Sound Chips
+
+`Andy4495/AY3891x` controls physical AY-3-8910/8912 programmable sound generators
+and compatible chips such as the YM2149. It is an MIT-licensed, portable Arduino
+library, but the experiment would require an external chip, clock generation,
+at least an eight-bit data bus plus control signals, and an analog output path.
+
+Treat this as a future hardware instrument rather than a software engine for the
+built-in M5 outputs. A probe becomes worthwhile when a suitable PSG and enough
+accessible GPIOs are available on the bench.
