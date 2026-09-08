@@ -13,13 +13,10 @@ This repository is the documentation hub for the experiments. It does not contai
 
 ## Showcases
 
-Executable compositions live in `showcases/`. The first one,
-`showcases/ble-midi-buzzer/`, combines the BLE MIDI input package with the buzzer
-instrument package so an M5StickC Plus2 can act as a small BLE MIDI sound box.
-
-`showcases/package-archive-probe/` is a native build probe for validating that
-subpackages from `monophonic-instrument` can be consumed as packed PlatformIO
-archives before those package URLs are used in hardware showcases.
+Executable compositions live in `showcases/`. The current showcase,
+`showcases/ble-midi-buzzer/`, combines the BLE MIDI input package with the
+monophonic instrument policy and M5StickC Plus2 buzzer output packages so the
+device can act as a small BLE MIDI sound box.
 
 ## Design notes
 
