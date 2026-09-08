@@ -44,15 +44,11 @@ Status:
 
 ## Next Priority Slices
 
-1. **Core Gray BLE MIDI follow-up validation**
-   Validate local panic, disconnect cleanup, reconnect, and a more deliberate
-   velocity-volume comparison on showcase 2.
-
-2. **Simple channel behavior**
+1. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
    Keep this as instrument policy, not receiver logic.
 
-3. **Raw BLE-MIDI transport research**
+2. **Raw BLE-MIDI transport research**
    Keep this as a fallback if future sources reproduce the My MIDI Hub backlog.
    Do not redesign the transport while SynthBridge routes remain responsive.
 
@@ -87,8 +83,11 @@ existing boundaries are genuinely portable.
    and disconnect cleanup on its speaker. Preserve the Plus2 showcase as the
    baseline rather than converting it into a single application full of board
    conditionals.
-   Build slice complete; initial hardware validation passed. Local panic,
-   disconnect cleanup, reconnect, and detailed velocity comparison remain.
+   Complete: the showcase passed deliberate hardware validation with an Arturia
+   controller routed through Android SynthBridge to the M5Stack Core Gray.
+   Validated local panic, disconnect cleanup, reconnect without reset,
+   overlapping-note fallback with preserved velocities, velocity-to-volume
+   response, and the previously observed pitch bend path.
 
 5. **Cross-hardware comparison**
    Document clarity, useful volume range, velocity response, note latency,
