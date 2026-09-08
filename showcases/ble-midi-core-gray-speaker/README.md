@@ -44,6 +44,12 @@ After reconnecting, the instrument worked through the full package chain. Notes
 played correctly, pitch bend was responsive, and the Core Gray speaker handled
 lower notes better than the M5StickC Plus2 buzzer.
 
+A later stability pass with an Arturia controller routed through Android
+SynthBridge to the M5Stack Core Gray passed the full checklist: Button A panic,
+sound off on BLE disconnect, reconnection without reset, overlapping-key
+fallback while preserving held-note velocities, and audible velocity-to-volume
+response.
+
 ## Stability Checklist
 
 Use this checklist before calling the Core Gray behavior equivalent to the
@@ -51,8 +57,8 @@ M5StickC Plus2 showcase baseline:
 
 | Behavior | Status | Observation target |
 | --- | --- | --- |
-| Button A panic | Pending deliberate hardware check | Held notes stop immediately after Button A is pressed. |
-| Silence on BLE disconnect | Pending deliberate hardware check | Active tone stops when SynthBridge disconnects or the route is broken. |
-| BLE reconnection | Pending deliberate hardware check | Notes play again after reconnecting without reflashing or power cycling. |
-| Overlapping-note fallback | Pending deliberate hardware check | Releasing the latest held note falls back to the previous held note. |
-| Velocity response | Pending deliberate hardware check | Low and high velocities produce an audible volume difference in the configured `5..35` range. |
+| Button A panic | Passed on Core Gray | Held notes stop immediately after Button A is pressed. |
+| Silence on BLE disconnect | Passed on Core Gray | Active tone stops when SynthBridge disconnects or the route is broken. |
+| BLE reconnection | Passed on Core Gray | Notes play again after reconnecting without reflashing or power cycling. |
+| Overlapping-note fallback | Passed on Core Gray | Releasing the latest held note falls back to the previous held note. |
+| Velocity response | Passed on Core Gray | Low and high velocities produce an audible volume difference in the configured `5..35` range. |

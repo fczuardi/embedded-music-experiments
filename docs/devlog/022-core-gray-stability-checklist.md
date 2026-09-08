@@ -23,9 +23,9 @@ validate the exact firmware being exercised:
 
 ## Limits
 
-These checks cannot be completed by command-line tests alone because they depend
-on a BLE route, a controller or SynthBridge input surface, and audible speaker
-behavior on the physical Core Gray.
+These checks could not be completed by command-line tests alone because they
+depended on a BLE route, a controller or SynthBridge input surface, and audible
+speaker behavior on the physical Core Gray.
 
 ## Verification Commands
 
@@ -35,4 +35,17 @@ just showcase-build 2
 
 ## Hardware Observations
 
-Pending deliberate Core Gray hardware pass.
+Passed on the M5Stack Core Gray with this route:
+
+```text
+Arturia controller -> Android SynthBridge app -> M5Stack Core Gray
+```
+
+Observed behaviors:
+
+- Button A panic silenced held notes.
+- BLE disconnect silenced active sound.
+- BLE reconnection worked without reflashing or resetting the device.
+- Multiple-key fallback returned to the previous held note and respected the
+  velocity preserved for that note.
+- Velocity influenced speaker volume audibly in the configured showcase range.
