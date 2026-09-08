@@ -1,11 +1,11 @@
 # Slice 017: Rename BLE MIDI Input Consumer
 
 The `midi-receiver` reusable package was renamed from the temporary
-`EmbeddedMusicBleMidiInput` name to `BleMidiInput`.
+`EmbeddedMusicBleMidiInput` name to `ble-midi-input`.
 
 Showcase 1 now consumes the renamed package from the `midi-receiver` commit that
 introduced the new package identity. Current architecture docs were updated to
-use `BleMidiInput` for the BLE MIDI input package name.
+use `ble-midi-input` for the BLE MIDI input package name.
 
 Validation targets:
 

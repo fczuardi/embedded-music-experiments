@@ -24,8 +24,8 @@ just showcase-build 1
 
 ## Expected Behavior
 
-The device advertises using the BLE MIDI name provided by `BleMidiInput`. After
-a controller connects, note on/off events should start and stop the buzzer.
+The device advertises using the BLE MIDI name provided by `ble-midi-input`.
+After a controller connects, note on/off events should start and stop the buzzer.
 Note On velocity is mapped by
 `m5-tone-output` to a constrained M5 speaker volume range, so
 different key velocities should produce audible loudness changes without using
