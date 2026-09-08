@@ -21,8 +21,9 @@ ecossistema possui:
 - contratos C++ compartilhados para eventos de nota, pitch bend e ciclo de vida;
 - uma entrada BLE MIDI reutilizável;
 - um instrumento monofônico com prioridade da última nota;
-- um backend de áudio para o buzzer do M5StickC Plus2;
-- um showcase que combina esses módulos e já foi tocado com um controlador real;
+- backends de áudio para o buzzer do M5StickC Plus2 e o speaker do Core Gray;
+- showcases que combinam esses módulos, com o Plus2 já tocado com um
+  controlador real e o Core Gray pronto para validação;
 - testes nativos, builds de firmware, empacotamento PlatformIO e registros de
   validação em hardware.
 
@@ -42,8 +43,8 @@ possam ser recombinadas.
 | Origem de eventos | BLE MIDI | USB MIDI, sequenciador, controles locais |
 | Contrato | nota, pitch bend e desconexão | CCs musicais e outros eventos necessários |
 | Política musical | instrumento monofônico, última nota | sustain, modulation, arpejo, polifonia |
-| Saída sonora | `SpeakerToneOutput` no buzzer | speaker do Core Gray, oscilador amostrado, I²S |
-| Composição | showcase BLE MIDI → buzzer | novos showcases por hardware ou combinação |
+| Saída sonora | backends M5 para buzzer e speaker | oscilador amostrado, I²S |
+| Composição | showcases BLE MIDI para Plus2 e Core Gray | novos showcases por hardware ou combinação |
 
 Cada nova peça deve resolver um caso concreto. Generalizações surgem quando uma
 segunda implementação ou composição revela o que realmente precisa ser comum.
@@ -85,8 +86,8 @@ fila de eventos e limpeza após desconexão.
 
 ### Instrumento monofônico e saída de buzzer
 
-O repositório [`buzzer-instrument`](https://github.com/fczuardi/buzzer-instrument)
-publica `EmbeddedMusicBuzzerInstrument`. Internamente, ele separa:
+O repositório [`monophonic-instrument`](https://github.com/fczuardi/monophonic-instrument)
+publica `monophonic-instrument` e `m5-tone-output`. Internamente, ele separa:
 
 - conversão de nota MIDI para frequência;
 - estado monofônico e prioridade da última nota ainda pressionada;
@@ -100,15 +101,16 @@ silencia imediatamente a saída. Pitch bend é armazenado como estado musical,
 mapeado para uma faixa configurável de semitons e entregue ao backend como uma
 frequência já calculada.
 
-### Primeira composição
+### Composições executáveis
 
-`showcases/ble-midi-buzzer` combina os três pacotes:
+`showcases/ble-midi-buzzer` combina os pacotes para o M5StickC Plus2:
 
 ```mermaid
 flowchart TD
     B["ble-midi-input"] --> C["firmware-contracts"]
-    C --> I["EmbeddedMusicBuzzerInstrument"]
-    I --> A["Buzzer do M5StickC Plus2"]
+    C --> I["monophonic-instrument"]
+    I --> O["m5-tone-output"]
+    O --> A["Buzzer do M5StickC Plus2"]
     P["Botão de panic"] --> I
 ```
 
@@ -121,8 +123,15 @@ OTG para BLE, enquanto SynthBridge parou notas imediatamente. Essa é uma
 observação específica da rota, não uma falha do contrato compartilhado, da
 política do instrumento ou do backend de buzzer.
 
-Essa composição é um exemplo executável, não um quarto produto. Ela pertence ao
-guarda-chuva porque prova que pacotes independentes realmente encaixam.
+`showcases/ble-midi-core-gray-speaker` usa a mesma lógica de composição e troca
+apenas a borda de hardware para `M5CoreGrayToneOutput`, o alvo
+`m5stack-core-esp32`, o nome BLE anunciado e a calibração de volume. A primeira
+validação por build passou; a validação em hardware real ainda precisa ser
+executada.
+
+Essas composições são exemplos executáveis, não produtos adicionais. Elas
+pertencem ao guarda-chuva porque provam que pacotes independentes realmente
+encaixam.
 
 ## Princípios
 
@@ -235,9 +244,11 @@ voz soando deixam de ser equivalentes.
 
 ### Backend atual
 
-O `SpeakerToneOutput` usa a abstração `M5.Speaker` para tocar tabelas curtas de
-onda square ou saw no buzzer passivo do M5StickC Plus2. Ele provou pitches
-reconhecíveis, início e parada, troca de nota e resposta básica à velocity.
+O `m5-tone-output` usa a abstração `M5.Speaker` para tocar tabelas curtas de
+onda square ou saw no buzzer passivo do M5StickC Plus2 e no speaker interno do
+M5Stack Core Gray. Ele provou pitches reconhecíveis, início e parada, troca de
+nota e resposta básica à velocity no Plus2; o caminho BLE MIDI equivalente para
+o Core Gray já compila e aguarda validação em hardware.
 
 Esse backend permanece como baseline para Note On/Off, velocity, panic e pitch
 bend. Ele já demonstrou movimento audível nas duas direções por uma rota BLE
@@ -294,7 +305,7 @@ escolher outro backend, layout e botão, mantendo contratos e política musical.
 | --- | --- |
 | `embedded-music-experiments` | design, roadmap, contratos compartilhados e showcases |
 | `midi-receiver` | experimento de diagnóstico e pacote reutilizável de entrada BLE MIDI |
-| `buzzer-instrument` | política monofônica e pacote reutilizável de saída/instrumento |
+| `monophonic-instrument` | política monofônica e pacote reutilizável de saída/instrumento |
 
 Os três repositórios usam PlatformIO com Arduino e dependências explícitas. Cada
 pacote possui `library.json`; o showcase fixa revisões das dependências para que

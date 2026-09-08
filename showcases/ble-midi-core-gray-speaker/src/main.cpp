@@ -2,36 +2,35 @@
 #include <M5Unified.h>
 
 #include "../../common/BleMidiInstrumentShowcase.h"
-#include "M5BuzzerToneOutput.h"
+#include "M5CoreGrayToneOutput.h"
 
 namespace {
-// custom volume limits for velocity mapping, the defaults are 64-128
-constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {96, 136};
+// custom volume limits for velocity mapping, the Core Gray defaults are 1-35
+constexpr VelocityVolumeRange SHOWCASE_VELOCITY_VOLUME_RANGE = {5, 35};
 // custom pitch bend range in semitones, the package default is 2.0
 constexpr float SHOWCASE_PITCH_BEND_RANGE_SEMITONES = 4.0f;
 
 constexpr BleMidiInstrumentShowcaseConfig SHOWCASE_CONFIG = {
-    "BLE MIDI buzzer showcase",
+    "BLE MIDI Core Gray speaker showcase",
     "BLE MIDI",
-    "Buzzer showcase",
-    "buzzer",
+    "Core Gray speaker",
+    "speaker",
     SHOWCASE_VELOCITY_VOLUME_RANGE,
     SHOWCASE_PITCH_BEND_RANGE_SEMITONES,
 };
 
-BleMidiInstrumentShowcase<M5BuzzerToneOutput> showcase(SHOWCASE_CONFIG);
+BleMidiInstrumentShowcase<M5CoreGrayToneOutput> showcase(SHOWCASE_CONFIG);
 
-void configureM5Stick() {
+void configureM5StackCoreGray() {
   auto config = M5.config();
   config.internal_spk = true;
   config.internal_mic = false;
-  config.fallback_board = m5::board_t::board_M5StickCPlus2;
   M5.begin(config);
 }
 }
 
 void setup() {
-  configureM5Stick();
+  configureM5StackCoreGray();
 
   Serial.begin(115200);
   delay(200);

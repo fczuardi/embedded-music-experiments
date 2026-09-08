@@ -34,9 +34,17 @@ jobs:
       - name: Validate PlatformIO library package
         run: pio pkg pack . --output /tmp
 
-  ble-midi-buzzer-showcase:
-    name: BLE MIDI buzzer showcase
+  showcases:
+    name: Showcase ${{ matrix.showcase_id }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - showcase_id: 1
+            showcase_path: showcases/ble-midi-buzzer
+          - showcase_id: 2
+            showcase_path: showcases/ble-midi-core-gray-speaker
 
     steps:
       - name: Check out repository
@@ -51,12 +59,15 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .platformio-home
-          key: platformio-${{ runner.os }}-${{ hashFiles('showcases/ble-midi-buzzer/platformio.ini') }}
+          key: platformio-${{ runner.os }}-${{ hashFiles('showcases/**/platformio.ini') }}
           restore-keys: |
             platformio-${{ runner.os }}-
 
       - name: Install PlatformIO
         run: python -m pip install platformio==6.1.19
 
+      - name: Prepare local package archives
+        run: env WORKSPACE_ROOT="${{ github.workspace }}" scripts/prepare-showcase-archives.sh
+
       - name: Build showcase firmware
-        run: env PLATFORMIO_CORE_DIR="${{ github.workspace }}/.platformio-home" pio run -d showcases/ble-midi-buzzer
+        run: env PLATFORMIO_CORE_DIR="${{ github.workspace }}/.platformio-home" pio run -d "${{ matrix.showcase_path }}"

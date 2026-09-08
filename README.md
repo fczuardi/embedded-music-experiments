@@ -13,10 +13,15 @@ This repository is the documentation hub for the experiments. It does not contai
 
 ## Showcases
 
-Executable compositions live in `showcases/`. The current showcase,
-`showcases/ble-midi-buzzer/`, combines the BLE MIDI input package with the
-monophonic instrument policy and M5StickC Plus2 buzzer output packages so the
-device can act as a small BLE MIDI sound box.
+Executable compositions live in `showcases/`.
+
+- `showcases/ble-midi-buzzer/` combines BLE MIDI input, the monophonic
+  instrument policy, and the M5StickC Plus2 buzzer output.
+- `showcases/ble-midi-core-gray-speaker/` uses the same input and instrument
+  policy with the M5Stack Core Gray speaker output.
+
+Run `just showcase-list` to see the numeric showcase IDs used by the build,
+upload, and monitor recipes.
 
 ## Design notes
 

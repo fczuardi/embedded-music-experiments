@@ -1,7 +1,7 @@
 # Roadmap
 
 This roadmap tracks the next useful slices across the umbrella repository,
-`midi-receiver`, and `buzzer-instrument`. It is intentionally practical: items
+`midi-receiver`, and `monophonic-instrument`. It is intentionally practical: items
 move up when they unlock a better hardware test, clarify a contract, or make a
 module more reusable.
 
@@ -14,11 +14,13 @@ Status:
 
 - `firmware-contracts` is shared by both firmware packages.
 - `ble-midi-input` is packaged from `midi-receiver`.
-- The original combined `EmbeddedMusicBuzzerInstrument` package has been split
+- The original combined buzzer instrument package has been split
   into `monophonic-instrument` and `m5-tone-output` archives for the showcase
   migration.
 - `showcases/ble-midi-buzzer` composes both packages and passed happy-path
   hardware tests.
+- `showcases/ble-midi-core-gray-speaker` now builds the same BLE MIDI
+  monophonic instrument idea for the M5Stack Core Gray speaker.
 - The showcase now composes `ble-midi-input`, `monophonic-instrument`,
   and `m5-tone-output`.
 - The showcase has a local panic button for route failures that do not produce
@@ -41,10 +43,10 @@ Status:
 
 ## Next Priority Slices
 
-1. **Core Gray speaker smoke test**
-   Bring the second hardware target into the bench with a minimal local tone
-   test. Keep BLE, pitch bend, and cross-repo composition out of this first
-   slice.
+1. **Core Gray BLE MIDI hardware validation**
+   Upload showcase 2 to the M5Stack Core Gray and validate BLE advertising,
+   SynthBridge connection, Note On/Off, overlapping notes, velocity, pitch
+   bend, panic, disconnect cleanup, and reconnect.
 
 2. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
@@ -85,6 +87,7 @@ existing boundaries are genuinely portable.
    and disconnect cleanup on its speaker. Preserve the Plus2 showcase as the
    baseline rather than converting it into a single application full of board
    conditionals.
+   Build slice complete; hardware validation remains next.
 
 5. **Cross-hardware comparison**
    Document clarity, useful volume range, velocity response, note latency,
