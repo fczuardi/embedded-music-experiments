@@ -22,8 +22,8 @@ ecossistema possui:
 - uma entrada BLE MIDI reutilizável;
 - um instrumento monofônico com prioridade da última nota;
 - backends de áudio para o buzzer do M5StickC Plus2 e o speaker do Core Gray;
-- showcases que combinam esses módulos, com o Plus2 já tocado com um
-  controlador real e o Core Gray pronto para validação;
+- showcases que combinam esses módulos, com o Plus2 e o Core Gray já tocados
+  com um controlador real;
 - testes nativos, builds de firmware, empacotamento PlatformIO e registros de
   validação em hardware.
 
@@ -126,8 +126,9 @@ política do instrumento ou do backend de buzzer.
 `showcases/ble-midi-core-gray-speaker` usa a mesma lógica de composição e troca
 apenas a borda de hardware para `M5CoreGrayToneOutput`, o alvo
 `m5stack-core-esp32`, o nome BLE anunciado e a calibração de volume. A primeira
-validação por build passou; a validação em hardware real ainda precisa ser
-executada.
+validação em hardware passou com SynthBridge no Android após limpar estado BLE
+obsoleto do app/sistema. O Core Gray tocou notas, respondeu bem a pitch bend e
+reproduziu notas graves melhor que o buzzer do Plus2.
 
 Essas composições são exemplos executáveis, não produtos adicionais. Elas
 pertencem ao guarda-chuva porque provam que pacotes independentes realmente
@@ -248,7 +249,8 @@ O `m5-tone-output` usa a abstração `M5.Speaker` para tocar tabelas curtas de
 onda square ou saw no buzzer passivo do M5StickC Plus2 e no speaker interno do
 M5Stack Core Gray. Ele provou pitches reconhecíveis, início e parada, troca de
 nota e resposta básica à velocity no Plus2; o caminho BLE MIDI equivalente para
-o Core Gray já compila e aguarda validação em hardware.
+o Core Gray também tocou em hardware real, com melhor resposta perceptível em
+notas graves e pitch bend responsivo.
 
 Esse backend permanece como baseline para Note On/Off, velocity, panic e pitch
 bend. Ele já demonstrou movimento audível nas duas direções por uma rota BLE

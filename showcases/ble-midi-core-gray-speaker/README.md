@@ -32,6 +32,14 @@ Disconnecting BLE should silence the instrument through
 
 ## Hardware Test Notes
 
-Not yet validated on hardware. The first manual pass should check BLE
-advertising, connection from SynthBridge, Note On/Off, overlapping notes,
-velocity response, pitch bend, local panic, disconnect cleanup, and reconnect.
+Initial hardware validation passed on the M5Stack Core Gray with SynthBridge on
+Android.
+
+The first scan/connect attempt was confused by stale Android or SynthBridge BLE
+state: SynthBridge continued to show both `M5 Gray Speaker` and the older
+`M5 Plus2 MIDI RX` entry after the Stick was powered off. Clearing SynthBridge
+app data and resetting Android Bluetooth fixed the connection path.
+
+After reconnecting, the instrument worked through the full package chain. Notes
+played correctly, pitch bend was responsive, and the Core Gray speaker handled
+lower notes better than the M5StickC Plus2 buzzer.

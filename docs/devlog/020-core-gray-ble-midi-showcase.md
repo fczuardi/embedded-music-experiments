@@ -64,7 +64,19 @@ links successfully with the larger app partition.
 
 ## Hardware Notes
 
-No hardware upload was run in this slice. The next hardware pass should upload
-showcase 2 to the Core Gray and validate BLE advertising, SynthBridge
-connection, Note On/Off, overlapping notes, velocity response, pitch bend,
-Button A panic, disconnect cleanup, and reconnect.
+After the build slice, showcase 2 was uploaded to the M5Stack Core Gray and
+validated with SynthBridge on Android.
+
+The first connection attempt exposed stale Android or SynthBridge BLE state.
+SynthBridge still displayed both `M5 Gray Speaker` and `M5 Plus2 MIDI RX` after
+the Stick was powered off, and the Core Gray entry did not connect reliably.
+Clearing SynthBridge app data and resetting Android Bluetooth fixed the scan and
+connection path.
+
+With that cleared, the Core Gray showcase connected and the instrument worked.
+Note playback reached the speaker through the composed package chain, pitch bend
+was responsive, and the speaker handled lower notes better than the Plus2
+buzzer.
+
+Still to check in a later pass: local Button A panic, disconnect cleanup,
+reconnect, and a more deliberate velocity-volume comparison.

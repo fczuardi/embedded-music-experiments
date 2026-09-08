@@ -19,8 +19,9 @@ Status:
   migration.
 - `showcases/ble-midi-buzzer` composes both packages and passed happy-path
   hardware tests.
-- `showcases/ble-midi-core-gray-speaker` now builds the same BLE MIDI
-  monophonic instrument idea for the M5Stack Core Gray speaker.
+- `showcases/ble-midi-core-gray-speaker` now runs the same BLE MIDI monophonic
+  instrument idea on the M5Stack Core Gray speaker. Initial hardware validation
+  passed with SynthBridge after clearing stale Android BLE app state.
 - The showcase now composes `ble-midi-input`, `monophonic-instrument`,
   and `m5-tone-output`.
 - The showcase has a local panic button for route failures that do not produce
@@ -43,10 +44,9 @@ Status:
 
 ## Next Priority Slices
 
-1. **Core Gray BLE MIDI hardware validation**
-   Upload showcase 2 to the M5Stack Core Gray and validate BLE advertising,
-   SynthBridge connection, Note On/Off, overlapping notes, velocity, pitch
-   bend, panic, disconnect cleanup, and reconnect.
+1. **Core Gray BLE MIDI follow-up validation**
+   Validate local panic, disconnect cleanup, reconnect, and a more deliberate
+   velocity-volume comparison on showcase 2.
 
 2. **Simple channel behavior**
    Decide one small channel-based behavior, such as per-channel waveform choice.
@@ -87,7 +87,8 @@ existing boundaries are genuinely portable.
    and disconnect cleanup on its speaker. Preserve the Plus2 showcase as the
    baseline rather than converting it into a single application full of board
    conditionals.
-   Build slice complete; hardware validation remains next.
+   Build slice complete; initial hardware validation passed. Local panic,
+   disconnect cleanup, reconnect, and detailed velocity comparison remain.
 
 5. **Cross-hardware comparison**
    Document clarity, useful volume range, velocity response, note latency,
