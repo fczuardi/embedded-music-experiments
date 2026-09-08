@@ -53,7 +53,7 @@ segunda implementação ou composição revela o que realmente precisa ser comum
 ### Contratos compartilhados
 
 O repositório guarda-chuva é também o pacote PlatformIO
-`EmbeddedMusicFirmwareContracts`. Ele publica, atualmente:
+`firmware-contracts`. Ele publica, atualmente:
 
 - `NoteEvent`, com tipo, canal, nota e velocity;
 - `PitchBendEvent`, com canal e valor centrado em `-8192..8191`;
@@ -106,7 +106,7 @@ frequência já calculada.
 
 ```mermaid
 flowchart TD
-    B["ble-midi-input"] --> C["EmbeddedMusicFirmwareContracts"]
+    B["ble-midi-input"] --> C["firmware-contracts"]
     C --> I["EmbeddedMusicBuzzerInstrument"]
     I --> A["Buzzer do M5StickC Plus2"]
     P["Botão de panic"] --> I

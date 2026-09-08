@@ -12,7 +12,7 @@ packaged modules.
 
 Status:
 
-- `EmbeddedMusicFirmwareContracts` is shared by both firmware packages.
+- `firmware-contracts` is shared by both firmware packages.
 - `ble-midi-input` is packaged from `midi-receiver`.
 - The original combined `EmbeddedMusicBuzzerInstrument` package has been split
   into `monophonic-instrument` and `m5-tone-output` archives for the showcase

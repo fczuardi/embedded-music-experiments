@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
-  "name": "EmbeddedMusicFirmwareContracts",
+  "name": "firmware-contracts",
   "version": "0.1.0",
   "description": "Shared event contracts for embedded music experiments",
   "keywords": ["midi", "embedded", "music", "contracts"],
