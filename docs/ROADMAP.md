@@ -13,13 +13,13 @@ packaged modules.
 Status:
 
 - `EmbeddedMusicFirmwareContracts` is shared by both firmware packages.
-- `EmbeddedMusicBleMidiInput` is packaged from `midi-receiver`.
+- `BleMidiInput` is packaged from `midi-receiver`.
 - The original combined `EmbeddedMusicBuzzerInstrument` package has been split
   into `monophonic-instrument` and `m5-tone-output` archives for the showcase
   migration.
 - `showcases/ble-midi-buzzer` composes both packages and passed happy-path
   hardware tests.
-- The showcase now composes `EmbeddedMusicBleMidiInput`, `monophonic-instrument`,
+- The showcase now composes `BleMidiInput`, `monophonic-instrument`,
   and `m5-tone-output`.
 - The showcase has a local panic button for route failures that do not produce
   MIDI cleanup events or BLE disconnects, and that button has been validated on
@@ -128,7 +128,8 @@ not need to replace it to be useful.
 - Revisit the velocity curve if more hardware tests show that the current
   package default or the showcase's calibrated `96..136` speaker volume range
   is too subtle or too aggressive.
-- Make the BLE advertised name configurable in `EmbeddedMusicBleMidiInput`.
+- Choose showcase-specific BLE advertised names now that `BleMidiInput` accepts
+  a compile-time name.
 - Document the one-active-instance constraint of BLE MIDI examples in the
   showcase README.
 - Add tags for package milestones once the SHA-pinned integration settles.

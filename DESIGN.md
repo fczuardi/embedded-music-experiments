@@ -76,8 +76,8 @@ contém dois papéis relacionados, mas separados:
 - a aplicação receiver acrescenta `AppState`, display e diagnóstico serial para
   tornar o tráfego observável no M5StickC Plus2.
 
-A parte reutilizável é publicada como `EmbeddedMusicBleMidiInput`. Consumidores
-não precisam copiar a implementação BLE nem importar o display do receiver.
+A parte reutilizável é publicada como `BleMidiInput`. Consumidores não precisam
+copiar a implementação BLE nem importar o display do receiver.
 
 O receiver já foi validado em hardware com conexão e reconexão, Note On/Off,
 acordes, canais, velocity, Control Change, sustain observado em CC64, pitch bend,
@@ -106,7 +106,7 @@ frequência já calculada.
 
 ```mermaid
 flowchart TD
-    B["EmbeddedMusicBleMidiInput"] --> C["EmbeddedMusicFirmwareContracts"]
+    B["BleMidiInput"] --> C["EmbeddedMusicFirmwareContracts"]
     C --> I["EmbeddedMusicBuzzerInstrument"]
     I --> A["Buzzer do M5StickC Plus2"]
     P["Botão de panic"] --> I
