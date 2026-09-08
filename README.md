@@ -9,7 +9,7 @@ This repository is the documentation hub for the experiments. It does not contai
 | Repository | Status | Purpose |
 | --- | --- | --- |
 | [midi-receiver](https://github.com/fczuardi/midi-receiver) | First milestone complete | Receive BLE MIDI, interpret messages, and make them observable on an M5StickC Plus2 |
-| [monophonic-instrument](https://github.com/fczuardi/monophonic-instrument) | Migration started | Provide shared monophonic policy and M5 audio output backends |
+| [monophonic-instrument](https://github.com/fczuardi/monophonic-instrument) | Two-hardware milestone complete | Provide shared monophonic policy and M5 audio output backends |
 
 ## Showcases
 
@@ -43,8 +43,8 @@ points PlatformIO at `firmware-contracts/include/` through `build.includeDir`.
 ## CI
 
 GitHub Actions validates the shared C++ headers, runs `pio pkg pack`, and builds
-the showcase firmware on pushes and pull requests. The workflow lives at
-`.github/workflows/ci.yml`.
+both the M5StickC Plus2 buzzer and M5Stack Core Gray speaker showcases on pushes
+and pull requests. The workflow lives at `.github/workflows/ci.yml`.
 
 ## Local PlatformIO Cache
 
