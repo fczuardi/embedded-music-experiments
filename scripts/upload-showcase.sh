@@ -7,6 +7,7 @@ pio_env="${3:-}"
 
 board_guard="${BOARD_GUARD:-scripts/probe-esp32-board.sh}"
 pio_bin="${PIO:-pio}"
+toolchain_repair="${PLATFORMIO_ESPTOOL_REPAIR:-scripts/repair-platformio-esptool-python.sh}"
 
 usage() {
   printf 'Usage: %s [m5stick-cplus2|m5stack-core-gray] [showcase-dir] [platformio-env]\n' "$0" >&2
@@ -16,6 +17,8 @@ if [[ -z "$expected_board" || -z "$showcase_dir" || -z "$pio_env" ]]; then
   usage
   exit 64
 fi
+
+"$toolchain_repair"
 
 if [[ "${M5_SKIP_BOARD_GUARD:-0}" == "1" ]]; then
   exec "$pio_bin" run -d "$showcase_dir" -e "$pio_env" --target upload
