@@ -44,3 +44,7 @@ name.
 Showcase 1 was uploaded to the M5StickC Plus2 after the repin. The expected
 configured name appeared during BLE scanning, confirming that the
 scan-response-name fix works for the buzzer showcase path.
+
+Showcase 2 was also uploaded to the M5Stack Core Gray after the repin and the
+configured `M5 Gray Speaker` name appeared during BLE scanning. That confirms
+the scan-response-name fix across both umbrella showcase targets.
