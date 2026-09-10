@@ -219,6 +219,51 @@ buffers PCM também podem revelar uma segunda borda entre geração de amostras 
 saída física; ainda não existe evidência suficiente para nomear uma interface
 universal para ela.
 
+### Instrumentos orientados a performance e synths MIDI externos
+
+O probe da AMY revelou uma distinção que o backend de tons simples não precisava
+expressar. Há pelo menos três formas diferentes de chegar ao som:
+
+| Caminho | Entrada útil | Responsabilidade de saída |
+| --- | --- | --- |
+| `VoiceOutput` atual | frequência, nível e waveform | produzir diretamente um tom |
+| Engine em software, como AMY | nota, velocity, patch e controles expressivos | renderizar blocos PCM |
+| Synth externo, como SAM2695 | mensagens de performance MIDI | produzir áudio pronto em hardware dedicado |
+
+O M5Stack Unit Synth é prior art útil para a terceira forma. Seu SAM2695 contém
+wavetable General MIDI, síntese, alocação polifônica, efeitos e DAC. O
+microcontrolador envia comandos MIDI por UART; a biblioteca oficial oferece
+operações de nota, programa/banco, pitch bend e seu alcance, volume, expression,
+pan, efeitos e all-notes-off. Essa implementação é muito diferente da AMY, mas
+ambas preservam a intenção musical por mais tempo do que um backend que recebe
+somente frequência.
+
+Isso reforça que a fronteira compartilhada deve continuar semântica:
+
+- `NoteEvent`, `PitchBendEvent`, desconexão e panic já descrevem intenções úteis
+  para os três caminhos;
+- patch é estado específico do instrumento, enquanto MIDI Program Change é uma
+  possível mensagem compartilhada;
+- o alcance do pitch bend é configuração do instrumento, separado da posição
+  instantânea recebida;
+- canal torna-se musicalmente relevante quando um engine ou módulo oferece
+  programas diferentes, multitimbralia ou efeitos por canal;
+- um consumidor pode ignorar eventos que não façam parte de suas capacidades.
+
+A API do Unit Synth não deve ser copiada como interface universal. Ela mistura
+mensagens MIDI padronizadas, SysEx e controles específicos do chip em uma única
+classe de driver. Seu valor aqui é servir como evidência de vocabulário e
+composição. Um futuro `ProgramChangeEvent` ou contrato de Control Change só deve
+ser acrescentado quando uma composição real possuir produtor e consumidor para
+ele.
+
+Fontes:
+
+- [M5Stack Unit Synth](https://docs.m5stack.com/en/unit/Unit-Synth)
+- [SAM2695 datasheet](https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/docs/products/unit/Unit-Synth/SAM2695.pdf)
+- [M5Unit-Synth Arduino API](https://github.com/m5stack/M5Unit-Synth/blob/main/src/M5UnitSynth.h)
+- [General MIDI instrument definitions](https://github.com/m5stack/M5Unit-Synth/blob/main/src/M5UnitSynthDef.h)
+
 ### Por que não expor BLE MIDI cru
 
 BLE MIDI é uma representação de transporte. Seus pacotes podem conter
