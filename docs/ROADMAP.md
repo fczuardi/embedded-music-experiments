@@ -106,6 +106,34 @@ The value is architectural contrast: learn what a Rust-first receiver module
 could look like outside pioarduino, while keeping the working PlatformIO modules
 available for compositions.
 
+## Deferred Direction: Native ESP-IDF C++ Probe
+
+Also after the current PlatformIO/C++ package ecosystem is stable, explore a
+native ESP-IDF + CMake implementation of the BLE MIDI receiver.
+
+This path stays in C++ and may reuse more existing thinking than Rust, but it is
+still not a drop-in dependency for the current pioarduino showcases. Treat it as
+a framework-specific sibling track:
+
+1. create a small ESP-IDF app or component probe;
+2. use ESP-IDF NimBLE directly, without Arduino or NimBLE-Arduino;
+3. advertise the BLE MIDI service and confirm the scan name;
+4. receive raw characteristic writes and parse Note On/Off;
+5. mirror the existing `NoteEvent` / `PitchBendEvent` shapes where useful;
+6. evaluate whether pure protocol/parser code can be shared while BLE transport
+   and showcase apps remain framework-specific.
+
+Expected composition model:
+
+- existing showcases continue to use PlatformIO Arduino packages;
+- native ESP-IDF probes compose ESP-IDF components;
+- any shared code should be framework-independent C++ only, not a universal
+  transport abstraction designed ahead of evidence.
+
+This is the more practical modernization path for C++ if PlatformIO/Arduino
+friction becomes the limiting factor, while the Rust probe remains the broader
+architecture experiment.
+
 ## Deferred Direction: Autonomous MIDI Input
 
 Removing Android remains desirable, but it is not the immediate track.
