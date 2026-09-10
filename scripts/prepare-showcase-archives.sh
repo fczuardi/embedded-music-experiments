@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-workspace_root="${WORKSPACE_ROOT:-/home/fcz/dev/m5stick}"
+workspace_root="${WORKSPACE_ROOT:-$(cd "$repo_root/.." && pwd)}"
 archive_dir="${ARCHIVE_DIR:-$repo_root/.tmp}"
 monophonic_repo="${MONOPHONIC_INSTRUMENT_REPO:-$workspace_root/monophonic-instrument}"
 monophonic_commit="${MONOPHONIC_INSTRUMENT_COMMIT:-e8d6ca63fcf2}"

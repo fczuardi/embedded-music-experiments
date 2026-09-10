@@ -49,6 +49,7 @@ and pull requests. The workflow lives at `.github/workflows/ci.yml`.
 ## Local PlatformIO Cache
 
 Sibling firmware repositories share the parent workspace cache at
-`/home/fcz/dev/m5stick/.platformio-home`. Each PlatformIO project records this
-with `core_dir` in its `platformio.ini`, and this repository's `justfile` points
-showcase commands at the same cache.
+`../.platformio-home` when checked out side by side. Each PlatformIO project
+records this with a relative `core_dir` in its `platformio.ini`; the local
+recipes therefore do not depend on a particular machine username or checkout
+root.
