@@ -38,3 +38,9 @@ just showcase-build 2
 Hardware follow-up should upload each showcase and confirm with `btmon` that
 the ESP32 scan response contains `Name (complete)` for the configured showcase
 name.
+
+## Hardware Observation
+
+Showcase 1 was uploaded to the M5StickC Plus2 after the repin. The expected
+configured name appeared during BLE scanning, confirming that the
+scan-response-name fix works for the buzzer showcase path.
