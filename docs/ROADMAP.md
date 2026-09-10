@@ -80,9 +80,11 @@ integrated.
 5. **Third composition showcase**
    Combine `ble-midi-input` with the engine and compare it with the two
    baseline showcases. The first Core Gray composition now exists at
-   `showcases/ble-midi-amy`; its remaining gates are package publication and
-   physical validation. The build currently leaves about 1% IRAM free, which
-   is an important constraint for future AMY features.
+   `showcases/ble-midi-amy`; its remaining distribution gate is package
+   publication. It has now been validated on the physical Core Gray with BLE
+   connection/reconnection, notes, velocity, pitch bend, disconnect cleanup,
+   idle gating, and panic. The build currently leaves about 1% IRAM free,
+   which is an important constraint for future AMY features.
 
 At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
 artifacts, BLE coexistence, output hardware, license, and adapter size. Failure

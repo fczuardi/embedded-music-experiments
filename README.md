@@ -10,7 +10,7 @@ This repository is the documentation hub for the experiments. It does not contai
 | --- | --- | --- |
 | [midi-receiver](https://github.com/fczuardi/midi-receiver) | First milestone complete | Receive BLE MIDI, interpret messages, and make them observable on an M5StickC Plus2 |
 | [monophonic-instrument](https://github.com/fczuardi/monophonic-instrument) | Two-hardware milestone complete | Provide shared monophonic policy and M5 audio output backends |
-| [amy-synth-m5](https://github.com/fczuardi/amy-synth-m5) | AMY package validated | Provide AMY musical-control and Core Gray PCM bridge components |
+| [amy-synth-m5](https://github.com/fczuardi/amy-synth-m5) | AMY package and showcase validated | Provide AMY musical-control and Core Gray PCM bridge components |
 
 ## Showcases
 

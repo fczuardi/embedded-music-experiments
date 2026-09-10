@@ -29,6 +29,13 @@ versions without changing the composition code.
 
 ## Verification
 
-The showcase build is the next validation target. Hardware behavior still
-needs confirmation on the Core Gray. This slice does not claim new hardware
-validation.
+The showcase build passed for the Core Gray. The firmware was then validated
+on the physical Core Gray with an Android BLE MIDI bridge and USB MIDI
+controller: the advertised name was correct, connection and reconnection
+worked, notes and velocity reached the AMY patch, pitch bend was audible,
+disconnect cleanup worked, the idle gate was responsive, and the local panic
+action stopped held sound.
+
+This confirms the complete composition path on hardware. Package publication
+in the PlatformIO Registry remains a distribution task; it does not block the
+validated local composition.
