@@ -1,5 +1,9 @@
 # Slice 027: PlatformIO Esptool Python Repair
 
+> Superseded by slice 028. The automatic cache repair described here was
+> removed because repository upload commands should not silently mutate
+> generated PlatformIO package files.
+
 ## Goal
 
 Make showcase uploads resilient to a local PlatformIO cache issue where the
@@ -62,3 +66,10 @@ failure. Hardware flashing still depends on a visible serial device.
 ## Hardware Observation
 
 No firmware behavior changed in this slice. This is upload tooling only.
+
+## Follow-Up
+
+Slice 028 removes the automatic repair script from the upload path. The useful
+part of this investigation was keeping our own board probe explicit about which
+Python interpreter runs `esptool.py`; mutating generated PlatformIO package
+files from a repository command was too implicit for normal workflow.
