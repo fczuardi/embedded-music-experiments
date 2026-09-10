@@ -5,3 +5,4 @@
 **/.pio/
 **/.platformio-home/
 **/.platformio-core/
+showcases/*/src/idf_component.yml
