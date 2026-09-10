@@ -35,13 +35,11 @@ _showcase-board id:
 
 # Build a showcase firmware. Defaults to showcase 1.
 showcase-build id="1":
-    @{{showcase_archives}}
     @showcase="$(just _showcase-path {{id}})"; \
       pio run -d "$showcase"
 
 # Upload a showcase firmware to the connected device. Defaults to showcase 1.
 showcase-upload id="1":
-    @{{showcase_archives}}
     @showcase="$(just _showcase-path {{id}})"; \
       env_name="$(just _showcase-env {{id}})"; \
       board="$(just _showcase-board {{id}})"; \
