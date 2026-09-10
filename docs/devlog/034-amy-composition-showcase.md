@@ -19,13 +19,10 @@ browser, display policy, or duplicated AMY implementation. Button A remains a
 small local panic action because it is useful when testing a physical MIDI
 controller.
 
-The current dependencies point to sibling package directories because the
-current `ble-midi-input` and `amy-synth-m5` versions are not both available in
-the PlatformIO Registry yet. The CI job checks out `amy-synth-m5` at commit
-`699686a5` and `midi-receiver` at commit `a330801b`, so these paths are
-deterministic and do not depend on the developer machine. After both packages
-are published, the dependency origins should move to exact PlatformIO Registry
-versions without changing the composition code.
+The showcase consumes exact PlatformIO Registry versions:
+`fcz2/ble-midi-input@0.3.0` and `fcz2/amy-synth-m5@0.1.1`. Their transitive
+dependencies resolve the shared contracts, monophonic note policy, AMY, and
+M5Unified. The CI job therefore needs no sibling repository checkout.
 
 ## Verification
 
@@ -36,6 +33,5 @@ worked, notes and velocity reached the AMY patch, pitch bend was audible,
 disconnect cleanup worked, the idle gate was responsive, and the local panic
 action stopped held sound.
 
-This confirms the complete composition path on hardware. Package publication
-in the PlatformIO Registry remains a distribution task; it does not block the
-validated local composition.
+This confirms the complete composition path on hardware. The same package
+versions are now consumed from the PlatformIO Registry by local builds and CI.
