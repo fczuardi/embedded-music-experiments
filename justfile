@@ -11,11 +11,13 @@ default:
 showcase-list:
     @printf '1\tble-midi-buzzer\tshowcases/ble-midi-buzzer\n'
     @printf '2\tble-midi-core-gray-speaker\tshowcases/ble-midi-core-gray-speaker\n'
+    @printf '3\tble-midi-amy\tshowcases/ble-midi-amy\n'
 
 _showcase-path id:
     @case "{{id}}" in \
       1) printf '%s\n' 'showcases/ble-midi-buzzer' ;; \
       2) printf '%s\n' 'showcases/ble-midi-core-gray-speaker' ;; \
+      3) printf '%s\n' 'showcases/ble-midi-amy' ;; \
       *) printf 'Unknown showcase id: %s\n' "{{id}}" >&2; exit 2 ;; \
     esac
 
@@ -23,6 +25,7 @@ _showcase-env id:
     @case "{{id}}" in \
       1) printf '%s\n' 'm5stick-cplus2' ;; \
       2) printf '%s\n' 'm5stack-core-gray' ;; \
+      3) printf '%s\n' 'm5stack-core-gray' ;; \
       *) printf 'Unknown showcase id: %s\n' "{{id}}" >&2; exit 2 ;; \
     esac
 
@@ -30,6 +33,7 @@ _showcase-board id:
     @case "{{id}}" in \
       1) printf '%s\n' 'm5stick-cplus2' ;; \
       2) printf '%s\n' 'm5stack-core-gray' ;; \
+      3) printf '%s\n' 'm5stack-core-gray' ;; \
       *) printf 'Unknown showcase id: %s\n' "{{id}}" >&2; exit 2 ;; \
     esac
 

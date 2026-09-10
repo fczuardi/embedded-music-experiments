@@ -78,8 +78,11 @@ integrated.
    directly instead of pretending to be the current single `VoiceOutput`.
 
 5. **Third composition showcase**
-   Only after the adapter works, combine `ble-midi-input` with the engine and
-   compare it with the two baseline showcases.
+   Combine `ble-midi-input` with the engine and compare it with the two
+   baseline showcases. The first Core Gray composition now exists at
+   `showcases/ble-midi-amy`; its remaining gates are package publication and
+   physical validation. The build currently leaves about 1% IRAM free, which
+   is an important constraint for future AMY features.
 
 At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
 artifacts, BLE coexistence, output hardware, license, and adapter size. Failure

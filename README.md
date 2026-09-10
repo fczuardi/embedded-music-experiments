@@ -10,6 +10,7 @@ This repository is the documentation hub for the experiments. It does not contai
 | --- | --- | --- |
 | [midi-receiver](https://github.com/fczuardi/midi-receiver) | First milestone complete | Receive BLE MIDI, interpret messages, and make them observable on an M5StickC Plus2 |
 | [monophonic-instrument](https://github.com/fczuardi/monophonic-instrument) | Two-hardware milestone complete | Provide shared monophonic policy and M5 audio output backends |
+| [amy-synth-m5](https://github.com/fczuardi/amy-synth-m5) | AMY package validated | Provide AMY musical-control and Core Gray PCM bridge components |
 
 ## Showcases
 
@@ -19,6 +20,8 @@ Executable compositions live in `showcases/`.
   instrument policy, and the M5StickC Plus2 buzzer output.
 - `showcases/ble-midi-core-gray-speaker/` uses the same input and instrument
   policy with the M5Stack Core Gray speaker output.
+- `showcases/ble-midi-amy/` composes BLE MIDI input with the AMY synth package
+  and the Core Gray PCM speaker bridge.
 
 Run `just showcase-list` to see the numeric showcase IDs used by the build,
 upload, and monitor recipes.
