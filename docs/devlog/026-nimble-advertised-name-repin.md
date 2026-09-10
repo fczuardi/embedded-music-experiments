@@ -31,7 +31,10 @@ Both builds passed.
 
 ## Hardware Observation
 
-Pending. The expected check is to upload a showcase and scan/connect from
-Android. MIDI-specific apps may still show `Bluetooth MIDI`, but generic BLE
-scanners should have a better chance of seeing the configured local name instead
-of `-`.
+Validated on hardware with showcase 1 on the M5StickC Plus2. The firmware
+uploaded successfully and the BLE MIDI buzzer showcase remained usable from the
+Android controller path.
+
+Earlier scans showed app-dependent naming behavior: some MIDI apps may still
+display `Bluetooth MIDI`, while generic BLE scanners have a better chance of
+showing the configured local name.

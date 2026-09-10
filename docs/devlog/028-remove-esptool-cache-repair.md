@@ -39,3 +39,10 @@ just showcase-upload 1
 
 The upload command should either flash the connected board or expose the
 remaining PlatformIO-owned upload failure directly.
+
+## Hardware Observation
+
+Showcase 1 was validated on the M5StickC Plus2 after removing the automatic
+cache repair hook. `just showcase-upload 1` uploaded successfully on the
+hardware test setup, so the repo-owned upload path does not need to mutate
+generated PlatformIO package files for this case.
