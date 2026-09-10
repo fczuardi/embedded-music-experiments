@@ -85,6 +85,27 @@ At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
 artifacts, BLE coexistence, output hardware, license, and adapter size. Failure
 to fit or coexist is useful evidence and does not require changing the baseline.
 
+## Deferred Direction: Rust Receiver Platform Probe
+
+After the current PlatformIO/C++ package ecosystem is stable, published, and
+validated through the existing showcases, start a separate `esp-rs`
+investigation for the BLE MIDI receiver.
+
+This should not replace `ble-midi-input` during the current stabilization work.
+Treat it as a fresh platform probe, likely in a sibling repository such as
+`ble-midi-input-rs` or `midi-receiver-rs-probe`, with a deliberately narrow
+first milestone:
+
+1. boot an ESP32 firmware with the Rust toolchain;
+2. advertise a BLE MIDI service with an observable device name;
+3. receive raw BLE characteristic writes and log packet bytes;
+4. parse Note On/Off only after raw packet reception is proven;
+5. compare the resulting module boundary with the current PlatformIO package.
+
+The value is architectural contrast: learn what a Rust-first receiver module
+could look like outside pioarduino, while keeping the working PlatformIO modules
+available for compositions.
+
 ## Deferred Direction: Autonomous MIDI Input
 
 Removing Android remains desirable, but it is not the immediate track.
