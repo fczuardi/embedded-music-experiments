@@ -79,6 +79,14 @@ bytes for the generated firmware image. The current measured values are
 are intentionally conservative and should be revisited only with measured
 evidence.
 
+An ELF investigation measured the BLE path separately: removing BLE from an
+otherwise equivalent AMY + M5 build recovered 50364 bytes of IRAM, while
+disabling unused NimBLE roles recovered only 256 bytes. A project-level
+`CONFIG_BT_NIMBLE_LOW_SPEED_MODE=1` define had no measurable effect in this
+Arduino/pioarduino build. The practical conclusion is that the current BLE
+composition should be treated as resource-constrained and stable; meaningful
+BLE savings would require a custom framework build or another transport.
+
 The next step is an explicit choice among resource profiling, exploring native
 polyphony, improving patch selection, or evaluating another engine. None is
 required to justify the current boundaries.
