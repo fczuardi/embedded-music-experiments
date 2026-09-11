@@ -64,3 +64,26 @@ by the ablation is therefore mostly below the application-facing NimBLE role
 configuration, in the ESP32 controller and required BLE infrastructure. A
 larger reduction would likely require rebuilding or replacing the precompiled
 framework/controller rather than changing the published project packages.
+
+## NimBLE host-in-Flash result
+
+A third temporary CI probe defined
+`CONFIG_BT_NIMBLE_LOW_SPEED_MODE=1` for a separate PlatformIO environment and
+compared its linked ELF with the unchanged published Showcase 3 baseline.
+
+| Configuration | IRAM used | IRAM free | Flash used |
+|---|---:|---:|---:|
+| Published Showcase 3 | 129,811 bytes | 1,261 bytes | 1,199,851 bytes |
+| NimBLE low-speed mode define | 129,811 bytes | 1,261 bytes | 1,199,851 bytes |
+
+The generated firmware had no static-memory change at all. In this
+Arduino/pioarduino build for the original ESP32, a project-level preprocessor
+definition does not reconfigure the ESP-IDF component placement or select a
+different precompiled Bluetooth controller library. The similarly named
+experimental controller-in-Flash option documented for newer ESP32 variants is
+therefore not a usable project-level optimization for the Core Gray baseline.
+
+The temporary environment and workflow steps were removed after capturing the
+successful Actions run and its artifacts. Pursuing this direction further would
+require a custom ESP-IDF/framework build and hardware BLE/audio regression
+testing, which is disproportionate to the current package-boundary milestone.
