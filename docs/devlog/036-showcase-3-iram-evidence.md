@@ -44,3 +44,23 @@ Removing the BLE path reduced linked IRAM by 50,364 bytes. The result justifies
 one focused follow-up experiment to determine whether a BLE-only controller
 configuration can recover part of that cost. The temporary probe itself was
 removed after its Actions artifacts and result were captured.
+
+## BLE-only configuration result
+
+NimBLE-Arduino 2.5.1 already defines `CONFIG_BTDM_CONTROLLER_MODE_BLE_ONLY`
+for the original ESP32. A second temporary CI probe therefore targeted the
+remaining source-level options that preserve this MIDI server: it disabled the
+unused Central and Observer roles, retained Peripheral and Broadcaster, and
+reduced the maximum connection count to one.
+
+| BLE configuration | IRAM used | IRAM free |
+|---|---:|---:|
+| Current Showcase 3 | 129,811 bytes | 1,261 bytes |
+| Minimal NimBLE roles | 129,555 bytes | 1,517 bytes |
+
+The functional role reduction recovered only 256 bytes of IRAM. This is too
+small to remove the practical limit. The roughly 50 KB BLE-path cost measured
+by the ablation is therefore mostly below the application-facing NimBLE role
+configuration, in the ESP32 controller and required BLE infrastructure. A
+larger reduction would likely require rebuilding or replacing the precompiled
+framework/controller rather than changing the published project packages.
