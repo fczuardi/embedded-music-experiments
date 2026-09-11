@@ -28,3 +28,19 @@ This slice measures static linked IRAM only. Runtime heap, stack high-water mark
 DMA allocations, audio continuity, and BLE behavior still require target-side
 instrumentation or hardware validation. No optimization is attempted until the
 link evidence identifies realistic candidates.
+
+## BLE ablation result
+
+A temporary CI probe rebuilt the same Core Gray, M5Unified, AMY package, patch,
+and monophonic voice composition without depending on or initializing
+`ble-midi-input`.
+
+| Composition | IRAM used | IRAM free |
+|---|---:|---:|
+| Published Showcase 3 | 129,811 bytes | 1,261 bytes |
+| AMY-only probe | 79,447 bytes | 51,625 bytes |
+
+Removing the BLE path reduced linked IRAM by 50,364 bytes. The result justifies
+one focused follow-up experiment to determine whether a BLE-only controller
+configuration can recover part of that cost. The temporary probe itself was
+removed after its Actions artifacts and result were captured.
