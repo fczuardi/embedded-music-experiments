@@ -29,9 +29,10 @@ def main() -> None:
                 "name": section.name,
                 "address": section["sh_addr"],
                 "size": size,
+                "executable": bool(section["sh_flags"] & 0x4),
             }
             sections.append(entry)
-            if section.name.startswith(".iram"):
+            if section.name.startswith(".iram") and section["sh_flags"] & 0x4:  # SHF_EXECINSTR
                 iram_section_indexes.add(index)
 
         symbols = []
@@ -53,7 +54,11 @@ def main() -> None:
 
     sections.sort(key=lambda item: item["address"])
     symbols.sort(key=lambda item: (-item["size"], item["name"]))
-    iram_sections = [item for item in sections if item["name"].startswith(".iram")]
+    iram_sections = [
+        item
+        for item in sections
+        if item["name"].startswith(".iram") and item["executable"]
+    ]
     iram_used = sum(item["size"] for item in iram_sections)
     report = {
         "elf": args.elf.name,
