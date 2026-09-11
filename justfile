@@ -42,6 +42,10 @@ showcase-build id="1":
     @showcase="$(just _showcase-path {{id}})"; \
       pio run -d "$showcase"
 
+# Build Showcase 3 and enforce its measured memory budget.
+showcase-budget:
+    scripts/check-amy-memory-budget.sh
+
 # Upload a showcase firmware to the connected device. Defaults to showcase 1.
 showcase-upload id="1":
     @showcase="$(just _showcase-path {{id}})"; \

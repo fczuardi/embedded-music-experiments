@@ -72,10 +72,16 @@ speaker components remain available for future compositions with different
 defaults. AMY's global pitch bend is intentionally hidden by the facade in
 this simple composition.
 
-The Core Gray build leaves approximately 1% of IRAM free. This is the main
-current AMY limit, so the next step is an explicit choice among measuring
-resource costs, exploring native polyphony, improving patch selection, or
-evaluating another engine. None is required to justify the current boundaries.
+The Core Gray build leaves approximately 1% of IRAM free. Showcase 3 now
+enforces a baseline budget of 130048 bytes IRAM, 65536 bytes DRAM, and 1300000
+bytes for the generated firmware image. The current measured values are
+129811 bytes IRAM, 60808 bytes DRAM, and 1219040 bytes image size. These limits
+are intentionally conservative and should be revisited only with measured
+evidence.
+
+The next step is an explicit choice among resource profiling, exploring native
+polyphony, improving patch selection, or evaluating another engine. None is
+required to justify the current boundaries.
 
 At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
 artifacts, BLE coexistence, output hardware, license, and adapter size. Failure
