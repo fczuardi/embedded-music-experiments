@@ -1,11 +1,7 @@
 #include <Arduino.h>
 #include <M5Unified.h>
 
-#include "AmyAudioActivityGate.h"
-#include "AmyM5SpeakerBridge.h"
-#include "AmyMonophonicInstrumentSink.h"
-#include "AmyRuntime.h"
-#include "AmySynthSlot.h"
+#include "AmyM5MonophonicSynth.h"
 #include "BleMidiInput.h"
 
 namespace {
@@ -13,14 +9,7 @@ constexpr uint8_t AMY_SYNTH_ID = 1;
 constexpr uint8_t AMY_VOICE_COUNT = 1;
 constexpr uint8_t AMY_PATCH = 19;
 
-AmyM5SpeakerBridge amyBridge;
-AmyAudioActivityGate audioGate(amyBridge);
-AmyRuntime amyRuntime;
-AmySynthSlot amySlot;
-AmyMonophonicInstrumentSink amyInstrument(
-    amyRuntime,
-    amySlot,
-    audioGate);
+AmyM5MonophonicSynth amySynth;
 BleMidiInput bleMidiInput;
 
 void configureCoreGray() {
@@ -36,11 +25,9 @@ void setup() {
   delay(200);
   configureCoreGray();
 
-  amyBridge.begin();
-  amyRuntime.begin(AMY_SYNTH_ID);
-  amySlot.begin(AMY_SYNTH_ID, AMY_VOICE_COUNT, AMY_PATCH);
+  amySynth.begin(AMY_SYNTH_ID, AMY_VOICE_COUNT, AMY_PATCH);
 
-  bleMidiInput.setInstrumentEventSink(&amyInstrument);
+  bleMidiInput.setInstrumentEventSink(&amySynth);
   bleMidiInput.begin();
 
   Serial.println("BLE MIDI AMY showcase");
@@ -54,10 +41,10 @@ void setup() {
 void loop() {
   M5.update();
   bleMidiInput.update();
-  audioGate.update(amyInstrument.noteActive());
+  amySynth.update();
 
   if (M5.BtnA.wasPressed()) {
-    amyInstrument.panic();
+    amySynth.panic();
     Serial.println("amy: panic button");
   }
 }
