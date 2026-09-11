@@ -94,3 +94,30 @@ jobs:
             ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray/memory-report.json
           if-no-files-found: error
           retention-days: 30
+
+      - name: Build Showcase 3 minimal BLE-role probe
+        if: matrix.showcase_id == 3
+        run: |
+          showcase_path="${{ matrix.showcase_path }}"
+          env PLATFORMIO_CORE_DIR="${{ github.workspace }}/.platformio-home" \
+            pio run -d "$showcase_path" -e m5stack-core-gray-minimal-ble
+          build_dir="$showcase_path/.pio/build/m5stack-core-gray-minimal-ble"
+          python scripts/elf-memory-report.py \
+            "$build_dir/firmware.elf" \
+            --markdown "$build_dir/memory-report.md" \
+            --json "$build_dir/memory-report.json"
+          printf '\n## Minimal BLE-role probe\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat "$build_dir/memory-report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Showcase 3 minimal BLE-role probe
+        if: matrix.showcase_id == 3
+        uses: actions/upload-artifact@v4
+        with:
+          name: showcase-3-minimal-ble-${{ github.sha }}
+          path: |
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-minimal-ble/firmware.elf
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-minimal-ble/firmware.map
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-minimal-ble/memory-report.md
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-minimal-ble/memory-report.json
+          if-no-files-found: error
+          retention-days: 30
