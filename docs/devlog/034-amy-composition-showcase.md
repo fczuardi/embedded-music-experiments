@@ -20,7 +20,7 @@ small local panic action because it is useful when testing a physical MIDI
 controller.
 
 The showcase consumes exact PlatformIO Registry versions:
-`fcz2/ble-midi-input@0.3.0` and `fcz2/amy-synth-m5@0.1.1`. Their transitive
+`fcz2/ble-midi-input@0.3.0` and `fcz2/amy-synth-m5@0.1.2`. Their transitive
 dependencies resolve the shared contracts, monophonic note policy, AMY, and
 M5Unified. The CI job therefore needs no sibling repository checkout.
 

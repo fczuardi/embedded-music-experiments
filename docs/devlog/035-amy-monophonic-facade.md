@@ -14,9 +14,9 @@ one M5 speaker output and a monophonic AMY instrument. It hides the fact that
 AMY pitch bend is global, which is not useful information for this single
 instrument composition, while retaining the lower-level APIs in the package.
 
-The showcase manifest still points to `fcz2/amy-synth-m5@0.1.1` until the new
-facade version is published. The local package build was validated against
-`amy-synth-m5` 0.1.2 before this documentation was written.
+The facade was published as `fcz2/amy-synth-m5@0.1.2`, and the showcase
+manifest now consumes that exact Registry version. The local package build was
+also validated against the package source before publication.
 
 ## Verification
 

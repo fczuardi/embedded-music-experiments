@@ -57,34 +57,25 @@ explored by other projects.
 These are alternatives with different purposes, not a queue that must all be
 integrated.
 
-### Suggested Next Micro-Slices
+### AMY Milestone Complete
 
-1. **AMY dependency and build probe**
-   Add no shared abstraction. Compile the smallest isolated Arduino/PlatformIO
-   program for the Core Gray target and record flash, RAM, toolchain, and package
-   friction.
+The five initial AMY probes are complete. `amy-synth-m5` is a published
+PlatformIO package, and `showcases/ble-midi-amy` is a third composition that
+consumes the package together with the published BLE MIDI receiver. The
+composition was validated on the physical Core Gray with BLE
+connection/reconnection, notes, velocity, pitch bend, disconnect cleanup, idle
+gating, and panic.
 
-2. **AMY local sound probe**
-   Without BLE, start the engine and produce one preset note on the Core Gray
-   speaker or precisely document why its output path needs adaptation.
+The package now also provides `AmyM5MonophonicSynth`, a convenience facade for
+the common one-slot monophonic case. Lower-level AMY runtime, slot, sink, and
+speaker components remain available for future compositions with different
+defaults. AMY's global pitch bend is intentionally hidden by the facade in
+this simple composition.
 
-3. **AMY local polyphony probe**
-   Trigger and release a small chord using buttons or a deterministic sequence.
-   Confirm cleanup and listen for underruns or conflicts before involving BLE.
-
-4. **Event adapter probe**
-   If local audio works, adapt `NoteEvent`, `PitchBendEvent`, and disconnection to
-   the engine. A mature polyphonic engine may implement `InstrumentEventSink`
-   directly instead of pretending to be the current single `VoiceOutput`.
-
-5. **Third composition showcase**
-   Combine `ble-midi-input` with the engine and compare it with the two
-   baseline showcases. The first Core Gray composition now exists at
-   `showcases/ble-midi-amy`; its remaining distribution gate is package
-   publication. It has now been validated on the physical Core Gray with BLE
-   connection/reconnection, notes, velocity, pitch bend, disconnect cleanup,
-   idle gating, and panic. The build currently leaves about 1% IRAM free,
-   which is an important constraint for future AMY features.
+The Core Gray build leaves approximately 1% of IRAM free. This is the main
+current AMY limit, so the next step is an explicit choice among measuring
+resource costs, exploring native polyphony, improving patch selection, or
+evaluating another engine. None is required to justify the current boundaries.
 
 At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
 artifacts, BLE coexistence, output hardware, license, and adapter size. Failure
