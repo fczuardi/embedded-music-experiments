@@ -82,6 +82,45 @@ jobs:
           cat "$build_dir/memory-report.md" >> "$GITHUB_STEP_SUMMARY"
           test -f "$build_dir/firmware.map"
 
+      - name: Probe NimBLE host code in flash
+        if: matrix.showcase_id == 3
+        run: |
+          env PLATFORMIO_CORE_DIR="${{ github.workspace }}/.platformio-home" \
+            pio run -d "${{ matrix.showcase_path }}" \
+            -e m5stack-core-gray-nimble-flash-probe
+
+          baseline_dir="${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray"
+          probe_dir="${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-nimble-flash-probe"
+          python scripts/elf-memory-report.py \
+            "$probe_dir/firmware.elf" \
+            --markdown "$probe_dir/memory-report.md" \
+            --json "$probe_dir/memory-report.json"
+
+          python - "$baseline_dir/memory-report.json" "$probe_dir/memory-report.json" <<'PY'
+          import json
+          import sys
+
+          baseline = json.load(open(sys.argv[1]))["iram_used_bytes"]
+          probe = json.load(open(sys.argv[2]))["iram_used_bytes"]
+          delta = baseline - probe
+          with open("nimble-flash-comparison.md", "w") as output:
+              output.write("## NimBLE host-in-Flash probe\n\n")
+              output.write("| Configuration | IRAM used | Change vs baseline |\n")
+              output.write("|---|---:|---:|\n")
+              output.write(f"| Published Showcase 3 | {baseline:,} bytes | — |\n")
+              output.write(
+                  f"| `CONFIG_BT_NIMBLE_LOW_SPEED_MODE=1` | {probe:,} bytes | "
+                  f"{delta:+,} bytes freed |\n\n"
+              )
+              if delta == 0:
+                  output.write(
+                      "The project-level define did not change linked IRAM; the "
+                      "Arduino framework/toolchain did not apply this ESP-IDF "
+                      "placement option to the linked components.\n"
+                  )
+          PY
+          cat nimble-flash-comparison.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload Showcase 3 memory evidence
         if: matrix.showcase_id == 3
         uses: actions/upload-artifact@v4
@@ -92,5 +131,10 @@ jobs:
             ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray/firmware.map
             ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray/memory-report.md
             ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray/memory-report.json
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-nimble-flash-probe/firmware.elf
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-nimble-flash-probe/firmware.map
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-nimble-flash-probe/memory-report.md
+            ${{ matrix.showcase_path }}/.pio/build/m5stack-core-gray-nimble-flash-probe/memory-report.json
+            nimble-flash-comparison.md
           if-no-files-found: error
           retention-days: 30
