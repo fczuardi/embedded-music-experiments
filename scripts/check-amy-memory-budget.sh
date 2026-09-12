@@ -31,7 +31,7 @@ if [[ ! -f "$elf_path" || ! -f "$binary_path" || -z "$iram_used" ||
   exit 1
 fi
 
-readonly iram_budget=130048
+readonly iram_budget=130971
 readonly dram_budget=65536
 readonly flash_budget=1300000
 

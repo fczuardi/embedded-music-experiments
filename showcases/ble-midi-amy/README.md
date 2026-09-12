@@ -12,8 +12,7 @@ receives notes, velocity, pitch bend, and disconnect cleanup through the shared
 instrument contracts, and drives the Core Gray speaker through the AMY PCM
 bridge.
 
-The current CI checkout consumes `amy-synth-m5` from the sibling package
-repository while that package distribution is being finalized. The composition
+The showcase consumes the published `amy-synth-m5` package. The composition
 does not copy code from the AMY probe app.
 
 ## Commands
