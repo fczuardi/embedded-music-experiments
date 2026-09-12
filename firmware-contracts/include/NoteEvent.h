@@ -12,9 +12,9 @@ enum class NoteEventType : uint8_t {
 // This contract intentionally contains no BLE, parser, display, or hardware
 // details. Pitch bend and control change should use separate event types.
 //
-// Producers are responsible for validating or normalizing raw MIDI data before
-// creating this event:
-// - channel uses the human-facing MIDI range 1-16;
+// Producers are responsible for validating raw MIDI data before creating this
+// event. Channel is deliberately the raw zero-based MIDI status nibble:
+// - channel uses the range 0-15 (physical MIDI channels 1-16);
 // - note uses the MIDI note range 0-127;
 // - velocity uses the MIDI velocity range 0-127.
 struct NoteEvent {
