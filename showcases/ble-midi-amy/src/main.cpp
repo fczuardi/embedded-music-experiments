@@ -7,7 +7,8 @@
 namespace {
 constexpr uint8_t AMY_SYNTH_ID = 1;
 constexpr uint8_t AMY_VOICE_COUNT = 1;
-constexpr uint8_t AMY_PATCH = 19;
+constexpr uint8_t FIRST_PATCH = 19;
+constexpr uint8_t SECOND_PATCH = 24;
 
 AmyM5MonophonicSynth amySynth;
 BleMidiInput bleMidiInput;
@@ -18,6 +19,28 @@ void configureCoreGray() {
   config.internal_mic = false;
   M5.begin(config);
 }
+
+void configureModWheelMappings() {
+  const AmyMidiControlMapping firstChannel{
+      .midiChannel = AmyM5MonophonicSynth::FIRST_MIDI_CHANNEL,
+      .controller = 1,
+      .targetOscillator = 3,
+      .target = AmyModulationTarget::Frequency,
+      .coefficientAtMinimum = 0.0f,
+      .coefficientAtMaximum = 0.1f,
+  };
+  const AmyMidiControlMapping secondChannel{
+      .midiChannel = AmyM5MonophonicSynth::SECOND_MIDI_CHANNEL,
+      .controller = 1,
+      .targetOscillator = 2,
+      .target = AmyModulationTarget::Frequency,
+      .coefficientAtMinimum = 0.0f,
+      .coefficientAtMaximum = 0.1f,
+  };
+
+  amySynth.configureMidiControlMapping(firstChannel);
+  amySynth.configureMidiControlMapping(secondChannel);
+}
 }  // namespace
 
 void setup() {
@@ -25,17 +48,20 @@ void setup() {
   delay(200);
   configureCoreGray();
 
-  amySynth.begin(AMY_SYNTH_ID, AMY_VOICE_COUNT, AMY_PATCH);
+  amySynth.begin(
+      AMY_SYNTH_ID, AMY_VOICE_COUNT, FIRST_PATCH, SECOND_PATCH);
+  configureModWheelMappings();
 
   bleMidiInput.setInstrumentEventSink(&amySynth);
   bleMidiInput.begin();
 
   Serial.println("BLE MIDI AMY showcase");
   Serial.printf(
-      "amy: synth_id=%u voices=%u patch=%u\n",
+      "amy: synth_id=%u voices=%u patches=%u,%u\n",
       AMY_SYNTH_ID,
       AMY_VOICE_COUNT,
-      AMY_PATCH);
+      FIRST_PATCH,
+      SECOND_PATCH);
 }
 
 void loop() {
