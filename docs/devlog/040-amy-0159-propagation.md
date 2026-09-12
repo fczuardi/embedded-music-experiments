@@ -23,8 +23,8 @@ check out sibling repositories or use machine-local paths for Showcase 3.
 The AMY upgrade was already measured on the Core Gray BLE composition:
 
 - IRAM: 130971 of 131072 bytes, 101 bytes physically free;
-- DRAM: 60808 bytes;
-- firmware image: 1219040 bytes.
+- DRAM: 62864 bytes;
+- firmware image: 1230944 bytes.
 
 The CI guard uses `130971` as the IRAM budget for this known-good firmware.
 This is a zero-growth budget, so future AMY or BLE changes must first be
