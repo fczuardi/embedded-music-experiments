@@ -20,27 +20,6 @@ void configureCoreGray() {
   M5.begin(config);
 }
 
-void configureModWheelMappings() {
-  const AmyMidiControlMapping firstChannel{
-      .midiChannel = AmyM5MonophonicSynth::FIRST_MIDI_CHANNEL,
-      .controller = 1,
-      .targetOscillator = 3,
-      .target = AmyModulationTarget::Frequency,
-      .coefficientAtMinimum = 0.0f,
-      .coefficientAtMaximum = 0.1f,
-  };
-  const AmyMidiControlMapping secondChannel{
-      .midiChannel = AmyM5MonophonicSynth::SECOND_MIDI_CHANNEL,
-      .controller = 1,
-      .targetOscillator = 2,
-      .target = AmyModulationTarget::Frequency,
-      .coefficientAtMinimum = 0.0f,
-      .coefficientAtMaximum = 0.1f,
-  };
-
-  amySynth.configureMidiControlMapping(firstChannel);
-  amySynth.configureMidiControlMapping(secondChannel);
-}
 }  // namespace
 
 void setup() {
@@ -50,7 +29,7 @@ void setup() {
 
   amySynth.begin(
       AMY_SYNTH_ID, AMY_VOICE_COUNT, FIRST_PATCH, SECOND_PATCH);
-  configureModWheelMappings();
+  amySynth.configureJunoPerformanceModulation();
 
   bleMidiInput.setInstrumentEventSink(&amySynth);
   bleMidiInput.begin();
