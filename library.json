@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
   "name": "firmware-contracts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared event contracts for embedded music experiments",
   "keywords": ["midi", "embedded", "music", "contracts"],
   "repository": {
@@ -10,7 +10,7 @@
   },
   "frameworks": "*",
   "platforms": "*",
-  "headers": ["NoteEvent.h", "PitchBendEvent.h", "InstrumentEventSink.h"],
+  "headers": ["NoteEvent.h", "PitchBendEvent.h", "ControlChangeEvent.h", "InstrumentEventSink.h"],
   "build": {
     "includeDir": "firmware-contracts/include",
     "srcFilter": [

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ControlChangeEvent.h"
 #include "NoteEvent.h"
 #include "PitchBendEvent.h"
 
@@ -13,5 +14,9 @@ public:
 
   virtual void onNoteEvent(const NoteEvent& event) = 0;
   virtual void onPitchBendEvent(const PitchBendEvent& event) = 0;
+  // Optional continuous performance control. Consumers that do not use
+  // control changes can inherit the no-op implementation.
+  virtual void onControlChangeEvent(const ControlChangeEvent&) {
+  }
   virtual void onDisconnected() = 0;
 };
