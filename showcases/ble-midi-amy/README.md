@@ -3,15 +3,15 @@
 This firmware composes the reusable module boundaries for a richer instrument:
 
 ```text
-ble-midi-input -> AmyMonophonicInstrumentSink -> amy-synth-m5 -> Core Gray speaker
+ble-midi-input -> AmyM5MonophonicSynth -> amy-synth-m5 -> Core Gray speaker
 ```
 
 The showcase intentionally has no patch browser, display policy, or custom
 musical state. It uses one globally monophonic AMY synth slot where MIDI
 channels 1 through 16 select the validated Juno patches `0`, `9`, `18`, `24`,
 `32`, `40`, `49`, `54`, `64`, `73`, `80`, `89`, `96`, `105`, `114`, and `120`.
-The mod wheel (CC1) applies the patch-specific frequency mappings already
-validated by the AMY probe. It receives notes, velocity, pitch bend, and
+The mod wheel (CC1) applies the Juno-style compound frequency modulation
+mapping to the active patch. It receives notes, velocity, pitch bend, and
 disconnect cleanup through the shared instrument contracts, and drives the
 Core Gray speaker through the AMY PCM bridge.
 
