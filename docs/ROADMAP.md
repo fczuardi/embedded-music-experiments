@@ -1,214 +1,326 @@
 # Roadmap
 
-This roadmap tracks small experiments across `embedded-music-experiments`,
-`midi-receiver`, and `monophonic-instrument`. It favors hardware evidence and
-reversible probes over feature accumulation.
+This roadmap orders small experiments across the embedded-music repositories. It
+is organized by reusable capabilities rather than by development board. Hardware
+showcases provide evidence; the lasting result is a set of modules and semantic
+boundaries that can be recombined.
 
-## Stable Baseline: Two-Hardware BLE MIDI Instrument
+The project remains an open-ended maker and learning effort. A useful outcome can
+be a self-contained instrument, a controller, a sequencer, a sound module, or
+simply a documented hardware limit.
 
-The current baseline turns MIDI events into audible monophonic performance on
-two physical devices:
+## Current Foundation
 
-- M5StickC Plus2 built-in buzzer;
-- M5Stack Core Gray built-in speaker.
+The ecosystem already demonstrates three complete compositions:
 
-Both showcases compose versioned `firmware-contracts`, `ble-midi-input`,
-`monophonic-instrument`, and `m5-tone-output` packages. Hardware validation
-covers Note On/Off, last-note fallback, velocity, pitch bend, local panic,
-disconnect cleanup, and reconnection. Native tests and CI cover the pure policy,
-package consumers, and both firmware builds.
+- BLE MIDI to the M5StickC Plus2 buzzer;
+- BLE MIDI to the M5Stack Core Gray speaker;
+- BLE MIDI to AMY synthesis through the Core Gray speaker.
 
-The baseline is tagged as `two-hardware-showcases-v0.1.0`. Package milestones
-are tagged independently in their owning repositories.
+The proven package set includes shared firmware contracts, BLE MIDI input,
+global last-note-priority monophonic policy, simple M5 tone outputs, and an AMY
+facade. Note On/Off, velocity, pitch bend, panic, disconnect cleanup, fallback,
+CC1 modulation, patch selection, packaging, CI, and hardware validation have
+all been exercised in at least one real composition.
 
-**Status: complete.**
+The AMY facade now accepts a fixed table of 16 patches, one for each zero-based
+MIDI event channel. The instrument remains one globally monophonic AMY slot:
+the channels select timbres; they do not create 16 voices or a multitimbral
+engine.
 
-## Why Continue
+The immediate stabilization step is to publish this AMY package milestone and
+propagate its 16-channel API into the umbrella Showcase 3.
 
-The project does not need to outperform phone or desktop synthesizer apps to be
-useful. Its current purpose is to explore how abandoned or modest embedded
-gadgets can become physical musical objects with their own buttons, displays,
-limitations, and playful character.
+## Capability Model
 
-The Arturia MicroLab currently reaches the devices through an Android USB MIDI
-to BLE MIDI bridge. A phone could synthesize the sound itself, so the current
-composition is not yet an autonomous product. It remains a valid learning and
-hardware-reuse experiment while exposing two independent directions:
+The reusable ecosystem can be understood as four families:
 
-1. remove the Android bridge;
-2. make the physical devices capable of richer sound.
-
-## Active Direction: Existing Audio Engines
-
-The current bench already has working input, contracts, two ESP32 devices, and
-two audio outputs. The next low-friction direction is to evaluate mature Open
-Source audio engines rather than reimplementing synthesis techniques already
-explored by other projects.
-
-| Candidate | Role to probe | Main question |
+| Family | Current examples | Candidate additions |
 | --- | --- | --- |
-| [AMY](https://github.com/shorepine/amy) | Complete polyphonic synth engine | Can its PCM or I²S path coexist with M5 hardware and later consume our events? |
-| [ESP32Synth](https://github.com/danilogcrf2-oss/ESP32Synth) | ESP32-optimized polyphonic engine | Do its direct task and peripheral choices coexist with M5Unified and BLE? |
-| [esp32_fm_synth](https://github.com/marcel-licence/esp32_fm_synth) and [successor](https://github.com/marcel-licence/ml_synth_fm_example) | FM synth reference implementation | Can the newer GPL-3.0 code be isolated, built on the current toolchain, and redistributed under clear terms? |
-| [TinySoundFont](https://github.com/schellingb/TinySoundFont) | SoundFont 2 renderer | Can useful banks fit or stream while buffers reach an M5 or I²S output reliably? |
-| [Mozzi](https://github.com/sensorium/Mozzi) | Synthesis toolkit | Is it a useful educational/custom voice beside the complete engines? |
-| [Faust](https://faust.grame.fr/) | DSP language and code generator | Can generated DSP become a reproducible PlatformIO package or showcase backend? |
+| Input | BLE MIDI | USB MIDI host, M5 Faces, buttons, MIDI files |
+| Semantics | notes, velocity, pitch bend, CC, lifecycle | transport clock, program change, timed events |
+| Processing | monophonic priority, patch selection | metronome, arpeggiator, sequencer, tracker, router |
+| Output | buzzer, Core Gray speaker, AMY PCM | I2S DAC, MIDI OUT, other synth engines and sound chips |
 
-These are alternatives with different purposes, not a queue that must all be
-integrated.
+The intended direction is:
 
-### AMY Milestone Complete
+\`\`\`text
+physical or protocol input
+        -> semantic musical events
+        -> musical policy or transformation
+        -> sound engine, hardware output, or another transport
+\`\`\`
 
-The five initial AMY probes are complete. `amy-synth-m5` is a published
-PlatformIO package, and `showcases/ble-midi-amy` is a third composition that
-consumes the package together with the published BLE MIDI receiver. The
-composition was validated on the physical Core Gray with BLE
-connection/reconnection, notes, velocity, pitch bend, disconnect cleanup, idle
-gating, and panic.
+BLE, USB, a local keyboard, and a sequencer should be able to express the same
+musical intention. AMY, the tone backends, and future outputs should not need to
+know where that intention originated.
 
-The package now also provides `AmyM5MonophonicSynth`, a convenience facade for
-the common one-slot monophonic case. Lower-level AMY runtime, slot, sink, and
-speaker components remain available for future compositions with different
-defaults. AMY's global pitch bend is intentionally hidden by the facade in
-this simple composition.
+## Hardware on the Bench
 
-The Core Gray build leaves 101 bytes of IRAM free. Showcase 3 now enforces a
-baseline budget of 130971 bytes IRAM, 65536 bytes DRAM, and 1300000 bytes for
-the generated firmware image. The current measured values are 130971 bytes
-IRAM, 62864 bytes DRAM, and 1230944 bytes image size. These limits
-are intentionally conservative and should be revisited only with measured
-evidence.
+| Hardware | Useful question |
+| --- | --- |
+| Two M5Stack Core Gray units | How far can AMY and coordinated physical instruments go? |
+| 36-key Keyboard Face | Can the ecosystem become a self-contained playable instrument without MIDI or a phone? |
+| 20-key Calculator Face | Can numeric entry and a button grid edit BPM, patches, steps, and parameters? |
+| Game-style Face | Can a small directional pad and action buttons provide useful transport and performance control? |
+| M5StickC | How portable are the modules across older M5 hardware? |
+| M5StickC Plus2 | What is the smallest useful buzzer instrument and control surface? |
+| M5Stick S3 | Can USB MIDI host remove the Android bridge while preserving the event boundary? |
+| LilyGo T-Display-S3 | Can a compact display-oriented board host a useful musical UI or sequencer? |
+| Heltec ESP32 LoRa boards, including V4 | Which sparse musical or orchestration messages tolerate a long-range radio transport? |
 
-An ELF investigation measured the BLE path separately: removing BLE from an
-otherwise equivalent AMY + M5 build recovered 50364 bytes of IRAM, while
-disabling unused NimBLE roles recovered only 256 bytes. A project-level
-`CONFIG_BT_NIMBLE_LOW_SPEED_MODE=1` define had no measurable effect in this
-Arduino/pioarduino build. The practical conclusion is that the current BLE
-composition should be treated as resource-constrained and stable; meaningful
-BLE savings would require a custom framework build or another transport.
+A board does not automatically deserve a dedicated module or repository. It
+becomes a useful target when it answers one of these questions with a working
+composition.
 
-The next step is an explicit choice among resource profiling, exploring native
-polyphony, improving patch selection, or evaluating another engine. None is
-required to justify the current boundaries.
+## Ordered Roadmap
 
-At every step record latency, simultaneous notes, CPU/RAM/flash cost, audible
-artifacts, BLE coexistence, output hardware, license, and adapter size. Failure
-to fit or coexist is useful evidence and does not require changing the baseline.
+### 0. Stabilize and Propagate the 16-Channel AMY Baseline
 
-## Deferred Direction: Rust Receiver Platform Probe
+1. publish the validated \`amy-synth-m5\` release;
+2. update umbrella Showcase 3 to consume the fixed 16-channel configuration;
+3. preserve the audited Juno patch table in the showcase;
+4. build it in CI with the established IRAM evidence;
+5. revalidate channel selection, fallback, pitch bend, CC1, panic, and
+   disconnect on the Core Gray.
 
-After the current PlatformIO/C++ package ecosystem is stable, published, and
-validated through the existing showcases, start a separate `esp-rs`
-investigation for the BLE MIDI receiver.
+This closes the current line before a new input source is introduced.
 
-This should not replace `ble-midi-input` during the current stabilization work.
-Treat it as a fresh platform probe, likely in a sibling repository such as
-`ble-midi-input-rs` or `midi-receiver-rs-probe`, with a deliberately narrow
-first milestone:
+### 1. Self-Contained Instrument: Keyboard Face to Core Gray AMY
 
-1. boot an ESP32 firmware with the Rust toolchain;
-2. advertise a BLE MIDI service with an observable device name;
-3. receive raw BLE characteristic writes and log packet bytes;
-4. parse Note On/Off only after raw packet reception is proven;
-5. compare the resulting module boundary with the current PlatformIO package.
+Use the 36-key Keyboard Face as the first non-MIDI producer:
 
-The value is architectural contrast: learn what a Rust-first receiver module
-could look like outside pioarduino, while keeping the working PlatformIO modules
-available for compositions.
+\`\`\`text
+Keyboard Face
+    -> local key mapping
+    -> NoteEvent
+    -> monophonic policy
+    -> AMY
+    -> Core Gray speaker
+\`\`\`
 
-## Deferred Direction: Native ESP-IDF C++ Probe
+The first slice should only prove key press, key release, note mapping, and safe
+cleanup. Octave changes, patch selection, sustain, and modulation can follow as
+separate slices.
 
-Also after the current PlatformIO/C++ package ecosystem is stable, explore a
-native ESP-IDF + CMake implementation of the BLE MIDI receiver.
+This experiment unlocks:
 
-This path stays in C++ and may reuse more existing thinking than Rust, but it is
-still not a drop-in dependency for the current pioarduino showcases. Treat it as
-a framework-specific sibling track:
+- a playable device without BLE, USB MIDI, or Android;
+- the first producer that proves \`NoteEvent\` is independent of MIDI transport;
+- an empirical boundary between physical key scanning and musical mapping;
+- a foundation for using the same Face later as step-entry hardware.
 
-1. create a small ESP-IDF app or component probe;
-2. use ESP-IDF NimBLE directly, without Arduino or NimBLE-Arduino;
-3. advertise the BLE MIDI service and confirm the scan name;
-4. receive raw characteristic writes and parse Note On/Off;
-5. mirror the existing `NoteEvent` / `PitchBendEvent` shapes where useful;
-6. evaluate whether pure protocol/parser code can be shared while BLE transport
-   and showcase apps remain framework-specific.
+The local input must not pretend that physical keys are raw MIDI. A small
+mapping component should translate hardware actions into the existing semantic
+contracts.
 
-Expected composition model:
+### 2. Direct USB MIDI Host on M5Stick S3
 
-- existing showcases continue to use PlatformIO Arduino packages;
-- native ESP-IDF probes compose ESP-IDF components;
-- any shared code should be framework-independent C++ only, not a universal
-  transport abstraction designed ahead of evidence.
+Connect the Arturia MicroLab directly to the S3 and translate USB MIDI into the
+same event vocabulary:
 
-This is the more practical modernization path for C++ if PlatformIO/Arduino
-friction becomes the limiting factor, while the Rust probe remains the broader
-architecture experiment.
+\`\`\`text
+Arturia USB MIDI
+    -> USB host transport
+    -> shared events
+    -> existing instrument consumer
+\`\`\`
 
-## Deferred Direction: Autonomous MIDI Input
+Proceed in this order:
 
-Removing Android remains desirable, but it is not the immediate track.
+1. establish USB host power and enumerate the Arturia;
+2. log raw MIDI messages;
+3. translate Note On/Off only;
+4. add pitch bend, CC1, channels, and cleanup;
+5. extract \`usb-midi-input\` only after the working path reveals its boundary;
+6. compare latency and failure cleanup with the Android BLE bridge.
 
-The cleanest likely experiment is a future ESP32-S3 device with usable USB OTG,
-such as an M5StickS3, acting as USB MIDI host for the Arturia. That hardware is
-not currently on the bench.
+A powered hub or power bank is a composition detail. USB parsing must remain
+independent from AMY or any other engine.
 
-Available Heltec boards may also participate in an autonomous route, but would
-likely require more than one board or an additional audio device. That makes the
-probe a larger weekend-scale composition rather than a small continuation of
-the current setup.
+This experiment removes the phone while retaining the full external keyboard.
+Together with the Keyboard Face experiment, it gives the ecosystem three real
+input sources: BLE MIDI, USB MIDI, and local keys.
 
-When hardware and time align, proceed in this order:
+### 3. Local Control Surfaces and Musical UI
 
-1. enumerate the Arturia as a USB MIDI device;
-2. translate input into the existing semantic contracts;
-3. create `usb-midi-input` only after the event path works;
-4. reuse an existing instrument or engine without changing its MIDI semantics;
-5. compare latency and cleanup with the Android BLE bridge.
+Use the available Faces and displays according to their physical strengths:
 
-Do not tie USB parsing to a particular synth engine. Input autonomy and sound
-generation must remain independently replaceable.
+| Input surface | Initial role |
+| --- | --- |
+| Keyboard Face | notes, octave, chord or step entry |
+| Calculator Face | BPM, patch number, pattern and numeric parameters |
+| Game Face | navigation, play/stop, pattern change, mute and performance actions |
+| Core/S3/T-Display screens | state display and editing feedback |
 
-## Contract Guidance for Future Engines
+Keep performance events separate from interface commands. A Start button is not
+a fake MIDI note. UI actions may later become transport commands, editor
+commands, or configuration changes.
 
-The current `VoiceOutput` describes one simple voice and should remain the
-boundary used by `MonophonicInstrumentSink`. Do not force a polyphonic engine
-behind it if that would discard native voice allocation, envelopes, patches,
-effects, channels, or multitimbral behavior.
+Do not create a universal UI framework from the first Face. Build one small
+working interaction, then extract only the repeated boundary.
 
-A future engine adapter may consume `InstrumentEventSink` directly. If several
-engines expose PCM blocks, their real implementations may later justify a
-separate render-source/audio-sink boundary. Do not design that abstraction
-before the first working probe.
+### 4. Clock, Transport, and a Minimal Metronome
 
-Support for MIDI channels is therefore not a goal by itself. Add channel-based
-patches, routing, or multitimbrality when a selected engine provides a concrete
-behavior worth exposing.
+Before implementing a tracker or sequencer, create the smallest experiment that
+needs musical time:
 
-## Later Audio and Hardware Options
+\`\`\`text
+internal clock
+    -> metronome tick
+    -> display and/or sound
+\`\`\`
 
-- Compare a second engine only after the first integration teaches us what to
-  measure and where the real boundary lies.
-- Explore a PCM5102 I²S line output when an engine can already produce continuous
-  PCM; keep board-specific pins at the composition edge.
-- Explore a physical AY-3-8910, AY-3-8912, or YM2149 only as a separate hardware
-  experiment. The `AY3891x` library needs the external PSG, its clock, a wide
-  GPIO bus, and an analog audio path; it is not another speaker backend for the
-  current M5 devices.
-- Keep the existing buzzer and Core Gray outputs as small, proven baselines.
-  Richer engines supplement them and do not need to replace them.
-- Revisit modulation, sustain, program change, CC120/CC123, sequencing, and
-  arpeggiation when an active composition needs them.
-- Keep raw BLE-MIDI parser research deferred unless the SynthBridge-compatible
-  route develops a reproducible transport problem.
+Let that experiment determine the initial semantics for start, continue, stop,
+tempo, and clock ticks. MIDI Clock, monotonic live time, and Standard MIDI File
+ticks are related but not identical and should not be collapsed prematurely.
+
+A useful contract may eventually resemble a typed transport event, but it
+should be introduced only when the metronome or sequencer has both a producer
+and a consumer.
+
+### 5. Minimal Step Sequencer, Then Tracker Exploration
+
+Start with a deliberately small sequencer:
+
+- 16 steps;
+- one track;
+- one note per step;
+- BPM;
+- play and stop;
+- output through the existing note-event boundary.
+
+The sequencer must produce semantic events rather than call AMY directly. That
+allows the same pattern to drive a buzzer, speaker, AMY, an external MIDI synth,
+or another gadget.
+
+After the one-track sequence works:
+
+1. use the Keyboard Face for note entry;
+2. use the Game Face for navigation and transport;
+3. evaluate the Calculator Face for direct step and parameter entry;
+4. use the T-Display-S3 when a denser visual editor becomes necessary;
+5. add tracks, rests, velocity, ties, automation, and tracker concepts only as
+   independent slices.
+
+### 6. Routing and Coordination Between Gadgets
+
+A router becomes justified only after multiple useful sources and destinations
+exist. Candidate compositions include:
+
+- local keyboard playing AMY and a second device;
+- one gadget acting as clock master;
+- a sequencer distributing channels across two Core Gray instruments;
+- one device providing UI while another provides sound;
+- channel, patch, or scene routing between physical objects.
+
+The router should preserve semantic events and lifecycle cleanup. It should not
+be introduced as a generic event bus before one of these compositions requires
+it.
+
+### 7. Additional Physical Transports
+
+Evaluate transports in increasing order of uncertainty:
+
+1. USB MIDI host;
+2. UART MIDI through DIN or TRS hardware;
+3. Wi-Fi or ESP-NOW between nearby gadgets;
+4. LoRa for sparse, latency-tolerant orchestration.
+
+LoRa is promising for installations, remote scene changes, coarse
+synchronization, and playful distributed objects. It is not assumed to be
+appropriate for every Note On/Off or tight musical clock because latency and
+jitter must be measured first.
+
+## Parallel Audio Track
+
+Input, sequencing, and sound generation should evolve independently. The
+existing tone outputs and AMY remain useful baselines while other engines are
+tested beside them.
+
+| Candidate | Question |
+| --- | --- |
+| PCM5102 or another I2S DAC | Can an existing PCM engine gain useful line output without changing musical contracts? |
+| ESP32Synth | Can its polyphonic engine coexist with M5 hardware and current inputs? |
+| Mozzi | Is it a useful educational/custom synthesis backend? |
+| TinySoundFont | Can useful SoundFont banks fit or stream on available hardware? |
+| Faust-generated DSP | Can generated code become a reproducible embedded package? |
+| FM engines | Can an existing implementation provide a distinct voice without duplicating mature DSP work? |
+| External synth or PSG hardware | Can semantic events drive dedicated sound chips or modules cleanly? |
+
+A mature synth engine may consume \`InstrumentEventSink\` directly. It should
+not be forced behind the simple frequency-oriented \`VoiceOutput\` abstraction
+if that would discard patches, envelopes, polyphony, effects, or native voice
+allocation.
+
+New engines begin as isolated sound probes. Only after producing useful audio
+should they receive adapters for shared events and enter a showcase.
+
+## Deferred Platform Investigations
+
+Rust/esp-rs and native ESP-IDF remain useful architecture probes, but they are
+not near-term replacements for the working PlatformIO/Arduino modules.
+
+A future receiver probe may:
+
+1. boot on the alternative framework;
+2. advertise BLE MIDI;
+3. receive and log raw packets;
+4. parse Note On/Off;
+5. compare component boundaries and resource use with \`ble-midi-input\`.
+
+Only framework-independent protocol or semantic code should be considered for
+sharing. Transport implementations and applications may remain
+framework-specific.
+
+## Module and Repository Rules
+
+- A new logical role does not automatically require a new repository.
+- A small executable composition normally belongs under \`showcases/\`.
+- Extract a package after a working experiment reveals a reusable boundary.
+- Create a sibling repository when the module has independent value and a
+  credible lifecycle of its own.
+- Keep board initialization, pins, calibration, buttons, and display layout at
+  the hardware or composition edge.
+- Prefer fixed-size state and explicit resource limits in firmware paths.
+- Preserve negative results and abandoned attempts in devlogs.
 
 ## Prioritization Rules
 
-- Prefer a probe that can finish in one short session.
-- Prefer integration over reimplementation when mature Open Source work exists.
-- Start audio engines without BLE, then add semantic events, then compose.
-- Add contracts only after a producer and a real consumer need them.
-- Keep transport, contracts, musical policy, engine, and physical output
-  independently replaceable.
-- Preserve license notices and upstream contribution policies.
-- Keep proven showcases working while experiments fail safely beside them.
-- Record negative findings instead of hiding or architecting around them.
+Prefer a slice that:
+
+- can finish in one short session;
+- produces observable hardware evidence;
+- unlocks more than one later composition;
+- tests an existing boundary from a new direction;
+- integrates mature Open Source work rather than reimplementing it;
+- keeps transport, semantics, policy, engine, and physical output replaceable;
+- records memory, latency, cleanup behavior, and hardware limitations;
+- leaves proven showcases working while an experiment fails safely beside them.
+
+## Current Next Steps
+
+1. Publish and propagate the AMY 16-channel milestone to Showcase 3.
+2. Begin the Keyboard Face + Core Gray self-contained instrument probe.
+3. Begin direct USB MIDI host enumeration on the M5Stick S3.
+4. Choose between the local-input and USB-input paths for the next reusable
+   package only after both boundaries have real evidence.
+
+The Keyboard Face and USB host experiments remove different dependencies:
+
+- local keys remove both the external controller and the phone;
+- USB host preserves the capable Arturia controller and removes only the phone.
+
+Together they are the strongest next test that the modularity built so far is
+real rather than specific to BLE MIDI.
+
+## North Star
+
+The goal is not to choose one final instrument early. It is to create a terrain
+where physical controls, MIDI transports, clocks, sequencers, synth engines,
+simple transducers, external audio hardware, and multiple small gadgets can
+participate through clear, tested boundaries.
+
+**The unit of progress remains a working experiment. The unit of architecture
+is a boundary that stays clear when a second producer, consumer, transport, or
+hardware device appears.**
