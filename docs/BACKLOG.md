@@ -61,15 +61,14 @@ Research options if the problem appears on a route other than My MIDI Hub:
 
 ## Autonomous MIDI Input
 
-Direct USB MIDI host input could remove the Android bridge from the current
-Arturia route. A future ESP32-S3 device with usable USB OTG is the smallest
-likely composition, but no such device is currently on the bench.
+Direct USB MIDI host input has been promoted to the active roadmap now that an
+M5Stick S3 is available on the bench. The roadmap tracks Arturia enumeration,
+typed-event translation, power, cleanup, and comparison with the Android BLE
+bridge.
 
-The available Heltec boards are another possible input-side experiment. They
-would probably need a second board or separate audio device, increasing wiring,
-transport, cleanup, and power questions. Keep that as a larger exploration
-rather than introducing a multi-board protocol merely to avoid the working
-phone bridge.
+Heltec and multi-board input routes remain lower-certainty alternatives. They
+may become useful later for distributed instruments, but should not introduce a
+new transport merely to duplicate the smaller S3 experiment.
 
 ## FM Synth Reference Implementation
 
