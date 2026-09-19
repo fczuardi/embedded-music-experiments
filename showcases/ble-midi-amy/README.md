@@ -8,7 +8,8 @@ ble-midi-input -> AmyMonophonicInstrumentSink -> amy-synth-m5 -> Core Gray speak
 
 The showcase intentionally has no patch browser, display policy, or custom
 musical state. It uses one globally monophonic AMY synth slot where MIDI
-channels 1 and 2 select the validated Juno patches 19 and 24 respectively.
+channels 1 through 16 select the validated Juno patches `0`, `9`, `18`, `24`,
+`32`, `40`, `49`, `54`, `64`, `73`, `80`, `89`, `96`, `105`, `114`, and `120`.
 The mod wheel (CC1) applies the patch-specific frequency mappings already
 validated by the AMY probe. It receives notes, velocity, pitch bend, and
 disconnect cleanup through the shared instrument contracts, and drives the
@@ -26,5 +27,7 @@ just showcase-monitor 3
 ```
 
 Button A sends panic and stops any held note. The device advertises as
-`M5 Gray AMY`. The two MIDI channels are zero-based in the wire protocol, so
-the physical MIDI channels 1 and 2 appear to the firmware as channels 0 and 1.
+`M5 Gray AMY`. MIDI channels are zero-based in the wire protocol, so physical
+channels 1 through 16 appear to the firmware as channels 0 through 15. Channel
+selection changes the patch in the one shared slot; it does not make the
+showcase multitimbral or provide 16 simultaneous voices.

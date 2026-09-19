@@ -5,10 +5,16 @@
 #include "BleMidiInput.h"
 
 namespace {
-constexpr uint8_t AMY_SYNTH_ID = 1;
-constexpr uint8_t AMY_VOICE_COUNT = 1;
-constexpr uint8_t FIRST_PATCH = 19;
-constexpr uint8_t SECOND_PATCH = 24;
+constexpr AmyM5MonophonicSynthConfiguration SYNTH_CONFIGURATION{
+    .synthId = 1,
+    .voiceCount = 1,
+    .patches = {
+        0, 9, 18, 24,
+        32, 40, 49, 54,
+        64, 73, 80, 89,
+        96, 105, 114, 120,
+    },
+};
 
 AmyM5MonophonicSynth amySynth;
 BleMidiInput bleMidiInput;
@@ -27,8 +33,7 @@ void setup() {
   delay(200);
   configureCoreGray();
 
-  amySynth.begin(
-      AMY_SYNTH_ID, AMY_VOICE_COUNT, FIRST_PATCH, SECOND_PATCH);
+  amySynth.begin(SYNTH_CONFIGURATION);
   amySynth.configureJunoPerformanceModulation();
 
   bleMidiInput.setInstrumentEventSink(&amySynth);
@@ -36,11 +41,10 @@ void setup() {
 
   Serial.println("BLE MIDI AMY showcase");
   Serial.printf(
-      "amy: synth_id=%u voices=%u patches=%u,%u\n",
-      AMY_SYNTH_ID,
-      AMY_VOICE_COUNT,
-      FIRST_PATCH,
-      SECOND_PATCH);
+      "amy: synth_id=%u voices=%u channel_patches=%u\n",
+      SYNTH_CONFIGURATION.synthId,
+      SYNTH_CONFIGURATION.voiceCount,
+      AMY_M5_MIDI_CHANNEL_COUNT);
 }
 
 void loop() {

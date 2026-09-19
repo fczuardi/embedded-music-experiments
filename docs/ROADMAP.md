@@ -28,8 +28,9 @@ MIDI event channel. The instrument remains one globally monophonic AMY slot:
 the channels select timbres; they do not create 16 voices or a multitimbral
 engine.
 
-The immediate stabilization step is to publish this AMY package milestone and
-propagate its 16-channel API into the umbrella Showcase 3.
+The AMY package milestone is published as `amy-synth-m5@0.3.1`, and its
+16-channel API and audited patch table are propagated into the umbrella
+Showcase 3 with Core Gray hardware validation.
 
 ## Capability Model
 
@@ -75,14 +76,12 @@ composition.
 
 ## Ordered Roadmap
 
-### 0. Stabilize and Propagate the 16-Channel AMY Baseline
+### 0. Completed: Stabilize and Propagate the 16-Channel AMY Baseline
 
-1. publish the validated `amy-synth-m5` release;
-2. update umbrella Showcase 3 to consume the fixed 16-channel configuration;
-3. preserve the audited Juno patch table in the showcase;
-4. build it in CI with the established IRAM evidence;
-5. revalidate channel selection, fallback, pitch bend, CC1, panic, and
-   disconnect on the Core Gray.
+The validated `amy-synth-m5@0.3.1` release is published. Umbrella Showcase 3
+consumes its fixed 16-channel configuration, preserves the audited Juno patch
+table, builds within the established IRAM budget, and has been revalidated on
+the Core Gray.
 
 This closes the current line before a new input source is introduced.
 
@@ -300,10 +299,9 @@ Prefer a slice that:
 
 ## Current Next Steps
 
-1. Publish and propagate the AMY 16-channel milestone to Showcase 3.
-2. Begin the Keyboard Face + Core Gray self-contained instrument probe.
-3. Begin direct USB MIDI host enumeration on the M5Stick S3.
-4. Choose between the local-input and USB-input paths for the next reusable
+1. Begin the Keyboard Face + Core Gray self-contained instrument probe.
+2. Begin direct USB MIDI host enumeration on the M5Stick S3.
+3. Choose between the local-input and USB-input paths for the next reusable
    package only after both boundaries have real evidence.
 
 The Keyboard Face and USB host experiments remove different dependencies:
