@@ -2,9 +2,11 @@
 
 **Status:** documento vivo de arquitetura e direção
 
-**Plataforma-base atual:** M5StickC Plus2
+**Última revisão:** 2026-09-19
 
-**Segundo hardware de validação:** M5Stack Core Gray 1.0
+**Hardwares de validação atuais:** M5StickC Plus2 e M5Stack Core Gray 1.0
+
+**Hardware de exploração disponível:** M5Stick S3
 
 **Escopo:** contratos, componentes e experiências musicais embarcadas combináveis
 
@@ -25,18 +27,22 @@ composição não se transforma em produto.
 A implementação atual já ultrapassou a primeira prova de conceito. Hoje o
 ecossistema possui:
 
-- contratos C++ compartilhados para eventos de nota, pitch bend e ciclo de vida;
+- contratos C++ compartilhados para nota, pitch bend, Control Change e ciclo
+  de vida;
 - uma entrada BLE MIDI reutilizável;
 - um instrumento monofônico com prioridade da última nota;
-- backends de áudio para o buzzer do M5StickC Plus2 e o speaker do Core Gray;
-- showcases que combinam esses módulos, com o Plus2 e o Core Gray já tocados
-  com um controlador real;
-- testes nativos, builds de firmware, empacotamento PlatformIO e registros de
-  validação em hardware.
+- backends simples para o buzzer do M5StickC Plus2 e o speaker do Core Gray;
+- uma integração AMY que preserva nota, velocity, canal, patch, pitch bend e
+  CC1 até uma engine de síntese completa;
+- três showcases validados em hardware: buzzer no Plus2, tone output no Core
+  Gray e AMY no Core Gray;
+- testes nativos, builds de firmware, pacotes PlatformIO, limites explícitos de
+  memória e registros de validação em hardware.
 
-O M5StickC Plus2 continua sendo a bancada principal. O M5Stack Core Gray já
-funciona como segundo alvo real, demonstrando quais fronteiras sobreviveram a
-diferenças de placa, transdutor, controles e configuração.
+O M5StickC Plus2 e o M5Stack Core Gray formam a baseline atual de hardware. O
+Plus2 preserva o caminho mínimo pelo buzzer; o Gray oferece speaker e recursos
+suficientes para a integração AMY. O M5Stick S3 está disponível para a próxima
+exploração de USB MIDI host, mas ainda não faz parte da baseline comprovada.
 
 As composições atuais ainda recebem o Arturia MicroLab por uma ponte USB MIDI
 para BLE MIDI executada no Android. Isso é uma limitação conhecida, mas também
@@ -51,11 +57,11 @@ possam ser recombinadas.
 
 | Papel | Implementação atual | Possibilidades futuras |
 | --- | --- | --- |
-| Origem de eventos | BLE MIDI | USB MIDI, sequenciador, controles locais |
-| Contrato | nota, pitch bend e desconexão | CCs musicais e outros eventos necessários |
-| Política musical | instrumento monofônico, última nota | sustain, modulation, arpejo, polifonia |
-| Saída sonora | backends M5 para buzzer e speaker | oscilador amostrado, I²S |
-| Composição | showcases BLE MIDI para Plus2 e Core Gray | novos showcases por hardware ou combinação |
+| Origem de eventos | BLE MIDI | USB MIDI host, sequenciador, controles locais |
+| Contrato | nota, pitch bend, Control Change e desconexão | tempo, Program Change e outros eventos quando necessários |
+| Política musical | monofonia com última nota; seleção de patch por canal na AMY | sustain executável, arpejo, sequenciamento, polifonia |
+| Saída sonora | tone output M5 e AMY PCM no Core Gray | outras engines, I²S e synths externos |
+| Composição | três showcases BLE MIDI em Plus2 e Core Gray | novos showcases por origem, hardware ou combinação |
 
 Cada nova peça deve resolver um caso concreto. Generalizações surgem quando uma
 segunda implementação ou composição revela o que realmente precisa ser comum.
@@ -67,9 +73,10 @@ O roadmap mantém dois eixos independentes:
 - **riqueza sonora:** integrar engines existentes ou novos backends atrás dos
   contratos semânticos já comprovados.
 
-O segundo eixo está mais próximo da bancada atual. O primeiro permanece
-importante, mas aguarda hardware apropriado ou um intervalo maior para uma
-composição com mais de uma placa.
+Os dois eixos agora possuem hardware disponível. O Core Gray sustenta a linha
+de engines e controles locais; o M5Stick S3 permite investigar USB MIDI host.
+A ordem dos experimentos e seus critérios de saída pertencem ao
+[`docs/ROADMAP.md`](docs/ROADMAP.md), não a este documento.
 
 ## Estado comprovado
 
@@ -80,14 +87,15 @@ O repositório guarda-chuva é também o pacote PlatformIO
 
 - `NoteEvent`, com tipo, canal, nota e velocity;
 - `PitchBendEvent`, com canal e valor centrado em `-8192..8191`;
+- `ControlChangeEvent`, com canal, número do controlador e valor `0..127`;
 - `InstrumentEventSink`, consumido por instrumentos e implementado sem conhecer
   BLE, display ou hardware de áudio;
 - `onDisconnected()`, uma notificação de ciclo de vida usada para limpeza segura.
 
-O contrato é deliberadamente pequeno. Control Change ainda não atravessa a
-fronteira de instrumento porque nenhum comportamento musical baseado em CC foi
-implementado. O receiver pode observar mais mensagens do que o contrato comum
-precisa expor.
+O contrato continua deliberadamente pequeno. CC atravessa a fronteira como
+mensagem semântica genérica; a interpretação de CC1, CC64 ou qualquer outro
+controlador pertence ao instrumento. Program Change, relógio e timestamps
+permanecem fora até que uma composição real exija sua semântica.
 
 ### Entrada BLE MIDI
 
@@ -123,6 +131,31 @@ silencia imediatamente a saída. Pitch bend é armazenado como estado musical,
 mapeado para uma faixa configurável de semitons e entregue ao backend como uma
 frequência já calculada.
 
+### Integração AMY
+
+O repositório [`amy-synth-m5`](https://github.com/fczuardi/amy-synth-m5)
+publica uma fachada que implementa `InstrumentEventSink` diretamente e dirige
+a engine AMY no M5Stack Core Gray. Ela não passa por `VoiceOutput`: preserva
+conceitos de nível musical que a engine entende nativamente, como nota,
+velocity, patch, pitch bend e modulação.
+
+A configuração validada contém um slot AMY globalmente monofônico e uma tabela
+fixa de 16 patches, um para cada canal MIDI. Mudar de canal seleciona timbre; não
+cria 16 vozes nem um sintetizador multitimbral. A política de última nota é
+global entre canais, e a volta para uma tecla ainda pressionada também restaura
+o patch correspondente.
+
+CC1 usa um perfil de performance inspirado no Juno: um único mapping por canal
+expande para comandos compostos nos osciladores tonais do patch ativo. A
+topologia concreta continua sendo responsabilidade da integração AMY, não do
+contrato genérico de Control Change. Estado contínuo como bend e modulação é
+preservado e reaplicado quando uma troca de patch exige reconstruir a voz.
+
+A versão validada pelo Showcase 3 é `amy-synth-m5@0.3.1`. Como a combinação
+AMY, BLE e framework ocupa praticamente toda a IRAM física do ESP32 clássico, o
+CI trata IRAM, DRAM e tamanho da imagem como orçamentos explícitos e publica
+artefatos de memória para inspeção.
+
 ### Composições executáveis
 
 `showcases/ble-midi-buzzer` combina os pacotes para o M5StickC Plus2:
@@ -151,6 +184,13 @@ apenas a borda de hardware para `M5CoreGrayToneOutput`, o alvo
 validação em hardware passou com SynthBridge no Android após limpar estado BLE
 obsoleto do app/sistema. O Core Gray tocou notas, respondeu bem a pitch bend e
 reproduziu notas graves melhor que o buzzer do Plus2.
+
+`showcases/ble-midi-amy` compõe `ble-midi-input` diretamente com
+`AmyM5MonophonicSynth` no Core Gray. O showcase usa o banco validado de 16
+patches, CC1 no perfil Juno, pitch bend, velocity, panic e limpeza na
+desconexão. Os atalhos de canal 1–16 do Arturia foram exercitados em hardware,
+incluindo fallback monofônico entre canais e a regressão de centralização do
+bend antes da nota seguinte.
 
 Essas composições são exemplos executáveis, não produtos adicionais. Elas
 pertencem ao guarda-chuva porque provam que pacotes independentes realmente
@@ -204,7 +244,8 @@ atual: iniciar, atualizar ou parar uma voz. Uma engine polifônica madura não d
 ser forçada a caber nessa abstração e perder sua própria alocação de vozes,
 envelopes, patches ou operação multitimbral.
 
-Uma integração futura pode implementar `InstrumentEventSink` diretamente:
+A integração AMY confirmou que uma engine completa pode implementar
+`InstrumentEventSink` diretamente:
 
 ```mermaid
 flowchart TD
@@ -214,15 +255,16 @@ flowchart TD
     X --> S["Engine externa"]
 ```
 
-Essa fronteira será extraída somente após um probe real. Engines que produzem
-buffers PCM também podem revelar uma segunda borda entre geração de amostras e
-saída física; ainda não existe evidência suficiente para nomear uma interface
-universal para ela.
+Esse caminho já foi provado sem transformar `VoiceOutput` numa abstração
+universal. A AMY também confirmou uma borda concreta entre a engine que produz
+PCM e a ponte que entrega amostras ao speaker do Core Gray. Ainda não existe
+evidência suficiente para promover essa borda específica a um contrato comum
+entre engines.
 
 ### Instrumentos orientados a performance e synths MIDI externos
 
-O probe da AMY revelou uma distinção que o backend de tons simples não precisava
-expressar. Há pelo menos três formas diferentes de chegar ao som:
+A integração da AMY revelou uma distinção que o backend de tons simples não
+precisava expressar. Há pelo menos três formas diferentes de chegar ao som:
 
 | Caminho | Entrada útil | Responsabilidade de saída |
 | --- | --- | --- |
@@ -240,8 +282,8 @@ somente frequência.
 
 Isso reforça que a fronteira compartilhada deve continuar semântica:
 
-- `NoteEvent`, `PitchBendEvent`, desconexão e panic já descrevem intenções úteis
-  para os três caminhos;
+- `NoteEvent`, `PitchBendEvent`, `ControlChangeEvent`, desconexão e panic
+  já descrevem intenções úteis para os três caminhos;
 - patch é estado específico do instrumento, enquanto MIDI Program Change é uma
   possível mensagem compartilhada;
 - o alcance do pitch bend é configuração do instrumento, separado da posição
@@ -253,9 +295,9 @@ Isso reforça que a fronteira compartilhada deve continuar semântica:
 A API do Unit Synth não deve ser copiada como interface universal. Ela mistura
 mensagens MIDI padronizadas, SysEx e controles específicos do chip em uma única
 classe de driver. Seu valor aqui é servir como evidência de vocabulário e
-composição. Um futuro `ProgramChangeEvent` ou contrato de Control Change só deve
-ser acrescentado quando uma composição real possuir produtor e consumidor para
-ele.
+composição. Um futuro `ProgramChangeEvent` só deve ser acrescentado quando uma composição
+real possuir produtor e consumidor para ele. Control Change já possui ambos e
+permanece genérico no contrato compartilhado.
 
 Fontes:
 
@@ -366,7 +408,8 @@ O projeto deve preferir integrar trabalho Open Source maduro a reimplementar
 síntese já bem explorada. Os candidatos atuais não são intercambiáveis:
 
 - **AMY:** sintetizador completo com polifonia, presets, FM, samples, envelopes
-  e efeitos; primeiro candidato para um probe de engine pronta;
+  e efeitos; já integrado e validado no Core Gray por uma fachada
+  `InstrumentEventSink`;
 - **ESP32Synth:** engine recente e otimizada especificamente para a família
   ESP32, com vários modos de saída e ampla capacidade declarada;
 - **esp32_fm_synth:** implementação de referência de um sintetizador FM
@@ -378,8 +421,9 @@ síntese já bem explorada. Os candidatos atuais não são intercambiáveis:
   saída de áudio para microcontroladores;
 - **Faust:** linguagem e toolchain capaz de gerar DSP C++ para ESP32.
 
-Cada candidato começa isolado, sem BLE, e precisa demonstrar som no hardware
-antes de receber um adapter para os contratos compartilhados. A integração deve
+Cada novo candidato deve começar isolado, sem BLE, e demonstrar som no hardware
+antes de receber um adapter para os contratos compartilhados. A AMY já percorreu
+esse caminho e serve como evidência para o método. A integração deve
 preservar a dependência externa e sua licença, não copiar silenciosamente a
 engine para dentro do ecossistema.
 
@@ -429,8 +473,9 @@ promessa de compatibilidade automática com qualquer ESP32.
 | `embedded-music-experiments` | design, roadmap, contratos compartilhados e showcases |
 | `midi-receiver` | experimento de diagnóstico e pacote reutilizável de entrada BLE MIDI |
 | `monophonic-instrument` | política monofônica e pacote reutilizável de saída/instrumento |
+| `amy-synth-m5` | integração AMY, fachada de instrumento e ponte PCM para hardware M5 |
 
-Os três repositórios usam PlatformIO com Arduino e dependências explícitas. Cada
+Os quatro repositórios usam PlatformIO com Arduino e dependências explícitas. Cada
 pacote possui `library.json`; o showcase fixa revisões das dependências para que
 uma composição validada possa ser reproduzida. CI verifica contratos, testes
 nativos, empacotamento e builds relevantes.
@@ -495,16 +540,20 @@ dependências e compatibilidade com as fronteiras existentes.
 
 ## Decisões ainda abertas
 
-- Qual engine existente produzirá primeiro som útil na bancada atual?
-- Uma engine completa consumirá `InstrumentEventSink` diretamente ou revelará
-  outra fronteira semântica necessária?
-- Os speakers internos aceitarão buffers PCM de forma útil ou uma saída I²S
-  externa será necessária para as engines contínuas?
-- Qual necessidade concreta fará Control Change atravessar o contrato comum?
-- Qual comportamento real de uma engine justificará expor canais, patches,
-  sustain ou modulation?
-- Quando hardware USB host disponível justificará retomar a autonomia de entrada
-  sem transformar o próximo slice numa composição grande demais?
+- Quais conceitos, se houver, devem ser comuns entre a fachada AMY e futuras
+  engines sem apagar capacidades próprias de cada uma?
+- Quando uma segunda engine PCM justificará extrair uma borda comum entre
+  renderização de amostras e saída física?
+- Sustain deve permanecer interpretação de CC64 em cada instrumento ou surgir
+  como política musical reutilizável após uma segunda implementação?
+- Qual caso concreto justificará `ProgramChangeEvent`, timestamps ou contratos
+  de clock e transporte?
+- Que fronteira real surgirá ao transformar Keyboard Face e outros controles
+  locais em produtores dos mesmos eventos semânticos?
+- O probe USB MIDI host no M5Stick S3 poderá reutilizar integralmente os
+  contratos atuais e eliminar a ponte Android numa composição de uma placa?
+- Quais limites de IRAM, DRAM, CPU e latência devem impedir a adição de recursos
+  a uma composição já validada?
 
 ## Critérios para boas decisões
 
