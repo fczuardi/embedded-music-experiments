@@ -44,12 +44,12 @@ The reusable ecosystem can be understood as four families:
 
 The intended direction is:
 
-\`\`\`text
+```text
 physical or protocol input
         -> semantic musical events
         -> musical policy or transformation
         -> sound engine, hardware output, or another transport
-\`\`\`
+```
 
 BLE, USB, a local keyboard, and a sequencer should be able to express the same
 musical intention. AMY, the tone backends, and future outputs should not need to
@@ -77,7 +77,7 @@ composition.
 
 ### 0. Stabilize and Propagate the 16-Channel AMY Baseline
 
-1. publish the validated \`amy-synth-m5\` release;
+1. publish the validated `amy-synth-m5` release;
 2. update umbrella Showcase 3 to consume the fixed 16-channel configuration;
 3. preserve the audited Juno patch table in the showcase;
 4. build it in CI with the established IRAM evidence;
@@ -90,14 +90,14 @@ This closes the current line before a new input source is introduced.
 
 Use the 36-key Keyboard Face as the first non-MIDI producer:
 
-\`\`\`text
+```text
 Keyboard Face
     -> local key mapping
     -> NoteEvent
     -> monophonic policy
     -> AMY
     -> Core Gray speaker
-\`\`\`
+```
 
 The first slice should only prove key press, key release, note mapping, and safe
 cleanup. Octave changes, patch selection, sustain, and modulation can follow as
@@ -106,7 +106,7 @@ separate slices.
 This experiment unlocks:
 
 - a playable device without BLE, USB MIDI, or Android;
-- the first producer that proves \`NoteEvent\` is independent of MIDI transport;
+- the first producer that proves `NoteEvent` is independent of MIDI transport;
 - an empirical boundary between physical key scanning and musical mapping;
 - a foundation for using the same Face later as step-entry hardware.
 
@@ -119,12 +119,12 @@ contracts.
 Connect the Arturia MicroLab directly to the S3 and translate USB MIDI into the
 same event vocabulary:
 
-\`\`\`text
+```text
 Arturia USB MIDI
     -> USB host transport
     -> shared events
     -> existing instrument consumer
-\`\`\`
+```
 
 Proceed in this order:
 
@@ -132,7 +132,7 @@ Proceed in this order:
 2. log raw MIDI messages;
 3. translate Note On/Off only;
 4. add pitch bend, CC1, channels, and cleanup;
-5. extract \`usb-midi-input\` only after the working path reveals its boundary;
+5. extract `usb-midi-input` only after the working path reveals its boundary;
 6. compare latency and failure cleanup with the Android BLE bridge.
 
 A powered hub or power bank is a composition detail. USB parsing must remain
@@ -165,11 +165,11 @@ working interaction, then extract only the repeated boundary.
 Before implementing a tracker or sequencer, create the smallest experiment that
 needs musical time:
 
-\`\`\`text
+```text
 internal clock
     -> metronome tick
     -> display and/or sound
-\`\`\`
+```
 
 Let that experiment determine the initial semantics for start, continue, stop,
 tempo, and clock ticks. MIDI Clock, monotonic live time, and Standard MIDI File
@@ -248,8 +248,8 @@ tested beside them.
 | FM engines | Can an existing implementation provide a distinct voice without duplicating mature DSP work? |
 | External synth or PSG hardware | Can semantic events drive dedicated sound chips or modules cleanly? |
 
-A mature synth engine may consume \`InstrumentEventSink\` directly. It should
-not be forced behind the simple frequency-oriented \`VoiceOutput\` abstraction
+A mature synth engine may consume `InstrumentEventSink` directly. It should
+not be forced behind the simple frequency-oriented `VoiceOutput` abstraction
 if that would discard patches, envelopes, polyphony, effects, or native voice
 allocation.
 
@@ -267,7 +267,7 @@ A future receiver probe may:
 2. advertise BLE MIDI;
 3. receive and log raw packets;
 4. parse Note On/Off;
-5. compare component boundaries and resource use with \`ble-midi-input\`.
+5. compare component boundaries and resource use with `ble-midi-input`.
 
 Only framework-independent protocol or semantic code should be considered for
 sharing. Transport implementations and applications may remain
@@ -276,7 +276,7 @@ framework-specific.
 ## Module and Repository Rules
 
 - A new logical role does not automatically require a new repository.
-- A small executable composition normally belongs under \`showcases/\`.
+- A small executable composition normally belongs under `showcases/`.
 - Extract a package after a working experiment reveals a reusable boundary.
 - Create a sibling repository when the module has independent value and a
   credible lifecycle of its own.
