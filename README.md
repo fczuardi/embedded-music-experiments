@@ -1,5 +1,7 @@
 # Embedded music experiments
 
+<img width="1600" height="719" alt="Image" src="https://github.com/user-attachments/assets/3e846caa-415e-4179-95d3-e37f114333b1" />
+
 Small, open-ended experiments with MIDI, embedded hardware, and simple musical instruments.
 
 This repository is the documentation hub for the experiments. It does not contain a monolithic application or promise a particular final product.
