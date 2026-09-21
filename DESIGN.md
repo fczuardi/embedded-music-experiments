@@ -2,7 +2,7 @@
 
 **Status:** documento vivo de arquitetura e direção
 
-**Última revisão:** 2026-09-19
+**Última revisão:** 2026-09-21
 
 **Hardwares de validação atuais:** M5StickC Plus2 e M5Stack Core Gray 1.0
 
@@ -492,6 +492,13 @@ preservam tentativas e descobertas empíricas; este documento descreve a
 arquitetura vigente; [`docs/ROADMAP.md`](docs/ROADMAP.md) ordena os próximos
 testes; [`docs/BACKLOG.md`](docs/BACKLOG.md) guarda possibilidades de menor
 certeza.
+
+O [`radar de semânticas de interação`](docs/design/interaction-semantics-radar.md)
+registra comportamentos já usados por instrumentos e softwares musicais, como
+trigger, gate, latch, probability e micro-timing. O radar preserva vocabulário,
+fontes e hipóteses; seus itens não são automaticamente contratos nem compromissos
+de roadmap. Uma ideia só atravessa essa fronteira quando experimentos locais
+revelam produtores e consumidores reais para ela.
 
 O Git e os devlogs contam como chegamos aqui. Este documento não precisa repetir
 essa cronologia nem funcionar como changelog.
