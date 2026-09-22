@@ -2,7 +2,7 @@
 
 **Status:** pesquisa de design, não API nem roadmap
 
-**Última revisão:** 2026-09-21
+**Última revisão:** 2026-09-22
 
 ## Propósito
 
@@ -34,15 +34,15 @@ não foi extraído como contrato compartilhado.
 
 | Conceito | Camada provável | Referências externas | Evidência ou uso nosso | Estado atual |
 | --- | --- | --- | --- | --- |
-| Trigger / one-shot | evento e reprodução | Koala, Roland P-6, Pocket Operators, drum machines | probe do drum kit AMY; plano do sequenciador Calculator | observado, candidato |
+| Trigger / one-shot | evento e reprodução | Koala, Roland P-6, Pocket Operators, drum machines | probe do drum kit AMY; sequenciador Calculator dispara quatro tracks AMY | observado, candidato |
 | Gate | evento e voz | MIDI, Koala, Roland P-6 | Note On/Off nos showcases BLE MIDI | observado |
 | Hold / latch | interação e voz | Koala, Roland P-6 e Behringer Crave | nenhum experimento dedicado | referência |
 | Loop / toggle | política de reprodução | Koala e Roland P-6 | nenhum experimento dedicado | referência |
 | Choke | política entre vozes | samplers e hi-hats de drum machines | ainda não testado | referência |
 | Monofonia / polifonia | alocação de vozes | MIDI, AMY e Roland P-6 | instrumento monofônico e slot AMY | adotado localmente |
 | Mute / mute all | política de pista | sequenciadores e Roland P-6 | interação planejada para Calculator | candidato |
-| Pattern | composição | sequenciadores e Roland P-6 | patterns planejados para Calculator | candidato |
-| Note / rest | conteúdo do step | Behringer Crave e sequenciadores melódicos | Calculator planeja trigger/rest sem pitch | referência |
+| Pattern | composição | sequenciadores e Roland P-6 | Calculator implementa um pattern volátil de quatro tracks por dezesseis steps | adotado localmente |
+| Note / rest | conteúdo do step | Behringer Crave e sequenciadores melódicos | Calculator implementa trigger/rest booleano sem pitch | adotado localmente para bateria |
 | Velocity / accent | evento e step | MIDI, Koala, Roland P-6 e Behringer Crave | velocity nos contratos e showcases MIDI | extraído para notas; candidato para steps |
 | Gate time | step e voz | Roland P-6 e Behringer Crave | ainda não necessário para bateria one-shot | adiado |
 | Probability | step | Roland P-6 | ainda não testado | referência |
@@ -52,14 +52,14 @@ não foi extraído como contrato compartilhado.
 | Parameter lock | automação por step | Pocket Operators | ainda não testado | referência |
 | Punch-in effect | performance temporária | Pocket Operators | ainda não testado | referência |
 | Accent | expressão do step | Pocket Operators e drum machines | velocity existe, accent por step ainda não | candidato distante |
-| Swing | clock e agendamento | Pocket Operators, Roland P-6 e Korg Volca | tempo fixo planejado para Calculator | referência |
+| Swing | clock e agendamento | Pocket Operators, Roland P-6 e Korg Volca | Calculator possui BPM variável, mas divisão reta | referência |
 | Step Loop / Scatter | performance sobre transporte | Roland P-6 | ainda não testado | referência |
-| Active Step | geometria do pattern | Korg Volca | todos os 16 steps planejados permanecem ativos | referência |
+| Active Step | geometria do pattern | Korg Volca | todos os 16 steps implementados permanecem ativos | referência |
 | Step Jump | performance sobre transporte | Korg Volca | troca de pattern planejada é quantizada, não um jump | referência |
 | Flux / gravação livre | captura temporal | Korg Volca Keys | ainda não testado | referência |
 | Step Trigger | articulação da voz | Korg Volca Keys | ainda não testado | referência |
 | Stutter | repetição performática | Korg Volca Beats | ainda não testado | referência |
-| Pattern end / logical length | estrutura do pattern | Behringer Crave | Calculator planeja 16 steps fixos | referência |
+| Pattern end / logical length | estrutura do pattern | Behringer Crave | Calculator implementa 16 steps fixos | adotado localmente |
 | Page | navegação de edição | Behringer Crave | Calculator expõe os 16 steps simultaneamente | referência |
 | Reset / hold playhead | performance sobre transporte | Behringer Crave | ainda não testado | referência |
 | Arpeggiator traversal | geração algorítmica | Behringer Crave | ainda não testado | referência |
@@ -97,7 +97,7 @@ não foi extraído como contrato compartilhado.
 | Chop | material sonoro e mapeamento | Roland P-6 | ainda não testado | referência |
 | Resampling | criação de material | Koala e Roland P-6 | ainda não testado | referência |
 | Síntese granular | engine sonora | Roland P-6 | AMY é outra classe de engine | referência |
-| Clock / transport | tempo e execução | MIDI e sequenciadores | clock contínuo planejado para Calculator | candidato |
+| Clock / transport | tempo e execução | MIDI e sequenciadores | `StepClock` local mantém playback contínuo na Calculator; metronome Plus2 será o segundo experimento | observado, candidato |
 | Program / bank | seleção de sons | MIDI e instrumentos digitais | patches AMY selecionados por canal | referência; sem contrato próprio |
 
 ## Fronteiras sugeridas pela comparação
@@ -134,10 +134,17 @@ bem com edição de steps, disparos one-shot e comandos toggle. Os botões A, B 
 do Core Gray continuam disponíveis quando uma interação precisar distinguir
 press e release.
 
-O primeiro sequenciador de bateria deve começar com steps booleanos e triggers
-one-shot. Velocity/accent, probability, sub-steps e micro-timing permanecem no
-radar, sem aumentar o primeiro modelo antes de existir validação musical e de
-interface para cada recurso.
+O repositório
+[`calculator-face-input`](https://github.com/fczuardi/calculator-face-input)
+validou essa hipótese em hardware. Seu baseline possui quatro tracks, dezesseis
+steps booleanos, playhead contínuo, triggers one-shot AMY, BPM e volume
+ajustáveis, e seleção direta de vinte sons por track. A grade mantém edição
+normal sem modificador; Core A abre settings e Core B abre seleção de som.
+
+O app ainda possui somente um pattern volátil. Mute, clear, copy, variation,
+patterns múltiplos e chains permanecem experimentos locais futuros. Velocity,
+accent, probability, sub-steps e micro-timing continuam no radar sem inflar o
+modelo validado antes de existir evidência musical e de interface.
 
 ## Pocket Operators como família
 
@@ -200,7 +207,8 @@ trigger  -> posição consome tempo e dispara
 Flux revela outra fronteira potencial: captura quantizada produz naturalmente
 um pattern de steps, enquanto captura livre exige uma timeline ou timestamps.
 Essa diferença deve permanecer no radar até algum experimento nosso precisar
-gravar performance, pois o sequenciador Calculator inicialmente só edita steps.
+gravar performance, pois o sequenciador Calculator edita steps e atribuições de
+som, mas não grava uma execução ao vivo.
 
 ## Behringer Crave e o step melódico
 
@@ -293,9 +301,10 @@ Loop possui posição e comprimento próprios e permite saída imediata ou na
 próxima barra. Essa última escolha exemplifica um **quantized command**: o gesto
 ocorre agora, mas a mudança de estado é aplicada numa fronteira musical.
 
-Para a Calculator, `queue next pattern` já é um candidato local dessa semântica.
-Isso não exige adotar a hierarquia completa do K.O. II: o primeiro pattern pode
-continuar contendo diretamente quatro tracks de dezesseis steps.
+Para a Calculator, `queue next pattern` continua candidato local dessa
+semântica, ainda não implementado. Isso não exige adotar a hierarquia completa
+do K.O. II: o primeiro pattern já contém diretamente quatro tracks de dezesseis
+steps.
 
 ## Survey de tiny sequencers
 

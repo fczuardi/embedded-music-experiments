@@ -32,6 +32,16 @@ The AMY package milestone is published as `amy-synth-m5@0.3.1`, and its
 16-channel API and audited patch table are propagated into the umbrella
 Showcase 3 with Core Gray hardware validation.
 
+The sibling
+[`calculator-face-input`](https://github.com/fczuardi/calculator-face-input)
+repository now also provides a self-contained instrument baseline: a
+hardware-validated four-track, sixteen-step drum sequencer for the Calculator
+Face and Core Gray. It runs continuously, triggers AMY drums, supports live
+step editing, exposes volume and tempo through a Core A modifier layer, and
+assigns one of twenty curated drum sounds to each track through a Core B layer.
+It deliberately remains a single volatile pattern; mute, copy, variation,
+pattern storage, and chains are later experiments.
+
 ## Capability Model
 
 The reusable ecosystem can be understood as four families:
@@ -62,7 +72,7 @@ know where that intention originated.
 | --- | --- |
 | Two M5Stack Core Gray units | How far can AMY and coordinated physical instruments go? |
 | 36-key Keyboard Face | Can the ecosystem become a self-contained playable instrument without MIDI or a phone? |
-| 20-key Calculator Face | Can numeric entry and a button grid edit BPM, patches, steps, and parameters? |
+| 20-key Calculator Face | Validated for direct track selection, 16-step editing, tempo/volume commands, and per-track sound assignment |
 | Game-style Face | Can a small directional pad and action buttons provide useful transport and performance control? |
 | M5StickC | How portable are the modules across older M5 hardware? |
 | M5StickC Plus2 | What is the smallest useful buzzer instrument and control surface? |
@@ -148,7 +158,7 @@ Use the available Faces and displays according to their physical strengths:
 | Input surface | Initial role |
 | --- | --- |
 | Keyboard Face | notes, octave, chord or step entry |
-| Calculator Face | BPM, patch number, pattern and numeric parameters |
+| Calculator Face | Validated for track/step editing and modal settings/sound commands; patterns and numeric entry remain open |
 | Game Face | navigation, play/stop, pattern change, mute and performance actions |
 | Core/S3/T-Display screens | state display and editing feedback |
 
@@ -159,10 +169,10 @@ commands, or configuration changes.
 Do not create a universal UI framework from the first Face. Build one small
 working interaction, then extract only the repeated boundary.
 
-### 4. Clock, Transport, and a Minimal Metronome
+### 4. Next Timing Experiment: a Minimal M5StickC Plus2 Metronome
 
-Before implementing a tracker or sequencer, create the smallest experiment that
-needs musical time:
+Create a focused sibling `metronome` repository for the smallest second
+experiment that needs musical time:
 
 ```text
 internal clock
@@ -170,36 +180,43 @@ internal clock
     -> display and/or sound
 ```
 
+Target the M5StickC Plus2, its two buttons, small display, and onboard buzzer.
 Let that experiment determine the initial semantics for start, continue, stop,
-tempo, and clock ticks. MIDI Clock, monotonic live time, and Standard MIDI File
-ticks are related but not identical and should not be collapsed prematurely.
+tempo, meter, downbeats, and clock ticks. MIDI Clock, monotonic live time, and
+Standard MIDI File ticks are related but not identical and should not be
+collapsed prematurely.
 
-A useful contract may eventually resemble a typed transport event, but it
-should be introduced only when the metronome or sequencer has both a producer
-and a consumer.
+A local `StepClock` already drives the Calculator sequencer, but one consumer is
+not enough evidence for extraction. Compare it with the metronome implementation
+before introducing a transport or beat-clock package. The umbrella should only
+gain a metronome showcase after the application becomes a thin composition of
+proven packages.
 
-### 5. Minimal Step Sequencer, Then Tracker Exploration
+### 5. Completed Drum Baseline, Then Melodic and Pattern Exploration
 
-Start with a deliberately small sequencer:
+The Calculator experiment exceeded the original one-track proposal with a
+validated baseline:
 
 - 16 steps;
-- one track;
-- one note per step;
-- BPM;
-- play and stop;
-- output through the existing note-event boundary.
+- four boolean drum tracks;
+- continuous playback with visible playhead;
+- live tempo and volume changes;
+- twenty directly selectable AMY drum sounds per track;
+- fixed-size state and no allocation in the event or audio paths.
 
-The sequencer must produce semantic events rather than call AMY directly. That
-allows the same pattern to drive a buzzer, speaker, AMY, an external MIDI synth,
-or another gadget.
+The app currently calls AMY directly at its output edge. That is acceptable for
+the focused experiment, but trigger semantics and a generic sequencer output
+must not be claimed from this single consumer.
 
-After the one-track sequence works:
+The next sequencer slices may:
 
-1. use the Keyboard Face for note entry;
-2. use the Game Face for navigation and transport;
-3. evaluate the Calculator Face for direct step and parameter entry;
-4. use the T-Display-S3 when a denser visual editor becomes necessary;
-5. add tracks, rests, velocity, ties, automation, and tracker concepts only as
+1. add mute, clear, copy, variation, pattern navigation, and chains locally;
+2. keep playing, editing, and queued pattern identities distinct;
+3. build a complementary melodic sequencer before extracting generic pattern
+   or sequencer contracts;
+4. use the Keyboard Face for melodic note entry or the Game Face for navigation
+   and transport only when a concrete composition needs them;
+5. add rests, velocity, ties, automation, and tracker concepts only as
    independent slices.
 
 ### 6. Routing and Coordination Between Gadgets
@@ -299,18 +316,14 @@ Prefer a slice that:
 
 ## Current Next Steps
 
-1. Begin the Keyboard Face + Core Gray self-contained instrument probe.
-2. Begin direct USB MIDI host enumeration on the M5Stick S3.
-3. Choose between the local-input and USB-input paths for the next reusable
-   package only after both boundaries have real evidence.
-
-The Keyboard Face and USB host experiments remove different dependencies:
-
-- local keys remove both the external controller and the phone;
-- USB host preserves the capable Arturia controller and removes only the phone.
-
-Together they are the strongest next test that the modularity built so far is
-real rather than specific to BLE MIDI.
+1. Preserve the Calculator drum sequencer as the current playable checkpoint.
+2. Start the M5StickC Plus2 metronome in a focused sibling repository.
+3. Compare its timing and tempo-change behavior with the Calculator
+   `StepClock`; extract nothing until the comparison reveals a stable contract.
+4. Return to Calculator mute, pattern variation, and chaining as independent
+   hardware-testable slices.
+5. Use a later melodic sequencer as the second consumer for any proposed
+   pattern-storage or sequencer-core boundary.
 
 ## North Star
 
