@@ -50,5 +50,5 @@ Calculator baseline, and melodic articulation waits for a real local consumer.
 ## Verification
 
 The cited manuals and product documentation were reviewed on 2026-09-21. Radar
-entries remain external references, while the queued Calculator section change
+entries remain external references, while the queued Calculator pattern change
 continues to be the only nearby candidate for a shared timing-related semantic.

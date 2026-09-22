@@ -41,7 +41,7 @@ não foi extraído como contrato compartilhado.
 | Choke | política entre vozes | samplers e hi-hats de drum machines | ainda não testado | referência |
 | Monofonia / polifonia | alocação de vozes | MIDI, AMY e Roland P-6 | instrumento monofônico e slot AMY | adotado localmente |
 | Mute / mute all | política de pista | sequenciadores e Roland P-6 | interação planejada para Calculator | candidato |
-| Pattern / section | composição | sequenciadores e Roland P-6 | seções planejadas para Calculator | candidato |
+| Pattern | composição | sequenciadores e Roland P-6 | patterns planejados para Calculator | candidato |
 | Note / rest | conteúdo do step | Behringer Crave e sequenciadores melódicos | Calculator planeja trigger/rest sem pitch | referência |
 | Velocity / accent | evento e step | MIDI, Koala, Roland P-6 e Behringer Crave | velocity nos contratos e showcases MIDI | extraído para notas; candidato para steps |
 | Gate time | step e voz | Roland P-6 e Behringer Crave | ainda não necessário para bateria one-shot | adiado |
@@ -55,7 +55,7 @@ não foi extraído como contrato compartilhado.
 | Swing | clock e agendamento | Pocket Operators, Roland P-6 e Korg Volca | tempo fixo planejado para Calculator | referência |
 | Step Loop / Scatter | performance sobre transporte | Roland P-6 | ainda não testado | referência |
 | Active Step | geometria do pattern | Korg Volca | todos os 16 steps planejados permanecem ativos | referência |
-| Step Jump | performance sobre transporte | Korg Volca | troca de seção planejada é quantizada, não um jump | referência |
+| Step Jump | performance sobre transporte | Korg Volca | troca de pattern planejada é quantizada, não um jump | referência |
 | Flux / gravação livre | captura temporal | Korg Volca Keys | ainda não testado | referência |
 | Step Trigger | articulação da voz | Korg Volca Keys | ainda não testado | referência |
 | Stutter | repetição performática | Korg Volca Beats | ainda não testado | referência |
@@ -63,15 +63,15 @@ não foi extraído como contrato compartilhado.
 | Page | navegação de edição | Behringer Crave | Calculator expõe os 16 steps simultaneamente | referência |
 | Reset / hold playhead | performance sobre transporte | Behringer Crave | ainda não testado | referência |
 | Arpeggiator traversal | geração algorítmica | Behringer Crave | ainda não testado | referência |
-| Composition hierarchy | arranjo e armazenamento | Teenage Engineering EP-133 K.O. II | Calculator combina tracks diretamente em sections | referência |
+| Composition hierarchy | arranjo e armazenamento | Teenage Engineering EP-133 K.O. II | Calculator combina tracks diretamente em patterns | referência |
 | Commit / variation | workflow de composição | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
-| Scene duration policy | sincronização de patterns | Teenage Engineering EP-133 K.O. II | sections atuais teriam duração uniforme | referência |
+| Scene duration policy | sincronização de patterns | Teenage Engineering EP-133 K.O. II | patterns atuais teriam duração uniforme | referência |
 | Parameter scope | estado e automação | Teenage Engineering EP-133 K.O. II | ainda não formalizado | referência |
 | Retrigger / legato continuation | articulação da voz | Teenage Engineering EP-133 K.O. II | synth BLE usa retrigger monofônico | referência |
 | Selective quantization | edição temporal | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
 | Undo | edição | Teenage Engineering EP-133 K.O. II e Pocket Operators | ainda não planejado | referência |
 | Loop window | performance sobre timeline | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
-| Quantized command | agendamento de interação | Teenage Engineering EP-133 K.O. II | troca de section planejada para a fronteira | candidato |
+| Quantized command | agendamento de interação | Teenage Engineering EP-133 K.O. II | troca de pattern planejada para a fronteira | candidato |
 | Pressure-sensitive effect | expressão de performance | Teenage Engineering EP-133 K.O. II | hardware Calculator não mede pressão | referência |
 | Tracker hierarchy | composição por referências | picoTracker e MicroDexed Touch | ainda não testado | referência |
 | Command table | automação reutilizável | picoTracker | ainda não testado | referência |
@@ -93,7 +93,7 @@ não foi extraído como contrato compartilhado.
 | Transformation pipeline | processamento de eventos | Arturia KeyLab mk3 | ainda não testado | referência |
 | Tie / legato transition | articulação do step | Arturia KeyStep e Moog Grandmother | ainda não testado | referência |
 | Polyphonic / chord step | conteúdo do step | Moog Matriarch | ainda não testado | referência |
-| Pattern chain | arranjo | Pocket Operators | seções navegáveis planejadas, mas não encadeadas | referência |
+| Pattern chain | arranjo | Pocket Operators | patterns navegáveis planejados, mas não encadeados | referência |
 | Chop | material sonoro e mapeamento | Roland P-6 | ainda não testado | referência |
 | Resampling | criação de material | Koala e Roland P-6 | ainda não testado | referência |
 | Síntese granular | engine sonora | Roland P-6 | AMY é outra classe de engine | referência |
@@ -175,7 +175,7 @@ variam entre modelos e não formam uma única API de sequenciador.
   gravação. Isso é diferente de um rest: o rest ocupa tempo sem disparar, enquanto
   um step inativo deixa de participar do ciclo.
 - **Step Jump** desloca imediatamente o playhead para uma posição pressionada.
-  Isso é diferente da troca de seção quantizada planejada para a Calculator.
+  Isso é diferente da troca de pattern quantizada planejada para a Calculator.
 - **Flux**, no Volca Keys, grava e reproduz continuamente sem alinhar a execução
   ao início de um step. Com Flux desligado, a gravação volta a ser quantizada.
 - **Step Trigger**, também no Volca Keys, força o envelope a reiniciar no começo
@@ -293,8 +293,8 @@ Loop possui posição e comprimento próprios e permite saída imediata ou na
 próxima barra. Essa última escolha exemplifica um **quantized command**: o gesto
 ocorre agora, mas a mudança de estado é aplicada numa fronteira musical.
 
-Para a Calculator, `queue next section` já é um candidato local dessa semântica.
-Isso não exige adotar a hierarquia completa do K.O. II: a primeira section pode
+Para a Calculator, `queue next pattern` já é um candidato local dessa semântica.
+Isso não exige adotar a hierarquia completa do K.O. II: o primeiro pattern pode
 continuar contendo diretamente quatro tracks de dezesseis steps.
 
 ## Survey de tiny sequencers

@@ -28,7 +28,7 @@ quantization, undo, loop windows, quantized commands, and pressure-sensitive
 effects.
 
 These remain reference concepts. The Calculator baseline still stores four
-tracks directly inside each fixed-length section. Its queued section change is
+tracks directly inside each fixed-length pattern. Its queued pattern change is
 the only current candidate for the more general quantized-command semantic.
 
 ## Verification
