@@ -73,6 +73,14 @@ não foi extraído como contrato compartilhado.
 | Loop window | performance sobre timeline | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
 | Quantized command | agendamento de interação | Teenage Engineering EP-133 K.O. II | troca de section planejada para a fronteira | candidato |
 | Pressure-sensitive effect | expressão de performance | Teenage Engineering EP-133 K.O. II | hardware Calculator não mede pressão | referência |
+| Tracker hierarchy | composição por referências | picoTracker e MicroDexed Touch | ainda não testado | referência |
+| Command table | automação reutilizável | picoTracker | ainda não testado | referência |
+| Overdub checkpoint | gravação incremental | Wavy Industries Monkey | ainda não testado | referência |
+| Nondestructive modifier / mixdown | edição e renderização MIDI | RetroKits RK-008 | ainda não testado | referência |
+| Track / MIDI-channel independence | roteamento | RetroKits RK-008 | canais selecionam patches AMY, mas não tracks | referência |
+| Parallel sequencer models | composição | MicroDexed Touch | ainda não testado | referência |
+| Conditional / generative step | decisão do sequenciador | Woovebox | ainda não testado | referência |
+| Gesture mapping | expressão de performance | Donner MEDO | ainda não testado | referência |
 | Pattern chain | arranjo | Pocket Operators | seções navegáveis planejadas, mas não encadeadas | referência |
 | Chop | material sonoro e mapeamento | Roland P-6 | ainda não testado | referência |
 | Resampling | criação de material | Koala e Roland P-6 | ainda não testado | referência |
@@ -277,6 +285,100 @@ Para a Calculator, `queue next section` já é um candidato local dessa semânti
 Isso não exige adotar a hierarquia completa do K.O. II: a primeira section pode
 continuar contendo diretamente quatro tracks de dezesseis steps.
 
+## Survey de tiny sequencers
+
+O vídeo *Tiny Sequencers Compared*, de Floyd Steinberg, foi usado como índice de
+descoberta para uma família mais ampla de instrumentos compactos. Afirmações
+técnicas abaixo foram confirmadas, quando possível, nos manuais e páginas dos
+respectivos projetos; o vídeo não é tratado como especificação.
+
+### Wavy Industries Monkey: loop por overdubs
+
+O Monkey favorece captura imediata em vez de edição de uma grade. Seu loop
+recorder possui comprimento fixo de 16 beats e cria um checkpoint ao terminar
+cada overdub. Undo remove o último checkpoint; uma ação mais ampla apaga um canal
+MIDI inteiro. Mute por canal permite transformar as camadas gravadas num arranjo
+performático simples.
+
+Esse modelo separa `take/overdub` de `track`: o histórico de criação é composto
+por passagens de gravação, enquanto organização e mute usam canais MIDI. Também
+mostra uma política útil de deduplicação ao atravessar a fronteira do loop: notas
+periódicas idênticas sobrepostas não são gravadas novamente.
+
+### picoTracker: referências e comandos verticais
+
+O picoTracker usa a hierarquia clássica de tracker: song channels referenciam
+chains, chains referenciam phrases e phrases armazenam eventos em rows. Uma
+chain pode reutilizar a mesma phrase com transposição diferente, reduzindo cópia
+de dados musicais.
+
+Tables formam pequenas sequências reutilizáveis de comandos, disparadas por uma
+phrase ou instrumento. Elas podem executar automação, arpejos e efeitos, fazer
+loop ou saltar entre trechos. Isso sugere uma fronteira entre conteúdo musical e
+programas de modificação, mas não exige uma linguagem de comandos no nosso
+sequenciador.
+
+### RetroKits RK-008: performance MIDI transformável
+
+O RK-008 grava performance MIDI em tempo real. Uma track pode conter eventos de
+qualquer um dos 16 canais, e canal de saída e porta são decisões de roteamento
+separadas. Track, canal MIDI e instrumento não são, portanto, sinônimos.
+
+Volume, transpose, quantize e note length podem ser aplicados como modificadores
+não destrutivos. `Mixdown` materializa essas transformações nos eventos, após o
+que novas transformações podem ser empilhadas. `Merge` combina tracks ou parts;
+`explode` divide conteúdo MIDI em várias tracks. O comprimento de uma part pode
+ser inferido da performance gravada em vez de definido antes da captura.
+
+Esse workflow distingue claramente:
+
+```text
+eventos gravados -> transformação não destrutiva -> render/mixdown
+```
+
+### MicroDexed Touch: dois sequenciadores sincronizados
+
+O MicroDexed Touch mantém dois modelos que podem funcionar simultaneamente: um
+sequenciador inspirado em LSDJ, estruturado em song, chains e patterns, e um
+LiveSequencer voltado à gravação mais direta. A coexistência é evidência de que
+tracker e gravador linear atendem atividades diferentes e não precisam ser
+fundidos numa abstração única para compartilhar clock e engines sonoras.
+
+Seu sequenciador por patterns também permite reutilizar dados com instrumentos
+e transposições diferentes. O conteúdo musical pode ser uma referência
+independente da voz que o executará.
+
+### Woovebox: steps como pequenas decisões
+
+O Woovebox amplia o step com conditionals, probability e mais de cem tipos de
+modificadores, além de polirritmia, geração, randomização de patterns/chains e
+transformações por fragmento no song mode. Ele representa o extremo oposto do
+step booleano inicial da Calculator: cada posição pode funcionar como uma
+pequena decisão programável.
+
+Essa referência reforça a cautela do radar. Um modelo poderoso de `Step` não é
+automaticamente um bom contrato comum; complexidade deve aparecer apenas quando
+um experimento musical precisar dela.
+
+### Donner MEDO: looper modal e gestos
+
+O MEDO organiza performance em papéis como drum, bass, chord, lead e sample e
+usa um looper com overdub, quantização e até 128 bars. Sensores permitem mapear
+click, press, slide, slap, tilt, shake, wiggle e movimento para parâmetros.
+
+Sua contribuição principal ao radar é a separação entre evento discreto e gesto
+contínuo ou corporal. `Gesture mapping` pertence à borda de controle; o resultado
+pode virar nota, modulação ou comando sem exigir que o instrumento conheça o
+sensor físico.
+
+### Itens que não entram como sequenciadores
+
+O computador Elecrow com Raspberry Pi é uma plataforma geral capaz de hospedar
+software musical, não uma semântica própria de sequenciamento. Geonkick, Surge
+XT, ZynAddSubFX e TAL Noisemaker aparecem no setup como engines ou instrumentos
+de software. Eles podem alimentar outra pesquisa sobre síntese e áudio, mas não
+são usados como evidência deste survey de workflows.
+
 ## Referências verificadas
 
 - [Koala Sampler Manual — Sample tab](https://manual.koalasampler.com/mobile/4-sample/):
@@ -320,6 +422,25 @@ continuar contendo diretamente quatro tracks de dezesseis steps.
   quantização seletiva, free time, note repeat e loop window.
 - [Teenage Engineering EP-133 effects](https://teenage.engineering/guides/ep-133/effects):
   effects por group e punch-in effects combináveis sensíveis à pressão.
+- [Floyd Steinberg — Tiny Sequencers Compared](https://www.youtube.com/watch?v=NyjVV-oM45Q):
+  índice comparativo usado para descobrir os dispositivos deste survey.
+- [Wavy Industries Monkey manual](https://wavyindustries.com/monkey/manual/):
+  loop de 16 beats, overdub checkpoints, undo e mute/erase por canal MIDI.
+- [picoTracker manual — introduction](https://manual.xiphonics.com/advance/introduction.html),
+  [chains](https://manual.xiphonics.com/advance/chains.html) e
+  [tables](https://manual.xiphonics.com/advance/tables.html): tracker de oito
+  canais, chains de phrases e sequências reutilizáveis de comandos.
+- [RetroKits RK-008 manual](https://retrokits.com/rk008/RK008_manual.pdf):
+  gravação MIDI em tempo real, routing por track, modificadores não destrutivos,
+  mixdown, merge e explode.
+- [MicroDexed Touch project](https://codeberg.org/positionhigh/MicroDexed-touch)
+  e [manual](https://www.musikandmore.net/wp-content/uploads/2025/12/MicroDexed-touch-manual.pdf):
+  sequenciadores tracker/pattern e live executáveis em paralelo.
+- [Woovebox product documentation](https://www.woovebox.com/): conditionals,
+  modifiers, probability, polyrhythm, generation, randomization e song mode.
+- [Donner MEDO product documentation](https://www.donnermusic.com/products/medo)
+  e [manual](https://cdn.accentuate.io/15091455787394/1757424260901/MEDO_maunal.pdf?v=1757424260901):
+  looper, modos instrumentais, quantização e controles por gesto.
 
 Links e comportamentos foram verificados em 2026-09-21. Uma atualização futura
 deve preservar a data e distinguir documentação oficial de inferências nossas.
