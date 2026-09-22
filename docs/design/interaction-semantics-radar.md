@@ -63,6 +63,16 @@ não foi extraído como contrato compartilhado.
 | Page | navegação de edição | Behringer Crave | Calculator expõe os 16 steps simultaneamente | referência |
 | Reset / hold playhead | performance sobre transporte | Behringer Crave | ainda não testado | referência |
 | Arpeggiator traversal | geração algorítmica | Behringer Crave | ainda não testado | referência |
+| Composition hierarchy | arranjo e armazenamento | Teenage Engineering EP-133 K.O. II | Calculator combina tracks diretamente em sections | referência |
+| Commit / variation | workflow de composição | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
+| Scene duration policy | sincronização de patterns | Teenage Engineering EP-133 K.O. II | sections atuais teriam duração uniforme | referência |
+| Parameter scope | estado e automação | Teenage Engineering EP-133 K.O. II | ainda não formalizado | referência |
+| Retrigger / legato continuation | articulação da voz | Teenage Engineering EP-133 K.O. II | synth BLE usa retrigger monofônico | referência |
+| Selective quantization | edição temporal | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
+| Undo | edição | Teenage Engineering EP-133 K.O. II e Pocket Operators | ainda não planejado | referência |
+| Loop window | performance sobre timeline | Teenage Engineering EP-133 K.O. II | ainda não testado | referência |
+| Quantized command | agendamento de interação | Teenage Engineering EP-133 K.O. II | troca de section planejada para a fronteira | candidato |
+| Pressure-sensitive effect | expressão de performance | Teenage Engineering EP-133 K.O. II | hardware Calculator não mede pressão | referência |
 | Pattern chain | arranjo | Pocket Operators | seções navegáveis planejadas, mas não encadeadas | referência |
 | Chop | material sonoro e mapeamento | Roland P-6 | ainda não testado | referência |
 | Resampling | criação de material | Koala e Roland P-6 | ainda não testado | referência |
@@ -215,6 +225,58 @@ Glide/portamento existe no sintetizador, mas a documentação consultada não é
 suficiente para afirmar `tie` ou slide programável por step. Esses comportamentos
 não entram no radar como capacidades confirmadas do sequenciador Crave.
 
+## Teenage Engineering EP-133 K.O. II
+
+O K.O. II acrescenta uma hierarquia de composição mais explícita que os
+instrumentos anteriores:
+
+```text
+project
+  -> quatro groups com samples e patterns próprios
+  -> scenes que combinam os patterns correntes
+  -> song positions que referenciam scenes em ordem
+```
+
+Essa hierarquia distingue dados musicais de suas combinações. Uma scene pode
+referenciar patterns de groups diferentes; uma song position referencia a scene
+em vez de copiar novamente seu conteúdo. A duração da song position segue o
+pattern mais longo da scene, tornando a política de duração parte explícita do
+arranjo.
+
+O comando **commit** preserva a combinação atual como scene e cria uma nova
+variação baseada nela sem parar a música. Ele funciona como checkpoint criativo
+e duplicate-and-continue, não apenas como persistência em armazenamento.
+
+O K.O. II também torna explícito o escopo dos parâmetros. Volume de group no
+project, level automatizável no pattern, configuração do sample, send de efeito
+por group e processamento master possuem nomes parecidos, mas ciclos de vida e
+capacidades de automação diferentes. Uma futura API não deveria oferecer um
+`setVolume()` ambíguo sem identificar seu alvo e escopo.
+
+Os modos de sample separam outras políticas de voz:
+
+- **oneshot** é monofônico e toca o sample inteiro;
+- **key** permite múltiplas instâncias polifônicas do mesmo sample;
+- **legato** é monofônico e muda a nota preservando a posição de reprodução.
+
+Legato demonstra que uma nova nota não precisa reiniciar cursor e articulação.
+Retrigger ou continuação pertencem à política da voz, não ao Note On isolado.
+
+Na edição temporal, o aparelho diferencia captura quantizada, free time,
+correção seletiva de uma nota ou pad, deslocamento dentro ou fora da grade e
+undo. Quantização aparece assim como transformação com escopo, e não apenas
+configuração global do clock.
+
+Automação de fader gravada num step é latching: o valor permanece até ser
+substituído. Punch-in effects respondem à pressão e podem ser combinados. O modo
+Loop possui posição e comprimento próprios e permite saída imediata ou na
+próxima barra. Essa última escolha exemplifica um **quantized command**: o gesto
+ocorre agora, mas a mudança de estado é aplicada numa fronteira musical.
+
+Para a Calculator, `queue next section` já é um candidato local dessa semântica.
+Isso não exige adotar a hierarquia completa do K.O. II: a primeira section pode
+continuar contendo diretamente quatro tracks de dezesseis steps.
+
 ## Referências verificadas
 
 - [Koala Sampler Manual — Sample tab](https://manual.koalasampler.com/mobile/4-sample/):
@@ -248,6 +310,16 @@ não entram no radar como capacidades confirmadas do sequenciador Crave.
 - [Behringer Crave product overview](https://www.behringer.com/en/products/0718-AAJ):
   sequenciador de 32 steps, 64 patterns em oito bancos e oito ordens de
   arpeggiador.
+- [Teenage Engineering EP-133 workflow](https://teenage.engineering/guides/ep-133/workflow):
+  projects, groups, patterns, scenes, song positions e commit.
+- [Teenage Engineering EP-133 sound modes](https://teenage.engineering/guides/ep-133/modes):
+  oneshot, key, legato, trim e envelope.
+- [Teenage Engineering EP-133 play and record](https://teenage.engineering/guides/ep-133/play-and-record):
+  automação latching, escopo de volume, erase, undo e offsets temporais.
+- [Teenage Engineering EP-133 functions](https://teenage.engineering/guides/ep-133/functions):
+  quantização seletiva, free time, note repeat e loop window.
+- [Teenage Engineering EP-133 effects](https://teenage.engineering/guides/ep-133/effects):
+  effects por group e punch-in effects combináveis sensíveis à pressão.
 
 Links e comportamentos foram verificados em 2026-09-21. Uma atualização futura
 deve preservar a data e distinguir documentação oficial de inferências nossas.
