@@ -81,6 +81,18 @@ não foi extraído como contrato compartilhado.
 | Parallel sequencer models | composição | MicroDexed Touch | ainda não testado | referência |
 | Conditional / generative step | decisão do sequenciador | Woovebox | ainda não testado | referência |
 | Gesture mapping | expressão de performance | Donner MEDO | ainda não testado | referência |
+| Phrase looper | captura de performance | Yamaha Reface CS/DX | ainda não testado | referência |
+| Record-defined loop length | estrutura temporal | Yamaha Reface CS/DX e RK-008 | ainda não testado | referência |
+| Volatile sketchpad | ciclo de vida da composição | Yamaha Reface CS/DX | ainda não testado | referência |
+| Control-value lane | sequenciamento de modulação | Moog DFAM | ainda não testado | referência |
+| Clock / value decoupling | agendamento | Moog Subharmonicon | ainda não testado | referência |
+| Rhythm generator | geração de pulsos | Moog Subharmonicon | ainda não testado | referência |
+| Remote projection / viewport | interface | Akai APC40 mkII | futura UI M5 ainda não possui host externo | referência |
+| Bidirectional controller feedback | interface e estado | Akai APC40 mkII | ainda não testado | referência |
+| Clip / scene launch | performance de arranjo | Ableton via Akai APC40 mkII | ainda não testado | referência |
+| Transformation pipeline | processamento de eventos | Arturia KeyLab mk3 | ainda não testado | referência |
+| Tie / legato transition | articulação do step | Arturia KeyStep e Moog Grandmother | ainda não testado | referência |
+| Polyphonic / chord step | conteúdo do step | Moog Matriarch | ainda não testado | referência |
 | Pattern chain | arranjo | Pocket Operators | seções navegáveis planejadas, mas não encadeadas | referência |
 | Chop | material sonoro e mapeamento | Roland P-6 | ainda não testado | referência |
 | Resampling | criação de material | Koala e Roland P-6 | ainda não testado | referência |
@@ -379,6 +391,110 @@ XT, ZynAddSubFX e TAL Noisemaker aparecem no setup como engines ou instrumentos
 de software. Eles podem alimentar outra pesquisa sobre síntese e áudio, mas não
 são usados como evidência deste survey de workflows.
 
+## Survey de sequenciadores embarcados em synths
+
+Uma segunda tier list em vídeo foi usada como índice para sequenciadores e
+controles integrados a sintetizadores. Apenas os modelos classificados pelo
+autor nos tiers A ou S foram examinados. O ranking é opinião editorial; as
+semânticas abaixo vêm dos manuais oficiais dos fabricantes.
+
+### Yamaha Reface CS/DX: phrase looper efêmero
+
+O Phrase Looper inicia a primeira gravação com o primeiro key-on e toma a duração
+executada como comprimento do loop. Depois permite overdubs, mudança de tempo e
+reprodução enquanto o músico altera o timbre. Atualizações dos Reface também
+oferecem quantização em semicolcheias ou tercinas de colcheia.
+
+A frase comporta até 2.000 notas ou aproximadamente dez minutos a 120 BPM, mas é
+perdida ao desligar o aparelho. Isso explicita dois conceitos: comprimento
+descoberto a partir da performance e **volatile sketchpad**, no qual a ausência
+de persistência favorece captura rápida em vez de edição e arquivo.
+
+### Moog DFAM: lanes de controle analógico
+
+Cada um dos oito steps do DFAM contém valores de pitch e velocity. Esses valores
+são tensões de controle: pitch pode modular os osciladores, enquanto velocity
+afeta os envelopes de oscilador, filtro e amplitude. Ambos também aparecem como
+saídas no patchbay.
+
+O step não precisa representar um objeto Note. O sequenciador produz lanes de
+valores; routing e patching determinam seus significados:
+
+```text
+step clock -> pitch CV lane ----> destino escolhido
+           -> velocity CV lane -> destino escolhido
+```
+
+Velocity em zero pode produzir silêncio sem remover a posição temporal. O efeito
+se parece com rest, mas emerge do valor de controle em vez de um tipo especial
+de evento.
+
+### Moog Subharmonicon: clock separado do valor
+
+O Subharmonicon combina dois sequenciadores de quatro steps com quatro rhythm
+generators. Cada sequenciador só avança ao receber pulsos e pode ser dirigido por
+um ou vários geradores. Suas saídas também podem ser redirecionadas no patchbay.
+
+```text
+ValueSequence --current value--> destino
+RhythmGenerator -----pulse-----> advance sequence
+```
+
+Essa separação faz polirritmia surgir da relação entre geradores e sequências,
+sem exigir micro-timing individual em cada step. É uma referência forte para não
+acoplar armazenamento de valores, produção de pulsos e transporte numa única
+classe universal.
+
+### Akai APC40 mkII: projeção remota
+
+O APC40 mkII não armazena a sequência. Sua matriz RGB 8x5 apresenta uma janela
+sobre clips mantidos pelo Ableton Live, envia comandos de lançamento e recebe de
+volta cores e estados.
+
+```text
+estado no host <-> viewport físico <-> gesto do performer
+```
+
+Clip launch dispara uma unidade existente; scene launch dispara uma combinação
+vertical. A superfície pode navegar uma matriz maior que o hardware e continuar
+sem ser proprietária dos dados. Isso é prior art direto para uma futura tela M5
+que observe e comande estado mantido por outro módulo.
+
+### Arturia KeyStep e KeyLab mk3
+
+O KeyStep representa um sequenciador MIDI/CV tradicional: sequências armazenadas,
+rest, tie, gate percentual, swing e divisões temporais, com configurações
+independentes para o arpeggiador. Ele confirma que tie não é apenas gate longo:
+rest ocupa tempo sem gate, uma nota rearticula e tie prolonga a articulação
+anterior pelo próximo step.
+
+O KeyLab mk3, por outro lado, é principalmente um controlador. Arpeggiator,
+chord mode e scale mode transformam a performance antes de emitir MIDI; DAW
+integration e clip launching comandam estado externo. Seu valor para o radar é
+o pipeline combinável de transformações e a separação entre porta MIDI musical
+e porta lógica de controle da DAW, não um sequenciador autônomo inexistente.
+
+### Moog Grandmother e Matriarch
+
+O Grandmother diferencia rest, tie e legato. Tie prolonga a mesma nota; legato
+muda a nota preservando uma transição articulada sem o comportamento de um novo
+ataque convencional. Sua memória contém três sequências de até 256 notas.
+
+O Matriarch amplia o conteúdo do step: cada posição pode conter até quatro notas
+e ainda incluir tie ou ratchets. Ele expõe CV, velocity e gate separadamente no
+patchbay. A cardinalidade de notas passa a ser parte do formato sequenciado, não
+apenas uma capacidade posterior do synth.
+
+Essas referências sugerem `Rest`, `Retrigger`, `Tie` e `Legato` como articulações
+distintas e um possível conjunto fixo de notas por step. Elas não justificam uma
+API compartilhada até existir um sequenciador melódico nosso.
+
+### K.O. II
+
+O K.O. II já possui seção própria neste radar. Nesta seleção ele reforça que uma
+boa experiência de synth sequencing pode residir na hierarquia de composição e
+no workflow de variações, não apenas na riqueza de cada step.
+
 ## Referências verificadas
 
 - [Koala Sampler Manual — Sample tab](https://manual.koalasampler.com/mobile/4-sample/):
@@ -441,6 +557,25 @@ são usados como evidência deste survey de workflows.
 - [Donner MEDO product documentation](https://www.donnermusic.com/products/medo)
   e [manual](https://cdn.accentuate.io/15091455787394/1757424260901/MEDO_maunal.pdf?v=1757424260901):
   looper, modos instrumentais, quantização e controles por gesto.
+- [Synth sequencer tier-list video](https://www.youtube.com/watch?v=TruXg9mUsIU):
+  índice de descoberta; o ranking não é usado como evidência técnica.
+- [Yamaha Reface owner's manual](https://usa.yamaha.com/files/download/other_assets/6/438816/ZT92080_reface_En_OM_C0.pdf):
+  Phrase Looper, key-on start, overdub, capacidade e armazenamento volátil.
+- [Moog DFAM manual](https://api.moogmusic.com/sites/default/files/2018-04/DFAM_Manual.pdf):
+  lanes analógicas de pitch e velocity e respectivas saídas CV.
+- [Moog Subharmonicon manual](https://api.moogmusic.com/sites/default/files/2020-05/Subharmonicon_Manual.pdf):
+  dois sequenciadores, quatro rhythm generators e routing pelo patchbay.
+- [Akai APC40 mkII user guide](https://cdn.inmusicbrands.com/akai/attachments/apc40II/APC40%20mkII%20-%20User%20Guide%20-%20v1.0.pdf):
+  viewport 8x5, feedback RGB, clip launch e scene launch no Ableton Live.
+- [Arturia KeyStep manual](https://downloads.arturia.net/products/keystep/manual/KeyStep_Manual_1_1_1_EN.pdf):
+  sequências, rest, tie, gate, swing, divisões temporais e arpeggiador.
+- [Arturia KeyLab mk3 overview](https://www.arturia.com/products/hybrid-synths/keylab-mk3/overview)
+  e [FAQ](https://support.arturia.com/hc/en-us/articles/15604245986460-KeyLab-mk3-General-Questions):
+  chord, scale, arpeggiator, DAW integration e portas MIDI/DAW separadas.
+- [Moog Grandmother manual](https://api.moogmusic.com/sites/default/files/2022-01/Grandmother_Manual_Version_2.pdf):
+  sequências, rest, tie e legato.
+- [Moog Matriarch manual](https://api.moogmusic.com/sites/default/files/2019-08/Moog-Matriarch-Manual.pdf):
+  steps com até quatro notas, tie, ratchets e saídas CV/velocity/gate.
 
 Links e comportamentos foram verificados em 2026-09-21. Uma atualização futura
 deve preservar a data e distinguir documentação oficial de inferências nossas.
