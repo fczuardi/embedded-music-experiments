@@ -36,17 +36,18 @@ não foi extraído como contrato compartilhado.
 | --- | --- | --- | --- | --- |
 | Trigger / one-shot | evento e reprodução | Koala, Roland P-6, Pocket Operators, drum machines | probe do drum kit AMY; plano do sequenciador Calculator | observado, candidato |
 | Gate | evento e voz | MIDI, Koala, Roland P-6 | Note On/Off nos showcases BLE MIDI | observado |
-| Hold / latch | interação e voz | Koala e Roland P-6 | nenhum experimento dedicado | referência |
+| Hold / latch | interação e voz | Koala, Roland P-6 e Behringer Crave | nenhum experimento dedicado | referência |
 | Loop / toggle | política de reprodução | Koala e Roland P-6 | nenhum experimento dedicado | referência |
 | Choke | política entre vozes | samplers e hi-hats de drum machines | ainda não testado | referência |
 | Monofonia / polifonia | alocação de vozes | MIDI, AMY e Roland P-6 | instrumento monofônico e slot AMY | adotado localmente |
 | Mute / mute all | política de pista | sequenciadores e Roland P-6 | interação planejada para Calculator | candidato |
 | Pattern / section | composição | sequenciadores e Roland P-6 | seções planejadas para Calculator | candidato |
-| Velocity / accent | evento e step | MIDI, Koala e Roland P-6 | velocity nos contratos e showcases MIDI | extraído para notas; candidato para steps |
-| Gate time | step e voz | Roland P-6 | ainda não necessário para bateria one-shot | adiado |
+| Note / rest | conteúdo do step | Behringer Crave e sequenciadores melódicos | Calculator planeja trigger/rest sem pitch | referência |
+| Velocity / accent | evento e step | MIDI, Koala, Roland P-6 e Behringer Crave | velocity nos contratos e showcases MIDI | extraído para notas; candidato para steps |
+| Gate time | step e voz | Roland P-6 e Behringer Crave | ainda não necessário para bateria one-shot | adiado |
 | Probability | step | Roland P-6 | ainda não testado | referência |
 | Micro-timing | agendamento | Roland P-6 | ainda não testado | referência |
-| Sub-steps / ratchet | expansão de step | Roland P-6 | ainda não testado | referência |
+| Sub-steps / ratchet | expansão de step | Roland P-6 e Behringer Crave | ainda não testado | referência |
 | Motion | automação de parâmetros | Roland P-6 | CC contínuo existe, mas não é sequenciado | referência |
 | Parameter lock | automação por step | Pocket Operators | ainda não testado | referência |
 | Punch-in effect | performance temporária | Pocket Operators | ainda não testado | referência |
@@ -58,6 +59,10 @@ não foi extraído como contrato compartilhado.
 | Flux / gravação livre | captura temporal | Korg Volca Keys | ainda não testado | referência |
 | Step Trigger | articulação da voz | Korg Volca Keys | ainda não testado | referência |
 | Stutter | repetição performática | Korg Volca Beats | ainda não testado | referência |
+| Pattern end / logical length | estrutura do pattern | Behringer Crave | Calculator planeja 16 steps fixos | referência |
+| Page | navegação de edição | Behringer Crave | Calculator expõe os 16 steps simultaneamente | referência |
+| Reset / hold playhead | performance sobre transporte | Behringer Crave | ainda não testado | referência |
+| Arpeggiator traversal | geração algorítmica | Behringer Crave | ainda não testado | referência |
 | Pattern chain | arranjo | Pocket Operators | seções navegáveis planejadas, mas não encadeadas | referência |
 | Chop | material sonoro e mapeamento | Roland P-6 | ainda não testado | referência |
 | Resampling | criação de material | Koala e Roland P-6 | ainda não testado | referência |
@@ -167,6 +172,49 @@ um pattern de steps, enquanto captura livre exige uma timeline ou timestamps.
 Essa diferença deve permanecer no radar até algum experimento nosso precisar
 gravar performance, pois o sequenciador Calculator inicialmente só edita steps.
 
+## Behringer Crave e o step melódico
+
+O Crave complementa as drum machines ao mostrar o conteúdo necessário para
+sequenciar uma voz melódica monofônica. Seu sequenciador armazena notas e rests
+em patterns de até 32 steps, organizados visualmente em quatro páginas, e permite
+ajustar gate length, accent, ratchet e o fim lógico do pattern.
+
+Um step de bateria one-shot pode inicialmente responder apenas se deve disparar
+uma pista. Um step melódico precisa separar mais dimensões:
+
+```text
+posição temporal
+  -> note ou rest
+  -> pitch, quando for note
+  -> gate length
+  -> accent
+  -> ratchet
+```
+
+Isso não justifica uma estrutura `Step` universal. Pelo contrário, sugere que um
+futuro pattern reutilizável precisaria ser parametrizado pelo tipo de conteúdo,
+ou que `DrumStep` e `MonophonicNoteStep` deveriam permanecer modelos distintos.
+A decisão deve esperar os dois consumidores existirem.
+
+O Crave também ajuda a separar conceitos que uma interface compacta aproxima:
+
+- **page** escolhe qual parte de um pattern longo está visível para edição;
+- **pattern end** define seu comprimento musical lógico;
+- **bank/pattern** seleciona material armazenado;
+- **reset** volta imediatamente ao primeiro step;
+- **hold step** mantém temporariamente a posição atual;
+- **arpeggiator** gera uma ordem algorítmica a partir de notas mantidas, em vez
+  de simplesmente reproduzir notas previamente gravadas no pattern.
+
+As saídas físicas separadas de keyboard CV e gate reforçam ainda que pitch e
+articulação são dimensões independentes. Um pitch pode permanecer estável
+enquanto novos gates rearticulam a voz; um rest pode fechar o gate sem precisar
+apagar o último pitch.
+
+Glide/portamento existe no sintetizador, mas a documentação consultada não é
+suficiente para afirmar `tie` ou slide programável por step. Esses comportamentos
+não entram no radar como capacidades confirmadas do sequenciador Crave.
+
 ## Referências verificadas
 
 - [Koala Sampler Manual — Sample tab](https://manual.koalasampler.com/mobile/4-sample/):
@@ -194,6 +242,12 @@ gravar performance, pois o sequenciador Calculator inicialmente só edita steps.
   choke configurável por parte.
 - [Korg Volca Sample overview](https://www.korg.com/us/products/dj/volca_sample/index.php):
   Active Step, Step Jump, swing e motion sequencing.
+- [Behringer Crave Quick Start Guide](https://mediadl.musictribe.com/download/documents/behringer/CRAVE/CRAVE_QSG_WW.pdf):
+  notes/rests, gate length, accent, ratchet, pages, pattern end, reset, hold,
+  arpeggiador e saídas CV/gate.
+- [Behringer Crave product overview](https://www.behringer.com/en/products/0718-AAJ):
+  sequenciador de 32 steps, 64 patterns em oito bancos e oito ordens de
+  arpeggiador.
 
 Links e comportamentos foram verificados em 2026-09-21. Uma atualização futura
 deve preservar a data e distinguir documentação oficial de inferências nossas.
