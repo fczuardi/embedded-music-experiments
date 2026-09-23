@@ -317,9 +317,11 @@ Prefer a slice that:
 ## Current Next Steps
 
 1. Preserve the Calculator drum sequencer as the current playable checkpoint.
-2. Start the M5StickC Plus2 metronome in a focused sibling repository.
-3. Compare its timing and tempo-change behavior with the Calculator
-   `StepClock`; extract nothing until the comparison reveals a stable contract.
+2. Keep the M5StickC Plus2 metronome as a focused sibling experiment.
+3. Use the [StepClock and BeatClock comparison](devlog/054-compare-step-and-beat-clocks.md)
+   to test tempo changes and delayed loops on both devices; treat current
+   implementation differences as observations, not established musical
+   requirements. Extract nothing until a stable shared contract emerges.
 4. Return to Calculator mute, pattern variation, and chaining as independent
    hardware-testable slices.
 5. Use a later melodic sequencer as the second consumer for any proposed
