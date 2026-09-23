@@ -42,6 +42,22 @@ assigns one of twenty curated drum sounds to each track through a Core B layer.
 It deliberately remains a single volatile pattern; mute, copy, variation,
 pattern storage, and chains are later experiments.
 
+The sibling [`metronome`](https://github.com/fczuardi/metronome) repository now
+provides a second self-contained timing baseline on the M5StickC Plus2. It has a
+phase-preserving mutable beat clock, visible four-beat position, generated PCM
+clicks, live tempo and volume controls, and independent accent/regular sound
+selection through a three-mode two-button interface. Its application code is
+split locally into clock, state, control-surface, display, audio-lifecycle, and
+sound-catalog boundaries; none of those seams has been promoted to a shared
+package yet.
+
+Metronome hardware work also exposed a backend concern now tracked in
+`monophonic-instrument`: restarting isolated PCM one-shots after speaker idle
+can add an electrical output transient. A silent keep-alive channel removes the
+transient and restores predictable master-gain behavior, but its lifecycle,
+channel ownership, and power cost still require a dedicated probe before the
+behavior belongs in `m5-tone-output`.
+
 ## Capability Model
 
 The reusable ecosystem can be understood as four families:
@@ -169,9 +185,9 @@ commands, or configuration changes.
 Do not create a universal UI framework from the first Face. Build one small
 working interaction, then extract only the repeated boundary.
 
-### 4. Next Timing Experiment: a Minimal M5StickC Plus2 Metronome
+### 4. Completed Metronome Baseline; Timing Comparison in Progress
 
-Create a focused sibling `metronome` repository for the smallest second
+The focused sibling `metronome` repository now supplies the smallest second
 experiment that needs musical time:
 
 ```text
@@ -180,17 +196,30 @@ internal clock
     -> display and/or sound
 ```
 
-Target the M5StickC Plus2, its two buttons, small display, and onboard buzzer.
-Let that experiment determine the initial semantics for start, continue, stop,
-tempo, meter, downbeats, and clock ticks. MIDI Clock, monotonic live time, and
-Standard MIDI File ticks are related but not identical and should not be
-collapsed prematurely.
+The M5StickC Plus2 baseline now validates:
 
-A local `StepClock` already drives the Calculator sequencer, but one consumer is
-not enough evidence for extraction. Compare it with the metronome implementation
-before introducing a transport or beat-clock package. The umbrella should only
-gain a metronome showcase after the application becomes a thin composition of
-proven packages.
+- a deadline-anchored periodic clock that reports elapsed beats;
+- phase-preserving live BPM changes;
+- four-beat display position and a distinct downbeat role;
+- generated PCM clicks with ten selectable high-frequency-oriented recipes;
+- master-gain volume under a continuously active silent output path;
+- a two-button `Tempo -> Volume -> Sound` mode cycle with chord suppression;
+- fixed-size state and no allocation in event or audio paths.
+
+Start, continue, stop, meter selection, and transport remain unimplemented.
+They should not be implied by the completed clock baseline.
+
+The Calculator `StepClock` and metronome `BeatClock` have now been compared.
+Both are periodic deadline accumulators with application-owned musical meaning,
+but they differ in startup, count width, late-poll arithmetic, zero handling,
+and tempo-change policy. Those differences are observations, not established
+step-versus-beat requirements. Record and test explicit timing scenarios before
+extracting or naming a shared clock/transport package.
+
+The metronome remains a sibling application rather than an umbrella showcase.
+The umbrella should only gain a metronome composition after reusable packages
+make that composition thin. The immediate cross-repository extraction candidate
+is the PCM speaker idle policy in `m5-tone-output`, not the clock.
 
 ### 5. Completed Drum Baseline, Then Melodic and Pattern Exploration
 
