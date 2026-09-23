@@ -30,8 +30,8 @@ The stronger immediate boundary finding is in audio lifecycle. The metronome
 showed that restarting PCM after speaker idle can add a physical transient, and
 that a silent keep-alive channel prevents it. Investigation and possible API
 ownership now belong to `monophonic-instrument` / `m5-tone-output`; the umbrella
-roadmap records that direction without declaring the experimental workaround a
-finished package feature.
+roadmap records that direction. The package implementation can proceed directly;
+hardware validation will refine it rather than gate the reversible API change.
 
 ## Deferred considerations
 

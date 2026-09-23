@@ -55,8 +55,8 @@ Metronome hardware work also exposed a backend concern now tracked in
 `monophonic-instrument`: restarting isolated PCM one-shots after speaker idle
 can add an electrical output transient. A silent keep-alive channel removes the
 transient and restores predictable master-gain behavior, but its lifecycle,
-channel ownership, and power cost still require a dedicated probe before the
-behavior belongs in `m5-tone-output`.
+channel ownership, and power cost remain useful validation questions while the
+behavior is implemented directly in `m5-tone-output`.
 
 ## Capability Model
 
