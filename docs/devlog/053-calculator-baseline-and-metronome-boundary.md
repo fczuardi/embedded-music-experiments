@@ -8,7 +8,7 @@ sequencer and choose the next experiment that can challenge its timing boundary.
 ## Calculator evidence
 
 The sibling
-[`calculator-face-input`](https://github.com/fczuardi/calculator-face-input)
+[`calculator-face-input`](https://github.com/embedded-music/calculator-face-input)
 repository now contains a hardware-validated, self-contained instrument on the
 original Core Gray:
 

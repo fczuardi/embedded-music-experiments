@@ -135,7 +135,7 @@ do Core Gray continuam disponíveis quando uma interação precisar distinguir
 press e release.
 
 O repositório
-[`calculator-face-input`](https://github.com/fczuardi/calculator-face-input)
+[`calculator-face-input`](https://github.com/embedded-music/calculator-face-input)
 validou essa hipótese em hardware. Seu baseline possui quatro tracks, dezesseis
 steps booleanos, playhead contínuo, triggers one-shot AMY, BPM e volume
 ajustáveis, e seleção direta de vinte sons por track. A grade mantém edição

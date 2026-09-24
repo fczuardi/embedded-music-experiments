@@ -2,7 +2,7 @@
 
 ## Question
 
-The [Calculator drum sequencer](https://github.com/fczuardi/calculator-face-input)
+The [Calculator drum sequencer](https://github.com/embedded-music/calculator-face-input)
 and [M5StickC Plus2 metronome](https://github.com/fczuardi/metronome) now provide
 two working timing implementations. What, if anything, can they share?
 

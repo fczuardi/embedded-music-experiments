@@ -33,7 +33,7 @@ The AMY package milestone is published as `amy-synth-m5@0.3.1`, and its
 Showcase 3 with Core Gray hardware validation.
 
 The sibling
-[`calculator-face-input`](https://github.com/fczuardi/calculator-face-input)
+[`calculator-face-input`](https://github.com/embedded-music/calculator-face-input)
 repository now also provides a self-contained instrument baseline: a
 hardware-validated four-track, sixteen-step drum sequencer for the Calculator
 Face and Core Gray. It runs continuously, triggers AMY drums, supports live
